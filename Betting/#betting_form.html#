@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+<div id="main">
+            <form id="myform" oninput="o.value = points.value">
+                <center><label for="betSize">Enter your best bet (value):</label>
+                <input type="text" size="7px" id="betSize"/><br>
+                <label for="lastName">Choose the size of your bet (points):</label>
+                <input type="range" name="points" min="1" max="100" step="1" style="width: 100px; height: 20px; -webkit-appearance: slider-horizontal;" value="50"/><br>
+		<output name="o">50</output>
+                <p id="submit" >
+                    <input type="submit" value="Place Your Bet"/>
+                </p></center>
+		            </form>
+
+            <canvas id="canvas" width="800" height="600" style="background-color:#000000">
+                <p>Your browser is sooooo old ! Download a modern one now !</p>
+            </canvas>
+        </div>
+</body>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>DOMElement Tutorial</title>
+	
+        <script src="http://code.createjs.com/easeljs-0.4.2.min.js"></script>
+        <script src="http://code.createjs.com/tweenjs-0.2.0.min.js"></script>
+        <link rel="stylesheet" href="css/style.css">
+         
+        <script>
+        var canvas, stage, exportRoot;
+        window.onload = init;
+        
+ 
+        function init() {
+            canvas = document.getElementById("canvas");
+ 
+            stage = new Stage(canvas);
+        //DOMElement creation
+ 	form = document.getElementById("myform");
+	formDOMElement = new DOMElement(form); 
+	  //move it's rotation center at the center of the form
+	formDOMElement.regX = form.offsetWidth*0.5;
+	formDOMElement.regY = form.offsetHeight*0.5;
+//move the form above the screen
+	formDOMElement.x = canvas.width * 0.2;
+	formDOMElement.y =  - 200;
+	//add the formDOMElement to the display list
+stage.addChild(formDOMElement);
+//Apply a tween to the form
+	Tween.get(formDOMElement).to({alpha:1, y:canvas.height * 0.2, rotation:-360},2000,Ease.cubicOut);
+
+            Ticker.setFPS(32);
+            Ticker.addListener(stage);
+    
+    
+
+ 
+	
+}
+function doStuff()
+      {
+        var nameElement = document.getElementById("betSize");
+        var theName = nameElement.value;
+        document.getElementById("someDiv").innerHTML += theName;
+      }
+        </script>
+    </head>
+ 
+    <body>
+<div id="someDiv">
+    Hello
+  </div>
+
+   <div id="main">
+            <form id="myform" oninput="o.value = points.value">
+                <center><label for="betSize">Enter your best bet (value):</label> 
+                <input type="text" size="7px" id="betSize"/><br>
+		
+                <label for="lastName">Choose the size of your bet (points):</label>
+                <input type="range" name="points" min="1" max="100" step="1" style="width: 100px; height: 20px; -webkit-appearance: slider-horizontal;" value="50"/><br>
+		<output name="o">50</output>
+                <p id="submit" >
+                    <input type="submit" value="Place Your Bet" onClick="doStuff()"/>
+                </p></center>
+		</form>
+
+            <canvas id="canvas" width="800" height="600" style="background-color:#ffffff">
+                <p>Your browser is sooooo old ! Download a modern one now !</p>
+            </canvas>
+        </div>     
+    </body>
+</html>

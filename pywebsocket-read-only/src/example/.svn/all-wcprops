@@ -1,0 +1,137 @@
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/817/trunk/src/example
+END
+bench_wsh.py
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/413/trunk/src/example/bench_wsh.py
+END
+handler_map.txt
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/160/trunk/src/example/handler_map.txt
+END
+util.js
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/806/trunk/src/example/util.js
+END
+hsts_wsh.py
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/720/trunk/src/example/hsts_wsh.py
+END
+origin_check_wsh.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/565/trunk/src/example/origin_check_wsh.py
+END
+internal_error_wsh.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/708/trunk/src/example/internal_error_wsh.py
+END
+benchmark.html
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/816/trunk/src/example/benchmark.html
+END
+benchmark_helper_wsh.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/817/trunk/src/example/benchmark_helper_wsh.py
+END
+echo_noext_wsh.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/723/trunk/src/example/echo_noext_wsh.py
+END
+echo_client.py
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/787/trunk/src/example/echo_client.py
+END
+eventsource.cgi
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/768/trunk/src/example/eventsource.cgi
+END
+console.html
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/797/trunk/src/example/console.html
+END
+eventsource.html
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/768/trunk/src/example/eventsource.html
+END
+special_headers.cgi
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/802/trunk/src/example/special_headers.cgi
+END
+close_wsh.py
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/634/trunk/src/example/close_wsh.py
+END
+xhr_benchmark.html
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/807/trunk/src/example/xhr_benchmark.html
+END
+abort_wsh.py
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/695/trunk/src/example/abort_wsh.py
+END
+cookie_wsh.py
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/793/trunk/src/example/cookie_wsh.py
+END
+pywebsocket.conf
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/575/trunk/src/example/pywebsocket.conf
+END
+abort_handshake_wsh.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/695/trunk/src/example/abort_handshake_wsh.py
+END
+arraybuffer_benchmark.html
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/769/trunk/src/example/arraybuffer_benchmark.html
+END
+echo_wsh.py
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/605/trunk/src/example/echo_wsh.py
+END

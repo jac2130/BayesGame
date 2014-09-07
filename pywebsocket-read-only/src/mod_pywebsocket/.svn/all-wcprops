@@ -1,0 +1,107 @@
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/!svn/ver/804/trunk/src/mod_pywebsocket
+END
+xhr_benchmark_handler.py
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/792/trunk/src/mod_pywebsocket/xhr_benchmark_handler.py
+END
+mux.py
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/744/trunk/src/mod_pywebsocket/mux.py
+END
+util.py
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/801/trunk/src/mod_pywebsocket/util.py
+END
+memorizingfile.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/552/trunk/src/mod_pywebsocket/memorizingfile.py
+END
+_stream_base.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/722/trunk/src/mod_pywebsocket/_stream_base.py
+END
+http_header_util.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/585/trunk/src/mod_pywebsocket/http_header_util.py
+END
+msgutil.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/676/trunk/src/mod_pywebsocket/msgutil.py
+END
+common.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/804/trunk/src/mod_pywebsocket/common.py
+END
+standalone.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/798/trunk/src/mod_pywebsocket/standalone.py
+END
+stream.py
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/646/trunk/src/mod_pywebsocket/stream.py
+END
+_stream_hixie75.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/679/trunk/src/mod_pywebsocket/_stream_hixie75.py
+END
+extensions.py
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/!svn/ver/804/trunk/src/mod_pywebsocket/extensions.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/765/trunk/src/mod_pywebsocket/__init__.py
+END
+dispatch.py
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/708/trunk/src/mod_pywebsocket/dispatch.py
+END
+headerparserhandler.py
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/698/trunk/src/mod_pywebsocket/headerparserhandler.py
+END
+_stream_hybi.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/744/trunk/src/mod_pywebsocket/_stream_hybi.py
+END
+fast_masking.i
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/734/trunk/src/mod_pywebsocket/fast_masking.i
+END

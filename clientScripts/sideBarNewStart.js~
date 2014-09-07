@@ -1,0 +1,19 @@
+//This module must contain:
+
+function makeBetViewButton(bayesVar)
+{
+    
+    
+    
+    var betViewButton=makeTextWidget("BETS", 15, "Arial", "#666");
+    var callback ={
+	bayesVar:bayesVar,
+	call: function()
+	{
+	    //this function must:
+	    this.bayesVar.activeView.erase()
+	    
+	}
+    
+    }
+}

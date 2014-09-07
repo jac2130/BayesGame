@@ -1,0 +1,25 @@
+import time, json
+class Emp():
+    def init(self):
+        self.id='';
+        self.hobbies='';
+        self.birthdate='';
+
+e=Emp();
+e.id=123;
+e.hobbies="sports";
+e.birthdate=str(time.localtime().tm_year-25)+'/'+str((time.localtime().tm_mon-6)%12)+ '/'+"28";
+
+class Emp():
+    def init(self):
+        self.id='';
+        self.hobbies='';
+        self.birthdate='';
+
+e=Emp();
+e.id=123;
+e.hobbies="sports";
+e.birthdate=str(time.localtime().tm_year-25)+'/'+str((time.localtime().tm_mon-6)%12)+ '/'+"28";
+
+e=demjson.encode(e)
+result=json.dumps(e); 

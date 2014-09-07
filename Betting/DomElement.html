@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>DOMElement Tutorial</title>
+
+	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="http://code.createjs.com/easeljs-0.4.2.min.js"></script>
+        <script src="http://code.createjs.com/tweenjs-0.2.0.min.js"></script>
+        <link rel="stylesheet" href="css/style.css">
+         
+        <script>
+        var canvas, stage, exportRoot;
+        window.onload = init;
+        
+ 
+        function init() {
+            canvas = document.getElementById("canvas");
+ 
+            stage = new Stage(canvas);
+        //DOMElement creation
+ 	form = document.getElementById("myform");
+	formDOMElement = new DOMElement(form); 
+	  //move it's rotation center at the center of the form
+	formDOMElement.regX = form.offsetWidth*0.5;
+	formDOMElement.regY = form.offsetHeight*0.5;
+//move the form above the screen
+	formDOMElement.x = canvas.width * 0.2;
+	formDOMElement.y =  - 200;
+	//add the formDOMElement to the display list
+stage.addChild(formDOMElement);
+stage.addChild(blogDOMElement);
+//Apply a tween to the form
+	Tween.get(formDOMElement).to({alpha:1, y:canvas.height * 0.2, rotation:-360},2000,Ease.cubicOut);
+
+            Ticker.setFPS(32);
+            Ticker.addListener(stage);
+    
+    
+
+ 
+	
+}
+
+
+
+
+function postBet()
+      {
+        var betElement = document.getElementById("betSize");
+        var theBet = betElement.value;
+	
+	var pointsElement=document.getElementById("Points");
+	var points=pointsElement.value;
+        $.ajax({
+    type: "post",
+    url: '/ajax/newpost',
+    async: true,
+    data:JSON.stringify({"subject":theBet, 'body':points, 'comments':[]}),
+    dataType: "json",
+    contentType: "application/json",
+    success: function(user){alert(user.name)} 
+    
+});
+      }
+
+
+function postCounter(permalink)
+      {
+        var betElement = document.getElementById(permalink);
+        var theBet = betElement.value;
+	
+	
+        $.ajax({
+    type: "post",
+    url: '/ajax/newcomment',
+    async: true,
+    data:JSON.stringify({"commentName":user.name, "commentEmail":"","commentBody": theBet, "permalink":permalink}),
+    dataType: "json",
+    contentType: "application/json",
+    success: function(user){alert(user.name)} 
+    
+});
+      }
+
+
+        </script>
+    </head>
+ 
+    <body>
+<script>
+var user={}
+      window.fbAsyncInit = function() 
+      {
+      FB.init(
+      {
+          appId      : '753236104711327',
+          status     : true,
+          xfbml      : true
+       }
+      );
+	
+	FB.login(function(response) 
+      {
+      if (response.authResponse) 
+      {
+      uid =response.authResponse.userID
+      
+      console.log('Welcome!  Fetching your information.... ');
+      FB.api('/me', function(response) 
+      {
+      console.log(response);
+      
+      user=response;
+      user.bets=[];
+      //user.key='value';
+      //user.key2='value2';
+
+      function welcomePlayer(user) {
+    var myWindow = window.open("", user.id, "width=300, height=300, menubar=0, scrollbars=0, location=0, resizable=0, titlebar=0");
+    myWindow.document.write("<head><title>"+user.name+"</title></head><body><p><img src='https://graph.facebook.com/" + uid + "/picture?width=96&height=96' width='96' height='96'></p><p>Welcome, "+user.name +"!</p></body>");
+};
+      
+
+      $.ajax({
+    type: "post",
+    url: '/ajax/login',
+    async: true,
+    data:JSON.stringify(user),
+    dataType: "json",
+    contentType: "application/json",
+    success: function(user){alert(user.name)} 
+    
+});
+
+
+     
+      welcomePlayer(user);
+
+      //console.log("welcome" + " " + uid)
+      //var welcomeMsgContainer=Object.create(Widget);
+      //welcomeMsgContainer.setShape(new createjs.Container());
+      //welcomeMsgContainer.bkgdRect = makeRect(600, 120, "#fffff0", 3, "#666");
+      //welcomeMsgContainer.bkgdRect.renderW(welcomeMsgContainer, {x:-10, y:0});
+      //var  = document.createElement('div');
+      var welcomeMsgStr = 'Welcome, ' + response.first_name + '!';
+      //var welcomeMsg=makeTextWidget(welcomeMsgStr, 20, "Arial", "#666");
+      //welcomeMsg.id = 'welcome_msg';
+
+		    //welcomeMsg.renderW(welcomeMsgContainer, {x:10, y:10});
+		    
+      
+      //welcomeMsg.innerHTML = welcomeMsgStr;
+      
+      //welcomeMsgContainer.appendChild(welcomeMsg);
+
+      //var imageURL = 'https://graph.facebook.com/' + uid + '/picture?width=96&height=96';
+      //var profileImage = new createjs.Bitmap(imageURL);;
+      //profileImage.setAttribute('src', imageURL);
+      //profileImage.id = 'welcome_img';
+      //profileImage.setBounds(,0, '48px', '48px'); 
+      //profileImage.setAttribute('width', '148px');
+      //welcomeMsgContainer.appendChild(profileImage);
+      //console.log(profileImage)
+      //profileImage.suppressCrossDomainErrors=true;
+      //profileImage.isVisible=welcomeMsgContainer.isVisible;
+      //welcomeMsgContainer.shape.addChild(profileImage);
+      //welcomeMsgContainer.render(topLayer.shape, {x:315, y:50});
+});
+
+
+   
+} 
+      else 
+      {
+     console.log('User cancelled login or did not fully authorize.');
+      }
+ }, {scope: 'user_birthday, friends_birthday, basic_info, user_about_me, friends_about_me, user_education_history, friends_education_history, user_hometown, friends_hometown, user_interests, friends_interests, user_location, friends_location, user_questions, friends_questions, user_relationships, friends_relationships, user_relationship_details, friends_relationship_details, user_religion_politics, friends_religion_politics, user_work_history, friends_work_history'});
+}; 
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "//connect.facebook.net/en_US/all.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+
+var user_data={};
+//var canvasWidth=canvas.width;
+console.log(canvas)
+$.ajax({
+    type: "GET",
+    url: '/ajax/',
+    async: true,
+    
+    dataType: "json",
+    success: function(data){
+	user_data=data//do your stuff with the JSON data;
+	//alert(user_data.myposts);
+var  mydiv= document.createElement('div');
+document.documentElement.appendChild(mydiv);
+mydiv.innerHTML="<h2 style='font-family:arial;color:red;font-size:16px;'><b>Bet&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp</b> <span style='color:blue;'>Points</span></h2>"
+for (var i in user_data.myposts){ post=user_data.myposts[i]; string=""; for (var i=1; i<(8-post.title.length);i++){string+="&nbsp;&nbsp;&nbsp;"};  mydiv.innerHTML+="<p style='font-family:arial;color:red;'>"+post.title+ string+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:blue'>"+post.body+"</span><form id='counter'><label for='betSize'>Counter bet:</label><input type='number' min='-9999' max='9999' step='0.001' value='35.00' id='"+ post.permalink + "'" +"/><span id='submit' ><input type='submit' value='Go!' onClick='postCounter("+post.permalink+")'/></span></form></p>"+"<p>Counter bets: " + post.comments.length + "</p>"; for (var i in post.comments){mydiv.innerHTML+="<p>" + post.comments[i].body + "&nbsp;&nbsp;&nbsp;" + post.comments[i].author + "</p>"}}
+
+blogDOMElement = new DOMElement(mydiv); 
+	  //move it's rotation center at the center of the form
+	blogDOMElement.regX = mydiv.offsetWidth*0.5;
+	blogDOMElement.regY = mydiv.offsetHeight*0.2;
+//move the form above the screen
+	blogDOMElement.x = 800 * 0.7;
+	blogDOMElement.y =  - 50;
+	//add the formDOMElement to the display list
+//stage.addChild(blogDOMElement);
+
+    }
+});
+
+    
+
+      
+
+</script>
+
+   <div id="main">
+            <form id="myform" oninput="o.value = points.value">
+                <center><label for="betSize">Enter your best bet (value):</label> 
+                <input type="number" min="-9999" max="9999" step="0.001" value="22.33" id="betSize"/><br>
+		
+                <label for="Points">Choose the size of your bet (points):</label>
+                <input type="range" name="points" min="1" max="100" step="1" style="width: 100px; height: 20px; -webkit-appearance: slider-horizontal;" value="50" id="Points"/><br>
+		<output name="o">50</output>
+                <p id="submit" >
+                    <input type="submit" value="Place Your Bet" onClick="postBet()"/>
+                </p></center>
+		</form>
+
+            <canvas id="canvas" width="800" height="600" style="background-color:#ffffff">
+                <p>Your browser is sooooo old ! Download a modern one now !</p>
+            </canvas>
+        </div>     
+    </body>
+</html>

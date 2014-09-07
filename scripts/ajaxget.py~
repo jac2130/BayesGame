@@ -1,0 +1,36 @@
+#-*- coding: utf-8 -*-
+import pprint
+import json
+import urlparse
+
+def wsgi_app(environ, start_response):
+    """ Display the contents of the environ dictionary."""
+    # produce some content
+
+    res = {}
+    res['keys'] = ["key2", "key"]
+    res['message'] = "Success"
+    if 'data' in environ:
+        res['data'] = environ['data']
+    if 'key' in environ:
+        res['key'] = environ['key']
+    if 'key2' in environ:
+        res['key2'] = environ['data']
+    #output = json.dumps(environ)
+    queryStr = dict(urlparse.parse_qsl(environ['QUERY_STRING']))
+    output = queryStr['key']
+    #output =  pprint.pformat(environ)
+    #output = pprint.pformat(environ['wsgi.input'].read())
+
+    # send first header and status
+    status = '200 OK'
+    headers = [('Content-type', 'text/plain'),
+                ('Content-Length', str(len(output)))]
+    start_response(status, headers)
+
+    # wsgi apps should return and iterable, the following is acceptable too :
+    # return [output]
+    yield output
+
+# mod_wsgi need the *application* variable to serve our small app
+application = wsgi_app

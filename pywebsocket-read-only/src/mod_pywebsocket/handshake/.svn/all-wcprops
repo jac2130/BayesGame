@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/794/trunk/src/mod_pywebsocket/handshake
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/674/trunk/src/mod_pywebsocket/handshake/__init__.py
+END
+_base.py
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/741/trunk/src/mod_pywebsocket/handshake/_base.py
+END
+hybi.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/794/trunk/src/mod_pywebsocket/handshake/hybi.py
+END
+hybi00.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/741/trunk/src/mod_pywebsocket/handshake/hybi00.py
+END

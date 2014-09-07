@@ -1,0 +1,14 @@
+from bottle import route, run
+import json
+
+def application(environ, start_response):
+   result = [{"name":"John Johnson","street":"Oslo West 555","age":33}]
+   response_body = json.dumps(result)
+   status = '200 OK'
+   response_headers = [('Content-Type', 'text/plain'),
+                  ('Content-Length', str(len(response_body)))]
+   start_response(status, response_headers)
+   return [response_body]
+
+run(application, host='0.0.0.0')
+
