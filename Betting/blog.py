@@ -20,9 +20,11 @@ from random import random
 import requests
 import pymongo
 import blogPostDAO
+import pointsDAO
 import sessionDAO
 import pictureDAO
 import dataDAO
+import putsDAO
 import modelDAO
 import userDAO
 import bottle
@@ -136,7 +138,7 @@ def gen_next_period( threadName, delay):
       new_point=random_monty();
       new_point['period']=count;
       data.add_data([new_point])
-      print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
+      #print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
 
 def gen_first_twenty( threadName, delay):
    count = 0
@@ -146,7 +148,7 @@ def gen_first_twenty( threadName, delay):
       new_point=random_monty();
       new_point['period']=count;
       data.add_data([new_point])
-      print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
+      #print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
 
 try:
     thread.start_new_thread( gen_first_twenty, ("Thread-2", 0.002, ) )
@@ -165,11 +167,12 @@ database = connection.blog
 
 pictures=pictureDAO.PictureDAO(database)
 posts = blogPostDAO.BlogPostDAO(database)
+puts  = putsDAO.PutsDAO(database)
 users = userDAO.UserDAO(database)
 models=modelDAO.ModelDAO(database)
 sessions = sessionDAO.SessionDAO(database)
 data =dataDAO.DataDAO(database)
- 
+points=pointsDAO.PointsDAO(database) 
 # General Discussion on structure. This program implements a blog. This file is the best place to start to get
 # to know the code. In this file, which is the controller, we define a bunch of HTTP routes that are handled
 # by functions. The basic way that this magic occurs is through the decorator design pattern. Decorators
@@ -184,6 +187,11 @@ data =dataDAO.DataDAO(database)
 def get_time():
     return json.dumps([(120-int(round(time.time()%120)))//60, (120-int(round(time.time()%120)))%60]);
 
+@bottle.route("/pointsRefresh/<user>")
+def points_refresh(user):
+    point_object=points.get_points(user)
+    return json.dumps({"points": point_object["points"], "shares":point_object["shares"]})
+
 @bottle.route("/<variable>/<period>")
 def blog_index(variable, period):
 
@@ -195,6 +203,18 @@ def blog_index(variable, period):
     l = posts.get_posts(variable, int(period))
     #print "printing myposts: " +str(l);
     return json.dumps(dict(myposts=l, username=username))
+
+@bottle.route("/puts/<variable>/<period>")
+def blog_index(variable, period):
+
+    cookie = bottle.request.get_cookie("session")
+
+    username = sessions.get_username(cookie)
+
+    # even if there is no logged in user, we can show the blog
+    l = puts.get_puts(variable, int(period))
+    #print "printing myposts: " +str(l);
+    return json.dumps(dict(myputs=l, username=username))
 
 @bottle.route("/query/<i>/<path:path>")
 def query(i, path):
@@ -217,8 +237,21 @@ def index():
     return json.dumps(new_data)
    
 
-
+@bottle.post("/accept_put/<put_id>/<accepter_id>/<poster_id>")
+def accept_put(put_id, accepter_id,poster_id):
+    postAll= bottle.request.json
+    point_count = postAll["points"]
+    puts.accept_put(put_id, accepter_id)
+    points.accept_put(poster_id, accepter_id, point_count)
 # used to insert a person's facebook picture in the mongodb database. 
+
+@bottle.post("/accept_call/<call_id>/<accepter_id>/<poster_id>")
+def accept_call(call_id, accepter_id,poster_id):
+    postAll= bottle.request.json
+    point_count = postAll["points"]
+    posts.accept_call(call_id, accepter_id)
+    points.accept_call(poster_id, accepter_id, point_count)
+
 @bottle.post('/picture')
 def post_new_picture():
     postAll= bottle.request.json
@@ -227,7 +260,7 @@ def post_new_picture():
     width=postAll['width']
     height=postAll['height']
     pictures.add_picture(name, url, width, height)
-    print url, width, height
+   # print url, width, height
     return
 
 @bottle.route("/picture/<id>/<width>/<height>")
@@ -261,7 +294,7 @@ def post_new_comment():
 def post_newpost():
     postAll= bottle.request.json
     title= postAll['subject'];
-    post=postAll['body'];
+    post=postAll['price'];
     comments=postAll['comments']
     username=postAll['username']
     userid=postAll['userid']
@@ -270,7 +303,7 @@ def post_newpost():
     # extract tags
     #tags = cgi.escape(tags)
     tags_array = [] #extract_tags(tags)
-
+    opend=postAll['open']
     # looks like a good entry, insert it escaped
     escaped_post = cgi.escape(post, quote=True)
 
@@ -278,9 +311,31 @@ def post_newpost():
     newline = re.compile('\r?\n')
     formatted_post = newline.sub("<p>", escaped_post)
 
-    permalink = posts.insert_entry(title, formatted_post, comments, tags_array, username, userid, variable, period)
+    permalink = posts.insert_entry(title, formatted_post, comments, tags_array, username, userid, variable, period, opend)
     
     
+@bottle.post('/newput')
+def post_newpost():
+    postAll= bottle.request.json
+    title= postAll['subject'];
+    post=postAll['price'];
+    comments=postAll['comments']
+    username=postAll['username']
+    userid=postAll['userid']
+    variable=postAll["variable"]
+    period=postAll["period"]
+    # extract tags
+    #tags = cgi.escape(tags)
+    tags_array = [] #extract_tags(tags)
+    opend=postAll['open']
+    # looks like a good entry, insert it escaped
+    escaped_post = cgi.escape(post, quote=True)
+
+    # substitute some <p> for the paragraph breaks
+    newline = re.compile('\r?\n')
+    formatted_post = newline.sub("<p>", escaped_post)
+
+    permalink = puts.insert_entry(title, formatted_post, comments, tags_array, username, userid, variable, period, opend)
 
 # handles a login and places the time stamped data in the database. 
 @bottle.post('/login')
@@ -289,12 +344,12 @@ def process_login():
     user= bottle.request.json
     username= user['id'];
     users.add_user(user);
-    print "user submitted ", username
+    #print "user submitted ", username
 
     
         # username is stored in the user collection in the _id key
     session_id = sessions.start_session(username)
-    print session_id;
+    #print session_id;
 
     if session_id is None:
         print "Error: there is no session id!!" 
@@ -304,7 +359,7 @@ def process_login():
         # Warning, if you are running into a problem whereby the cookie being set here is
         # not getting set on the redirect, you are probably using the experimental version of bottle (.12).
         # revert to .11 to solve the problem.
-    print bottle.response.set_cookie;
+    #print bottle.response.set_cookie;
     bottle.response.set_cookie("session", cookie)
 
 @bottle.post('/model')

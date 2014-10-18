@@ -19,7 +19,7 @@ class DataDAO:
         data = {'data':data};
         data['entry_time']=time.time()
         try:
-            self.data.insert(data, safe=True)
+            self.data.insert(data)
         except pymongo.errors.OperationFailure:
             print "oops, mongo error"
             return False

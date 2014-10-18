@@ -377,6 +377,11 @@ TextWidget.changeText = function(newText)
     this.shape.text = newText;
 }
 
+TextWidget.getColor = function(newColor)
+{
+    return this.shape.color;
+}
+
 TextWidget.changeColor=function(newColor)
 {
     this.shape.color=newColor;
@@ -646,4 +651,13 @@ function Point(x,y) {
     var point = Object.create(PointObj);
     point.init(x,y);
     return point;
+}
+
+function paramExists(param)
+{
+    if (typeof param === "undefined") {
+        return false;
+    } else {
+        return true;
+    }
 }

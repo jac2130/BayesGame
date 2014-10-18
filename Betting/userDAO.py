@@ -22,6 +22,7 @@ import string
 import hashlib
 import pymongo
 import time
+from bson.objectid import ObjectId
 
 # The User Data Access Object handles all interactions with the User collection.
 class UserDAO:
@@ -56,7 +57,7 @@ class UserDAO:
         user = user;
         user['entry_time']=time.time()
         try:
-            self.users.insert(user, safe=True)
+            self.users.insert(user)
         except pymongo.errors.OperationFailure:
             print "oops, mongo error"
             return False
@@ -67,3 +68,5 @@ class UserDAO:
         return True
 
 
+    
+        

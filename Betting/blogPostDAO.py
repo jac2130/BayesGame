@@ -34,7 +34,7 @@ class BlogPostDAO:
         self.posts = database.posts
 
     # inserts the blog entry and returns a permalink for the entry
-    def insert_entry(self, title, post, comments, tags_array, author, userid, variable, period):
+    def insert_entry(self, title, post, comments, tags_array, author, userid, variable, period, opend):
         print "inserting blog entry", title, post
 
         # fix up the permalink to not include whitespace
@@ -47,9 +47,10 @@ class BlogPostDAO:
         # Build a new post
         post = {"variable":variable,
                 "title": title,
+                "open":opend,
                 "author": author,
                 "userid":userid,
-                "body": post,
+                "price": post,
                 "permalink":permalink,
                 "tags": tags_array,
                 "comments": comments,
@@ -74,7 +75,7 @@ class BlogPostDAO:
         # XXX HW 3.2 Work here to get the posts
         for i in range(10):print period
         l = []
-        cursor=self.posts.find({'variable': variable, 'period':period}).sort('date',-1)
+        cursor=self.posts.find({'variable': variable, 'period':period, 'open':1}).sort('price',-1)
         for post in cursor:
             
             post['date'] =str(time.time())  # fix up date
@@ -116,6 +117,13 @@ class BlogPostDAO:
             post['date'] = post['date'].strftime("%A, %B %d %Y at %I:%M%p")
 
         return post
+
+    def accept_call(self, id, accepter_id):
+        call=self.get_post_by_id(id)
+        
+        call["open"]=False;
+        call['accepted']=accepter_id
+        self.posts.update({'_id':call['_id']}, {"$set": call}, upsert=False)
 
     # add a comment to a particular blog post
     def add_comment(self, id, name, email, body, commentId):

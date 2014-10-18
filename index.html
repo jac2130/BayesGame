@@ -81,10 +81,10 @@ function main()
     textBar.render(topLayer.shape, {x:310, y:0});
     tutorial.init(textBar);
 
-    
-
     variables = createSideBar2();
+
     GraphJson.userId=user.id;
+
     logInScreen   = WidgetHL();
     logInScreen.cover=makeRect(stageWidth, stageHeight, "#ffffff");
     logInScreen.cover.render(logInScreen.shape, Point(0, 0));
@@ -101,30 +101,20 @@ function main()
     logInScreen.pic.scaleY*=0.9;
     logInScreen.message1=makeTextWidget("No worries; nothing will be posted on your facebook profile without your permission", 15, "Arial", "#FFFFFF");
     logInScreen.message1.renderW(logInScreen, Point((stageWidth-logInScreen.message1.width)/2, 300));
-logInScreen.message2=makeTextWidget("and your facebook data will be made anonymous and will only be used for scientific purposes.", 15, "Arial", "#FFFFFF");
+    logInScreen.message2=makeTextWidget("and your facebook data will be made anonymous and will only be used for scientific purposes.", 15, "Arial", "#FFFFFF");
     logInScreen.message2.renderW(logInScreen, Point((stageWidth-logInScreen.message2.width)/2, 320));
 
     logInScreen.pic.on("click", function(event){
-           
-           //getMe(5, 5);
            logInScreen.erase()
            Login();
-           
-           
-           //if (user.first_name!==undefined)
-           //{welcome()}
-           //else {/*wait one second*/ welcome()}
     });
 
     logInScreen.shape.addChild(logInScreen.pic);    
     
     logInScreen.render(topLayer.shape, Point(0, 0));
-    //alert(JSON.stringify(user.first_name))
-    //displayTestHist();
-    //alert(user.name)
+    createjs.Ticker.setFPS(45);
     createjs.Ticker.addEventListener("tick", function(event) {
         fullStage.update();
-//console.log("total time:" + createjs.Ticker.getTime());
     });
 }
 

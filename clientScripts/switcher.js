@@ -341,7 +341,9 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
 	    switcher.hists.push(tempHist)
 	    if (tempHist.conditions.length)
 	    {
-		model[model.id][switcher.varKey].push([tempHist.conditions, tempHist.valDict]);
+		var modelDict={}
+		for (var k in tempHist.valDict){modelDict[k]=tempHist.valDict[k]/100}
+		model[model.id][switcher.varKey].push([tempHist.conditions, modelDict]);
 	    }
 	    Id+=1
 	})
@@ -393,7 +395,9 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
 			   {			       
 			       if (hist.conditions.length)
 			       {
-				   model[model.id][switcher.varKey].push([hist.conditions, hist.valDict]);
+				   var modelDict={}
+				   for (var k in hist.valDict){modelDict[k]=hist.valDict[k]/100}
+				   model[model.id][switcher.varKey].push([hist.conditions, modelDict]);
 			       }
 			       
 			   });
@@ -488,8 +492,10 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
 
 	//ajaxObject[bayesVar.varText][ajaxObject[bayesVar.varText].length-1]=[valList, valObj];
 	condString+=")";
-
-	model[model.id][switcher.varKey].push([switcher.hists[switcher.hists.length-1].conditions, switcher.hists[switcher.hists.length-1].valDict]);
+	var ValDict=switcher.hists[switcher.hists.length-1].valDict
+	var modelDict={}
+	for (var k in ValDict){modelDict[k]=ValDict[k]/100}
+	model[model.id][switcher.varKey].push([switcher.hists[switcher.hists.length-1].conditions, modelDict]);
 	
 	//here goes the ajax post call.
 	$.ajax({

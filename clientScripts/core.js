@@ -1,7 +1,7 @@
-function welcome(){
-     
+function welcome()
+{
     var welcomeScreen = WidgetHL();
-    welcomeScreen.tutorialCover=makeRect(400, 400, "#ffffff");
+    welcomeScreen.tutorialCover=makeRect(400, 200, "#ffffff");
     welcomeScreen.tutorialCover.render(welcomeScreen.shape, Point(260, 0));
     welcomeScreen.background=makeRect(stageWidth, stageHeight, "rgba(0, 0, 0, 0.75)");
     welcomeScreen.background.render(welcomeScreen.shape, Point(0, 0));
@@ -16,13 +16,42 @@ function welcome(){
         "welcomeScreen": welcomeScreen,
         "call": function() {
             this.welcomeScreen.erase();
-	    user.points=150;
+            user.points=150;
+            user.shares=10;
             pointWindow=WidgetHL();
-	    pointWindow.background=makeRect(358,30,"#3b5998", 0, 1, 3);
-	    pointWindow.background.renderW(pointWindow, Point(0, 0));
-	    pointWindow.points=makeTextWidget(user.points +"      points", 15, "Verdana", "#ffffff");
-	    pointWindow.points.renderW(pointWindow, Point(5, 5));
-	    pointWindow.renderW(topLayer, Point(stageWidth-368, 10));
+            pointWindow.background=makeRect(358,30,"#3b5998", 0, 1, 3);
+            pointWindow.background.renderW(pointWindow, Point(0, 0));
+            pointWindow.points=makeTextWidget(user.points +"      points", 15, "Verdana", "#ffffff");
+            pointWindow.shares=makeTextWidget(user.shares +"      shares", 15, "Verdana", "#ffffff");
+            pointWindow.points.renderW(pointWindow, Point(5, 5));
+            pointWindow.shares.renderW(pointWindow, Point(150, 5));
+            pointWindow.renderW(topLayer, Point(stageWidth-368, 10));
+            var pointWindowUpdatePrevTime = getTime();
+            pointWindow.refresh = function() {
+                var newTime = getTime() 
+                if (newTime > pointWindowUpdatePrevTime + 500)
+                {
+                    pointWindowUpdatePrevTime = newTime;
+                    $.ajax({
+                        type: "GET",
+                        url: '/ajax/pointsRefresh/' + user.id,
+                        async: true,
+                    
+                        dataType: "json",
+                        success: function(data) {
+                            user.points = parseInt(data['points']);
+                            user.shares = parseInt(data['shares']);
+                            //alert(user.points);
+                            //alert(user.shares);
+                            pointWindow.points.shape.text = user.points +"      points";
+                            pointWindow.shares.shape.text = user.shares +"      shares";
+                            //do your stuff with the JSON data;
+                        }
+                    });
+                }
+            }
+            createjs.Ticker.addEventListener("tick", pointWindow.refresh);
+
         }
     }
     makeClickable(welcomeScreen.nextButton, callback);
@@ -139,16 +168,32 @@ Login = function()
 				    success: function(data){
 					if (data) 
 					{
-					    truth=truth.concat(data);
-					    var dataWindow=makeDataWindow(truth, ['A', 'B', 'C'], variables, stageWidth-250);
+					    truth = truth.concat(data);
+                        if (truth[truth.length-1]['monty_door']==='A')
+                        {
+                            share_door='B';
+                        }
+                        else
+                        {
+                            share_door='A';
+                        }
+					    var dataWindow = makeDataWindow(truth, ['A', 'B', 'C'], variables, stageWidth-250);
 					    
 					    var dataButton=makeContractedButton(dataWindow);
 					    dataButton.render(stage, {x:dataWindow.xPos, y:stageHeight-25})
-					    var betsWindow=makeBetWindow(user_data.myposts, ['A', 'B', 'C'], variables[variables.length-1], stageWidth-500);
+					    var betsWindow = makeCallWindow(user_data.myposts, ['A', 'B', 'C'], variables[variables.length-1], stageWidth-500);
 
 					    //the last variable must always be the betting variable!
+                        //MARK1
 					    var betButton=makeContractedButton(betsWindow);
 					    betButton.render(stage, {x:betsWindow.xPos, y:stageHeight-25});
+					    
+					    var putsWindow = makePutWindow([], ['A', 'B', 'C'], variables[variables.length-1], stageWidth-750);
+
+					    //the last variable must always be the betting variable!
+					    var putButton = makeContractedButton(putsWindow);
+					    putButton.render(stage, {x:putsWindow.xPos, y:stageHeight-25});
+
 					} 
 					else
 					{

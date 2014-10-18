@@ -32,6 +32,10 @@ function makeMenuButton(text, width, height)
 }
 
 
+EMPTY_CALLBACK = {
+    call: function() {}
+}
+
 // for this function, callback is an object with the method "call()"
 function makeClickable(widget, callback)
 {
@@ -40,7 +44,7 @@ function makeClickable(widget, callback)
             this.widget.background.changeColor("#f0f0f0");
         } else {
             this.widget.background.changeColor("#666");
-	    this.widget.text.changeColor("#ffffff");
+            this.widget.text.changeColor("#ffffff");
         }
     });
     widget.shape.on("mouseout", function(evt) {
@@ -84,11 +88,47 @@ function makeClickable2(widget, callback)
         if (mouseOnWidget(widget, evt.stageX, evt.stageY)) {
             callback.call();
             widget.text.changeColor("red");
-	    
-	
         } 
 	else {
             widget.text.changeColor("#ffffff");
         }
+    });
+}
+
+function makeClickable3(widget, callback, overColor, clickColor)
+{
+    // widget.buttonProps
+    widget.origBkgdColor = widget.background.color;
+    widget.overColor = overColor;
+    widget.clickColor = clickColor;
+    //widget.origTextColor = widget.text.getColor();
+    widget.shape.on("mouseover", function(evt) {
+        if (mousePressed && paramExists(widget.clickColor)) {
+            this.widget.background.changeColor(widget.clickColor);
+        } else if (paramExists(widget.overColor)) {
+            this.widget.background.changeColor(widget.overColor);
+        } else {
+            this.widget.background.changeColor(widget.origBkgdColor);
+        }
+    });
+
+    widget.shape.on("mouseout", function(evt) {
+        this.widget.background.changeColor(widget.origBkgdColor);
+    });
+
+    widget.shape.on("mousedown", function(evt) {
+        if (paramExists(widget.clickColor)) {
+            this.widget.background.changeColor(widget.clickColor);
+        }
+        mousePressed = true;
+    });
+
+    widget.shape.on("pressup", function(evt) {
+        var widget = this.widget;
+        mousePressed = false;
+        if (mouseOnWidget(widget, evt.stageX, evt.stageY)) {
+            callback.call();
+        }
+        widget.background.changeColor(widget.origBkgdColor);
     });
 }

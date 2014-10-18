@@ -104,8 +104,8 @@ function makeQueryView(width, height, bayesVar)
     
     queryView.query=function(){
 	var queryPath="";
-	var conditions={'bayesVar':queryView.bayesVar.varName}
-	conditions[queryView.bayesVar.varName]={};
+	var conditions={'bayesVar':queryView.bayesVar.varName.toLowerCase().replace(/\s+/g, '_')}
+	conditions[queryView.bayesVar.varName.toLowerCase().replace(/\s+/g, '_')]={};
 	for (var i=0; i< queryView.menues.length; i++)
 	{
 	    //conds.push(switcher.menues[i].activeChoice)
@@ -114,8 +114,8 @@ function makeQueryView(width, height, bayesVar)
 	    if ((i+3)%3===0) 
 	    {
 		if (queryView.menues[i+2].activeChoice!=="Value"){//in the case that it has been specified
-		    queryPath+="/" + queryView.menues[i].activeChoice + ":"+ queryView.menues[i+2].activeChoice;
-		    conditions[queryView.bayesVar.varName][queryView.menues[i].activeChoice]= queryView.menues[i+2].activeChoice;
+		    queryPath+="/" + queryView.menues[i].activeChoice.toLowerCase().replace(/\s+/g, '_') + ":"+ queryView.menues[i+2].activeChoice;
+		    conditions[queryView.bayesVar.varName.toLowerCase().replace(/\s+/g, '_')][queryView.menues[i].activeChoice.toLowerCase().replace(/\s+/g, '_')]= queryView.menues[i+2].activeChoice;
 		}
 	    }
 	}
@@ -526,6 +526,20 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
 }
  
 	}})
+
+    $.ajax({
+	type: "GET",
+	url: '/ajax/puts/'+ betView.bayesVar.varName.replace(/\s+/g, '') + '/' + 0,
+	async: true,
+    
+	dataType: "json",
+	success: function(data){
+	    user_data2=data//do your stuff with the JSON data;
+	    puts=user_data2.myputs;
+
+	    
+	}})
+    
     betView.name="BETS"
     return betView;
 }

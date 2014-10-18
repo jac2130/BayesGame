@@ -20,7 +20,7 @@ class PictureDAO:
         picture['height']=height;
         picture['entry_time']=time.time()
         try:
-            self.pictures.insert(picture, safe=True);
+            self.pictures.insert(picture);
             print _id, width, height, "HERE!!!"
         except pymongo.errors.OperationFailure:
             print "oops, mongo error"

@@ -161,7 +161,10 @@ function bayesVarFactory ()
         newBayesVar.probSetter = makeHist([20, 30, 50], possibilities,
                                   1400, 800, 20, newBayesVar.color);
 	//adding the innitial variable object to the graph object.
-	GraphJson[newBayesVar.varName.toLowerCase().replace(" ", "_")]=[[newBayesVar.probSetter.conditions, newBayesVar.probSetter.valDict]];
+	var modelDict={}
+	for (var k in newBayesVar.probSetter.valDict){modelDict[k]=newBayesVar.probSetter.valDict[k]/100}
+
+	GraphJson[newBayesVar.varName.toLowerCase().replace(" ", "_")]=[[newBayesVar.probSetter.conditions, modelDict]];
 	//the reason why there are so many brackets is because later several conditions can fill the outer list. 
 	newBayesVar.dataView = makeDataView(1400, 800, newBayesVar);
 	newBayesVar.modelView= makeModelView(1400, 800, newBayesVar);

@@ -118,8 +118,8 @@ function makeFrameWidget(fullFrameWidgetWidth, fullFrameWidgetHeight,
     frameWindow.renderW(frameWidget, Point(0, 0));
     frame.renderW(frameWidget, Point(0, 0));
 
-    //frame.shape.setBounds(0, 0, frameWindowWidth, frameLen);
-    //alert(frame.shape.getBounds());
+    // frame.shape.setBounds(0, 0, frameWindowWidth, frameLen);
+    // alert(frame.shape.getBounds());
 
     if (frameLen < windowLen) {
         frameLen = windowLen;
@@ -190,6 +190,5 @@ function makeFrameWidget(fullFrameWidgetWidth, fullFrameWidgetHeight,
     //fullFrameWidget.currWindowPos = 0;
     //fullFrameWidget.currWindowPos = 0;
     fullFrameWidget.moveSB(fullFrameWidget.sbPos);
-
     return fullFrameWidget;
 }
