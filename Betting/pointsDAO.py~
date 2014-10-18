@@ -1,0 +1,99 @@
+import sys
+import re
+import datetime
+import time
+from bson.objectid import ObjectId
+
+
+# The Blog Post Data Access Object handles interactions with the Posts collection
+class PointsDAO:
+
+    # constructor for the class
+    def __init__(self, database):
+        self.db = database
+        self.points = database.points
+
+    # inserts the blog entry and returns a permalink for the entry
+    def insert_entry(self, user_id, points, shares):
+        #print "inserting blog entry", title, post
+
+        # fix up the permalink to not include whitespace
+
+        entry = {"user_id":user_id,
+                "points": points,
+                "shares": shares,
+                "time": datetime.datetime.utcnow()
+        }
+
+        # now insert the post
+        try:
+            # XXX HW 3.2 Work Here to insert the post
+            print "Inserting the put", put
+            self.points.insert(entry)
+        except:
+            print "Error inserting post"
+            print "Unexpected error:", sys.exc_info()[0]
+        return permalink
+
+    # returns an array of num_posts posts, reverse ordered
+    def get_puts(self, variable, period):
+
+        cursor = []         # Placeholder so blog compiles before you make your changes
+
+        # XXX HW 3.2 Work here to get the posts
+        for i in range(10):print period
+        l = []
+        cursor=self.puts.find({'variable': variable, 'period':period, 'open':1}).sort('price',-1)
+        for put in cursor:
+            
+            put['date'] =str(time.time())  # fix up date
+            put['id']=str(put['_id']);
+            if 'tags' not in put:
+                put['tags'] = [] # fill it in if its not there already
+            if 'comments' not in put:
+                put['comments'] = []
+            put["_id"]=str(put['_id']);
+            if 'period' not in put:
+                put['period'] = 0
+            else:
+                put['period']=str(put['period']);
+            l.append(put) 
+        return l
+
+
+    # find a post corresponding to a particular permalink
+    def get_put_by_permalink(self, permalink):
+
+        put = None
+        # XXX Work here to retrieve the specified post
+        put=self.puts.find_one({'permalink':permalink})
+        print put;
+        if put is not None:
+            # fix up date
+            put['date'] = put['date'].strftime("%A, %B %d %Y at %I:%M%p")
+
+        return put
+
+    def get_put_by_id(self, id):
+
+        put = None
+        #Work here to retrieve the specified post
+        put=self.puts.find_one({'_id':ObjectId(id)})
+        #print put;
+        if put is not None:
+            # fix up date
+            put['date'] = put['date'].strftime("%A, %B %d %Y at %I:%M%p")
+
+        return put
+
+    def accept_put(self, id, accepter_id):
+        put=self.get_put_by_id(id)
+        put["open"]=False;
+        put['accepted']=accepter_id
+        self.puts.update({'_id':put['_id']}, {"$set": put}, upsert=False)
+
+
+
+def accept_put(poster_id, accepter_id, points):
+        poster=self.users.find_one({'_id':ObjectId(poster_id)})
+        accepter=self.users.find_one({'_id':ObjectId(accepter_id)})

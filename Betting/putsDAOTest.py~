@@ -1,0 +1,8 @@
+import putsDAO
+connection_string ="mongodb://localhost"
+import pymongo
+connection=pymongo.MongoClient()
+database=connection.blog
+puts=putsDAO.PutsDAO(database)
+puts.accept_put('5429ad3e559cd95646abdee7', '1256')
+print puts.get_put_by_id('5429ad3e559cd95646abdee7')
