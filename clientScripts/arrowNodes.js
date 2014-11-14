@@ -23,6 +23,7 @@ function connectCircles2(fromCircle, toCircle)
     toCircle.fromNodes.push([fromCircle, arrow]);
     arrow.fromNode = fromCircle;
     arrow.toNode = toCircle;
+
     //var fromnames=[]
     //if (fromVars.length > 0) {
       //  for (var i=0;i<fromVars.length; i++){
@@ -37,26 +38,13 @@ function connectCircles2(fromCircle, toCircle)
       //              1400, 800, 20, toCircle.bayesVar.color);
        // toCircle.bayesVar.isMultiVar = false;
     //}
-    
+
     fromVars = arrow.toNode.bayesVar.getFromVars();
     //alert(fromVars)
     fromNames=[]
     for (var i=0;i< fromVars.length; i++){
-        
         fromNames.push(fromVars[i].varText)
     }
-    
-    for (var i=1; i<fromVars.length; i++) {
-        console.log(fromVars[i])
- 
-    }
-   //alert(fromNames[0])
-    /*if (fromVars.length > 0) {
-        switcher
-    }
-    */
-    console.log("arrow.toNode: ", arrow.toNode);
-    console.log("probSetter: ", arrow.toNode.bayesVar.probSetter);
     
     var currHist;
     if (arrow.toNode.bayesVar.isMultiVar) {
@@ -66,10 +54,15 @@ function connectCircles2(fromCircle, toCircle)
     }
 
     var smallHists = currHist.smallHists;
-    console.log("smallHists: ", smallHists);
+    var possibilities = arrow.toNode.bayesVar.possibilities;
+    var valArr = [];
+    for (var i=0; i<possibilities.length; i++)
+    {
+        valArr.push(100/possibilities.length);
+    }
     
     arrow.toNode.bayesVar.probSetter = makeSwitcher(arrow.toNode.bayesVar, 1400, 800, 
-            arrow.toNode.bayesVar.color,fromNames, arrow.toNode.miniHist.getVals());
+            arrow.toNode.bayesVar.color, fromNames, valArr);
     //activating the view. This makes this view the active one. This should be 
     //eventually replaced with an if statement saying that if the current 
     //active view is the model view this should replace it. 
@@ -92,7 +85,6 @@ function connectCircles2(fromCircle, toCircle)
         disconnectCircles(this.widget.fromNode, this.widget.toNode, tutorial);
     });
     currHist = arrow.toNode.bayesVar.probSetter.getCurrHist();
-    console.log("smallHists2: ", currHist.smallHists);
     return arrow;
 }
 
@@ -237,7 +229,6 @@ function makeBayesCircle(radius, color)
 
     circle.clickOut = function()
     {
-        console.log("clicked out from bayes circle!");
         this.unhlCircle();
     }
     clickOutList.push(circle);
@@ -321,7 +312,6 @@ Arrow2.getHeight = function()
 
 Arrow2.getTrianglePos = function(rectLen)
 {   
-    console.log("rectLen: ", rectLen);
     //var rectVec = vectorize2(rectLen, rectAngle);
     var trianglePos = rectVec;
     var point = new LabeledPoint(trianglePos.x, trianglePos.y);

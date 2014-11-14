@@ -17,6 +17,16 @@ function notDefined(avar)
     }
 }
 
+function notDef(avar)
+{
+    return notDefined(avar);
+}
+
+function isDef(avar)
+{
+    return !notDefined(avar);
+}
+
 // verify the type of avar and outputs an error if not the case
 // atype := ["boolean" | "object" | "string" | "number"]
 function verifyType(avar, atype, avarName)

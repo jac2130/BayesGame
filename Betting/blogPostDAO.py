@@ -50,7 +50,7 @@ class BlogPostDAO:
                 "open":opend,
                 "author": author,
                 "userid":userid,
-                "price": post,
+                "price": int(post),
                 "permalink":permalink,
                 "tags": tags_array,
                 "comments": comments,
@@ -80,6 +80,7 @@ class BlogPostDAO:
             
             post['date'] =str(time.time())  # fix up date
             post['id']=str(post['_id']);
+            post['price'] = str(post['price'])
             if 'tags' not in post:
                 post['tags'] = [] # fill it in if its not there already
             if 'comments' not in post:

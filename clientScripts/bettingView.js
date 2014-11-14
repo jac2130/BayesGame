@@ -102,79 +102,65 @@ function makeQueryView(width, height, bayesVar)
     queryView.menues=menues;
     
     
-    queryView.query=function(){
-	var queryPath="";
-	var conditions={'bayesVar':queryView.bayesVar.varName.toLowerCase().replace(/\s+/g, '_')}
-	conditions[queryView.bayesVar.varName.toLowerCase().replace(/\s+/g, '_')]={};
-	for (var i=0; i< queryView.menues.length; i++)
-	{
-	    //conds.push(switcher.menues[i].activeChoice)
-	    
-	    
-	    if ((i+3)%3===0) 
-	    {
-		if (queryView.menues[i+2].activeChoice!=="Value"){//in the case that it has been specified
-		    queryPath+="/" + queryView.menues[i].activeChoice.toLowerCase().replace(/\s+/g, '_') + ":"+ queryView.menues[i+2].activeChoice;
-		    conditions[queryView.bayesVar.varName.toLowerCase().replace(/\s+/g, '_')][queryView.menues[i].activeChoice.toLowerCase().replace(/\s+/g, '_')]= queryView.menues[i+2].activeChoice;
-		}
-	    }
-	}
-	
+    queryView.query = function()
+    {
+        var queryPath="";
+        var conditions={'bayesVar':queryView.bayesVar.varName.toLowerCase().replace(/\s+/g, '_')}
+        conditions[queryView.bayesVar.varName.toLowerCase().replace(/\s+/g, '_')]={};
 
-	//alert(queryPath);
-	index=varNames.indexOf(queryView.bayesVar.varName);
-	$.ajax({
-	    type: "GET",
-	    url: '/ajax/query/'+ user.id + queryPath,
-	    async: true,
-    
-	    dataType: "json",
-	    success: function(data){
-		if (typeof data === 'string'){ 
-		    //alert(JSON.stringify(data))
-		    var warningWindow = WidgetHL();
-		    warningWindow.background = makeRect(400, 200, '#EBEEF4'/*"#f0f0f0"*/, 0.5, 1, 3);
-		    warningWindow.background.render(warningWindow.shape, Point(0, 0));
-		    warningWindow.bar = makeRect(401, 25, "#3b5998", 0, 1, 3);
-		    warningWindow.bar.render(warningWindow.shape, Point(0, -25.5));
-		    warningWindow.killButton=makeDeleteCross(10, 10, "#8b9dc3", 2);
-		    warningWindow.killButton.render(warningWindow.shape, Point(385, -18));
-		    warningWindow.killButton.shape.on('click', function(){warningWindow.erase()});
-		    warningWindow.killButton.shape.on("mouseover", function(evt)
-				       {
-					   warningWindow.killButton.changeColor("#ffffff");
-				       })
-		    warningWindow.killButton.shape.on("mouseout", function(evt)
-				       {
-					   warningWindow.killButton.changeColor('#8b9dc3'/*"#f0f0f0"*/);
-				       });
-		    var message=user.first_name + ": ";
-		    var message2=data;
-	
-		    warningWindow.message1=makeTextWidget(message, 16, "Arial", "#666");
-		    warningWindow.message2=makeTextWidget(message2, 16, "Arial", "#666");
-		    warningWindow.message1.renderW(warningWindow, Point(10, 10));
-		    warningWindow.message2.renderW(warningWindow, Point(10, 40));
-		
-		    warningWindow.render(topLayer.shape, Point(stageWidth/2-200, stageHeight/2-100));
-		
-		}
-		else{
-		    //alert(JSON.stringify(data[varModelNames[index]]))//do your stuff with the JSON data;
-		    queryView.menues.map(function(item){item.erase()})
-		    var queryHist=makeQueryHist(data[varModelNames[index]], queryView.width, queryView.height, queryView.bayesVar.color, conditions)
-		    if (queryView.hasHist){queryView.queryHist.erase()}
-		    queryView.queryHist=queryHist;
-		    queryView.hasHist=true;
-		    queryView.queryHist.render(queryView.shape, Point(0, 55));
-		    queryView.menues.map(function(item){item.renderW(queryView,{x:item.x, y:10});})
-		}
-	    }
-	})
+        for (var i=0; i<queryView.menues.length; i++)
+        {
+            //conds.push(switcher.menues[i].activeChoice)
+            
+            
+            if ((i+3)%3===0) 
+            {
+                if (queryView.menues[i+2].activeChoice!=="Value"){//in the case that it has been specified
+                    queryPath+="/" + queryView.menues[i].activeChoice.toLowerCase().replace(/\s+/g, '_') + ":"+ queryView.menues[i+2].activeChoice;
+                    conditions[queryView.bayesVar.varName.toLowerCase().replace(/\s+/g, '_')][queryView.menues[i].activeChoice.toLowerCase().replace(/\s+/g, '_')]= queryView.menues[i+2].activeChoice;
+                } else {
+                    warn("Some values have still not been selected");
+                    return;
+                }
+            }
+        }
+        
+
+        //alert(queryPath);
+        index=varNames.indexOf(queryView.bayesVar.varName);
+        $.ajax({
+            type: "GET",
+            url: '/ajax/query/'+ user.id + queryPath,
+            async: true,
+        
+            dataType: "json",
+            success: function(data)
+            {
+                if (typeof data === 'string')
+                { 
+                    //alert(JSON.stringify(data))
+                    warn(data);
+                }
+                else
+                {
+                    //alert(JSON.stringify(data[varModelNames[index]]))//do your stuff with the JSON data;
+                    queryView.menues.map(function(item){item.erase()})
+                    var queryHist = makeQueryHist(data[varModelNames[index]], queryView.width, queryView.height, queryView.bayesVar.color, conditions)
+                    if (queryView.hasHist)
+                    {
+                        queryView.queryHist.erase()
+                    }
+                    queryView.queryHist=queryHist;
+                    queryView.hasHist=true;
+                    queryView.queryHist.render(queryView.shape, Point(0, 55));
+                    queryView.menues.map(function(item){item.renderW(queryView,{x:item.x, y:10});})
+                }
+            }
+        });
 
     }
     
-    queryView.queryButton=makeQueryButton(queryView)
+    queryView.queryButton = makeQueryButton(queryView)
     queryView.queryButton.renderW(queryView,{x:nextVarXcoord, y:10});
 
     return queryView
@@ -228,9 +214,10 @@ function makeDataView(width, height, bayesVar)
 
 function makeModelView(width, height, bayesVar)
 {
-    var modelView=bayesVar.probSetter;
+    var modelView = WidgetHL();
     
     bayesVar.probSetter.render(modelView.shape, {x:0, y:0});
+    bayesVar.probSetter.modelView = modelView;
     var querySwitch = makeQueryViewButton(bayesVar);
     querySwitch.render(modelView.shape, {x:130, y:-35});
 
@@ -241,7 +228,7 @@ function makeModelView(width, height, bayesVar)
     //bettingSwitch.render(modelView.shape, {x:230, y:-35});
     modelView.name="MODEL"
 
-    return modelView
+    return modelView;
 }
 
 function makeCounterButton(menu, post, betView)
@@ -253,6 +240,7 @@ function makeCounterButton(menu, post, betView)
 	'betView':betView,
         "call": function() {
             var theBet=this.bet.activeChoice;
+	    //alert(theBet)
 	    var permalink=this.post.permalink;
 	    var id=this.post['id'];
 	    var betView=this.betView;
@@ -261,6 +249,7 @@ function makeCounterButton(menu, post, betView)
 	    if (bayesVar.possibilities.indexOf(theBet)>=0) //if the bet is in ['A','B'...
 		//in python this would be 'if theBet in ["A", "B", "C"]:'
 	    {
+		
 		$.ajax({
 		    type: "post",
 		    url: '/ajax/newcomment',
@@ -332,36 +321,34 @@ function makeBetButton(betView)
 		makeActiveView(betView, bayesVar)
 		
 	    }
-	    else {alert("you must first choose a value for your bet and you must decide how many points you want to bet!")}
+	    else {
+            alert("you must first choose a value for your bet and you must decide how many points you want to bet!")
+        }
         }
     };
     makeClickable(betButton, callback);
     return betButton;
 }
 
-function makeBlackFade(betView) 
+function makeBlackFade(view) 
 {
     var blackFade = WidgetHL();
     blackFade.top = makeRect(stageWidth, 80, "rgba(0, 0, 0, 0.75)");
     blackFade.top.render(blackFade.shape, {x:0, y:0});
     blackFade.background = makeRect(stageWidth, stageHeight, "rgba(0, 0, 0, 0.75)");
     blackFade.background.render(blackFade.shape, {x:0, y:80}); //rendering should happen after makeBlackFade is called 
-    betView.shape.scaleX = 0.5;
-    betView.shape.scaleY = 0.5;
-    betView.render(blackFade.shape, Point(120, 70));
+    view.renderW(blackFade, {x:200, y:100});
+
     blackFade.background.shape.on("dblclick", function (evt)
-		 {
-		     //this.currentOne must be a bayesVar with an activeView, 
-		     //which is attached to the blackFade (this).
-		     //blackFade.currentOne.activeView.erase()
-		     blackFade.currentOne.hasActiveView=false;  
-		     blackFade.erase()
-		 });
-
-    return blackFade
-		 
+	{
+	    //this.currentOne must be a bayesVar with an activeView, 
+	    //which is attached to the blackFade (this).
+	    //blackFade.currentOne.activeView.erase()
+	    blackFade.currentOne.hasActiveView = false;  
+	    blackFade.erase()
+	});
+    return blackFade;
 }
-
 
 
 function makeBettingView(graphWidth, graphHeight, bayesVar)

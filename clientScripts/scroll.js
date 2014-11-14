@@ -32,8 +32,6 @@ function makeFrameWidget(fullFrameWidgetWidth, fullFrameWidgetHeight,
 
     //var scrollBarRectHeight = scrollBarHeight - 2*widgetBorder;
 
-    console.log(scrollBarHeight);
-
     var scrollBarWidth = 10;
     //labelPoint(stage, 100+scrollBarWidth+1, 100);
     var scrollerHeight = 20;
@@ -103,8 +101,6 @@ function makeFrameWidget(fullFrameWidgetWidth, fullFrameWidgetHeight,
 
     //frame.render(stage, Point(100, 100));
     var clear = createjs.Graphics.getRGB(0, 0, 0, 0);
-    console.log(clear);
-
     var frameWindow = makeRect(frameWindowWidth, windowLen, clear);
     frameWindow.shape.x = 0;
     frameWindow.shape.y = 50;
@@ -124,8 +120,6 @@ function makeFrameWidget(fullFrameWidgetWidth, fullFrameWidgetHeight,
     if (frameLen < windowLen) {
         frameLen = windowLen;
     }
-    console.log(frameLen)
-    console.log(windowLen)
     var maxWindowScrollLen = frameLen - windowLen;
     var maxBarScrollLen = maxSBPos - minSBPos;
 
@@ -141,14 +135,13 @@ function makeFrameWidget(fullFrameWidgetWidth, fullFrameWidgetHeight,
         this.moveWindowPos(newWindowY);
     }
 
-    fullFrameWidget.moveWindowPos = function(newWindowY) {
-        console.log(newWindowY);
+    fullFrameWidget.moveWindowPos = function(newWindowY)
+    {
         if (newWindowY < 0) {
             newWindowY = 0;
         } else if (newWindowY > maxWindowScrollLen) {
             newWindowY = maxWindowScrollLen;
         }
-        console.log(newWindowY);
         this.currWindowPos = newWindowY;
         this.frameWidget.frame.move(Point(0,-newWindowY));
     }

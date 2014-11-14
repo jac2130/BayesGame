@@ -1,6 +1,21 @@
 <!DOCTYPE html>
+
 <html>
 <head>
+
+<style>
+body {
+    overflow-x: hidden;
+}
+.fb-like {
+    position:absolute;
+    left:1%;
+    top:90%;;
+}
+</style>
+
+<div id="fbl" class="fb-like" data-send="true" data-width="450" data-layout="button_count" data-show-faces="true"></div>
+
 <link rel="shortcut icon" href="/icon.ico" >
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="http://code.createjs.com/createjs-2013.12.12.min.js" type="text/javascript" charset="utf-8"></script>
@@ -16,6 +31,7 @@
 <script src="clientScripts/verify.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/jslib.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/shapeLib.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScripts/warn.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/arrowNodes.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/sideBar.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/button.js" type="text/javascript" charset="utf-8"></script>
@@ -24,7 +40,9 @@
 <script src="clientScripts/dropDown.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/switcher.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/bettingView.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScripts/textBox.js" type="text/javascript" charset="utf-8"></script>
 <link rel="stylesheet" href="Betting/css/style.css">
+
 <script>
 
 function displayTestSwitcher()
@@ -54,7 +72,6 @@ function displayTestBettingView()
 var debug = false;
 var circleActive = false;
 
-
 function main()
 {
     var layers = layerStage(2);
@@ -81,8 +98,6 @@ function main()
     textBar.render(topLayer.shape, {x:310, y:0});
     tutorial.init(textBar);
 
-    variables = createSideBar2();
-
     GraphJson.userId=user.id;
 
     logInScreen   = WidgetHL();
@@ -95,38 +110,45 @@ function main()
     logInScreen.title.renderW(logInScreen, Point((stageWidth-logInScreen.title.width)/2, 100));
 
     logInScreen.pic=new createjs.Bitmap(THIS_DOMAIN + "/LoginWithFacebook.png");
-    logInScreen.pic.x=(stageWidth-318)/2;
-    logInScreen.pic.y=200;
-    logInScreen.pic.scaleX*=0.9;
-    logInScreen.pic.scaleY*=0.9;
-    logInScreen.message1=makeTextWidget("No worries; nothing will be posted on your facebook profile without your permission", 15, "Arial", "#FFFFFF");
+    logInScreen.pic.x = (stageWidth-318)/2;
+    logInScreen.pic.y = 200;
+    logInScreen.pic.scaleX *= 0.9;
+    logInScreen.pic.scaleY *= 0.9;
+    logInScreen.message1 = makeTextWidget("No worries; nothing will be posted on your facebook profile without your permission", 15, "Arial", "#FFFFFF");
     logInScreen.message1.renderW(logInScreen, Point((stageWidth-logInScreen.message1.width)/2, 300));
-    logInScreen.message2=makeTextWidget("and your facebook data will be made anonymous and will only be used for scientific purposes.", 15, "Arial", "#FFFFFF");
+    logInScreen.message2 = makeTextWidget("and your facebook data will be made anonymous and will only be used for scientific purposes.", 15, "Arial", "#FFFFFF");
     logInScreen.message2.renderW(logInScreen, Point((stageWidth-logInScreen.message2.width)/2, 320));
 
-    logInScreen.pic.on("click", function(event){
-           logInScreen.erase()
-           Login();
+    logInScreen.pic.on("click", function(event) {
+        logInScreen.erase()
+        Login();
     });
+    form = document.getElementById("fbl");
+
+    formDOMElement = new DOMElement(form);
+    //formDOMElement.regX = form.offsetWidth*0.5;
+    //formDOMElement.regY = form.offsetHeight*0.5;
+    //formDOMElement.x = 500;
+    //formDOMElement.y = 300;
 
     logInScreen.shape.addChild(logInScreen.pic);    
     
     logInScreen.render(topLayer.shape, Point(0, 0));
+   
     createjs.Ticker.setFPS(45);
     createjs.Ticker.addEventListener("tick", function(event) {
         fullStage.update();
     });
+    
 }
-
 
 
 </script>
 </head>
 <body onload="main();">
-<div id="fb-root"></div>
 
 <canvas id="canvasId" height="600" width="800"></canvas>
-<div class="fb-like" top:20px data-send="true" data-width="450" data-show-faces="true"></div>
+<div id="fb-root"></div>
 
 </body>
 </html>

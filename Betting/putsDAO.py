@@ -23,7 +23,7 @@ import re
 import datetime
 import time
 from bson.objectid import ObjectId
-
+import pymongo 
 
 # The Blog Post Data Access Object handles interactions with the Posts collection
 class PutsDAO:
@@ -50,7 +50,7 @@ class PutsDAO:
                 "open":opend,
                 "author": author,
                 "userid":userid,
-                "price": post,
+                "price": int(post),
                 "permalink":permalink,
                 "tags": tags_array,
                 "comments": comments,
@@ -73,13 +73,14 @@ class PutsDAO:
         cursor = []         # Placeholder so blog compiles before you make your changes
 
         # XXX HW 3.2 Work here to get the posts
-        for i in range(10):print period
+        #for i in range(10):print period
         l = []
-        cursor=self.puts.find({'variable': variable, 'period':period, 'open':1}).sort('price',-1)
+        cursor=self.puts.find({'variable': variable, 'period':period, 'open':1}).sort('price', pymongo.ASCENDING)
         for put in cursor:
             
             put['date'] =str(time.time())  # fix up date
             put['id']=str(put['_id']);
+            put['price']=str(put['price'])
             if 'tags' not in put:
                 put['tags'] = [] # fill it in if its not there already
             if 'comments' not in put:

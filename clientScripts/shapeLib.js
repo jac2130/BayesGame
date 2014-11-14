@@ -1,3 +1,4 @@
+
 function LabeledPoint(x, y)
 {
     var point = new createjs.Shape();
@@ -354,7 +355,7 @@ function drawRectGraphic (rectShape, width, height, color,
 
 var TextWidget = Object.create(Widget);
 
-function makeTextWidget(text, fontSize, fontFamily, color)
+function makeTextWidget(text, fontSize, fontFamily, color, bold)
 {
     if (typeof fontFamily === "undefined") {
         fontFamily = "Arial";
@@ -363,6 +364,10 @@ function makeTextWidget(text, fontSize, fontFamily, color)
         color = "black";
     }
     var font = fontSize + "px " + fontFamily;
+    if (bold === true)
+    {
+        font = "bold " + font;
+    }
     var textWidget = Object.create(TextWidget);
     textWidget.setShape(new createjs.Text(text, font, color));
     textWidget.height = textWidget.shape.getMeasuredHeight();
@@ -372,9 +377,19 @@ function makeTextWidget(text, fontSize, fontFamily, color)
     return textWidget
 }
 
+function makeTextWidget2(text, fontSize, color, fontFamily, bold)
+{
+    return makeTextWidget(text, fontSize, fontFamily, color, bold)
+}
+
 TextWidget.changeText = function(newText)
 {
     this.shape.text = newText;
+}
+
+TextWidget.getText = function()
+{
+    return this.shape.text;
 }
 
 TextWidget.getColor = function(newColor)
@@ -591,8 +606,33 @@ function setBackground (stage, color)
     stage.addChildAt(rect.shape, 0);
 }
 
+function setKeyboardHandlers(keyboardHandlerList)
+{
+    $(document).keydown(function(e)
+    {
+        if (e.keyCode === 8) {
+            e.preventDefault();
+            for (var i=0; i<keyboardHandlerList.length; i++)
+            {
+                keyboardHandlerList[i].handleBackspace();
+            }
+
+        }
+    });
+
+    document.getElementsByTagName('body')[0].onkeypress = function (event)
+    {
+        var inpChar = getChar(event || window.event);
+        for (var i=0; i<keyboardHandlerList.length; i++)
+        {
+            keyboardHandlerList[i].handleInputChar(inpChar);
+        }
+    }
+}
+
 var stage;
 var clickOutList = [];
+var keyboardHandlerList = [];
 
 $(function() {
     var canvasId = document.getElementsByTagName("canvas")[0].id
@@ -603,6 +643,7 @@ $(function() {
     stage.canvas.height = window.innerHeight-20;
     stageHeight = window.innerHeight-20;
     setClickOut(stage, clickOutList);
+    setKeyboardHandlers(keyboardHandlerList);
 });
 
 function layerStage(numLayers)
@@ -614,6 +655,7 @@ function layerStage(numLayers)
         layers.push(layer);
         stage.addChild(layers[i].shape);
     };
+    fullStage = stage;
     /*
     for (var i=layers.length-1; i>=0; i--) {
         stage.addChild(layers[i].shape);

@@ -1,11 +1,11 @@
 function welcome()
 {
     var welcomeScreen = WidgetHL();
-    welcomeScreen.tutorialCover=makeRect(400, 200, "#ffffff");
+    welcomeScreen.tutorialCover = makeRect(400, 200, "#ffffff");
     welcomeScreen.tutorialCover.render(welcomeScreen.shape, Point(260, 0));
     welcomeScreen.background=makeRect(stageWidth, stageHeight, "rgba(0, 0, 0, 0.75)");
     welcomeScreen.background.render(welcomeScreen.shape, Point(0, 0));
-    welcomeScreen.pic=new createjs.Bitmap(THIS_DOMAIN + "/ajax/picture/" + user.id + "/180/180");
+    welcomeScreen.pic = new createjs.Bitmap(THIS_DOMAIN + "/ajax/picture/" + user.id + "/180/180");
     welcomeScreen.pic.x=150;
     welcomeScreen.pic.y=100;
     welcomeScreen.pic.scaleX*=0.54;
@@ -16,13 +16,45 @@ function welcome()
         "welcomeScreen": welcomeScreen,
         "call": function() {
             this.welcomeScreen.erase();
+	    user.score=0; 
             user.points=150;
             user.shares=10;
-            pointWindow=WidgetHL();
+	    scoreWindow=WidgetHL();
+            scoreWindow.background=makeRect(91,20,"#3b5998", 0, 1, 3);
+            scoreWindow.background.renderW(scoreWindow, Point(0, 0));
+            scoreWindow.title = makeTextWidget(" Total Score " , 12, "Arial", "#ffffff");
+            scoreWindow.title.renderW(scoreWindow, Point(14, 3));
+
+	    //alert(scoreLength)
+            scoreWindow.renderW(topLayer, Point(stageWidth*0.0040, stageHeight*0.875));
+	    scoreTag = WidgetHL();
+	    scoreTag.shape = new createjs.Shape();
+	    scoreTag.score=makeTextWidget(user.score, 12, "Arial", "#666");
+	    var scoreLength = JSON.stringify(scoreTag.score.shape.text).length*7
+	    var globalScoreTag = scoreTag.shape.graphics.beginFill("white");
+	    
+            globalScoreTag.beginStroke("black").setStrokeStyle(0.5);
+
+	    globalScoreTag.moveTo(10, 8).lineTo(10, 14);
+	    globalScoreTag.lineTo(6, 17)
+	    globalScoreTag.lineTo(10, 20)
+	    globalScoreTag.lineTo(10, 26)
+	    globalScoreTag.lineTo(10 + scoreLength + 16, 26)
+	    globalScoreTag.lineTo(10 + scoreLength + 16, 8).closePath();
+    
+            globalScoreTag.endStroke("black");
+	    globalScoreTag.endFill();
+	    
+	    //scoreTag.addChild(scoreTag.score, Point(5, 5))
+	    
+	    scoreTag.renderW(topLayer, Point(scoreWindow.shape.x+88, scoreWindow.shape.y - 7))
+            scoreTag.score.renderW(topLayer, Point(scoreWindow.shape.x+106, scoreWindow.shape.y + 3))
+	    
+	    pointWindow=WidgetHL();
             pointWindow.background=makeRect(358,30,"#3b5998", 0, 1, 3);
             pointWindow.background.renderW(pointWindow, Point(0, 0));
-            pointWindow.points=makeTextWidget(user.points +"      points", 15, "Verdana", "#ffffff");
-            pointWindow.shares=makeTextWidget(user.shares +"      shares", 15, "Verdana", "#ffffff");
+            pointWindow.points=makeTextWidget(user.points +"      points", 15, "Arial", "#ffffff");
+            pointWindow.shares=makeTextWidget(user.shares +"      shares", 15, "Arial", "#ffffff");
             pointWindow.points.renderW(pointWindow, Point(5, 5));
             pointWindow.shares.renderW(pointWindow, Point(150, 5));
             pointWindow.renderW(topLayer, Point(stageWidth-368, 10));
@@ -78,7 +110,8 @@ Login = function()
 	    frictionlessRequests: true,
 	    status     : true,
 	    cookie     : true,
-	    xfbml      : true
+	    xfbml      : true,
+	    version    : 'v2.0'
 	}
     );
     
@@ -94,7 +127,6 @@ Login = function()
 				model.id=user.id
 				model[user.id]= GraphJson;
 				getMe(180, 180);
-				welcome();
 			 
 
 				//alert(JSON.stringify(model))
@@ -144,9 +176,11 @@ Login = function()
 				    data:JSON.stringify(user),
 				    dataType: "json",
 				    contentType: "application/json",
-				    success: function(user){alert(user.name)} 
-    
+				    success: function(){
+                        alert("logged in!");
+                    } 
 				});
+
 				//then his model:
 				$.ajax({
 				    type: "post",
@@ -155,44 +189,78 @@ Login = function()
 				    data:JSON.stringify(model),
 				    dataType: "json",
 				    contentType: "application/json",
-				    success: function(user){alert(user.name)} 
+				    success: function(){
+                        alert("sent model");
+                    } 
     
 				});
-			 
+
+				$.ajax({
+				    type: "post",
+				    url: '/ajax/new_user_points/' + user.id,
+				    async: true,
+				    //data:JSON.stringify({}),
+				    dataType: "json",
+				    contentType: "application/json",
+				    success: function(){
+                        alert("sent new user points");
+                    } 
+				});
+
 				$.ajax({
 				    type: "GET",
-				    url: '/ajax/truth',
+				    url: '/ajax/truth/' + user.id,
 				    async: true,
 				    
 				    dataType: "json",
 				    success: function(data){
 					if (data) 
 					{
-					    truth = truth.concat(data);
-                        if (truth[truth.length-1]['monty_door']==='A')
+                        var modelClass = data['model_class'];
+                        truth = data['samples'];
+                        var bettingVar = modelClass['betting_variable'];
+                        //truth = truth.concat(data);
+                        var isMonty;
+                        if (modelClass['model_name'] == 'monty')
                         {
-                            share_door='B';
+                            isMonty = true;
+                            if (truth[truth.length-1]['monty_door']==='A')
+                            {
+                                share_val = 'B';
+                            }
+                            else
+                            {
+                                share_val = 'A';
+                            }
+                        } else {
+                            share_val = 'H';
+                            isMonty = false;
                         }
-                        else
-                        {
-                            share_door='A';
+                        var domain;
+                        if (isMonty) {
+                            domain = ["A", "B", "C"];
+                        } else {
+                            domain = ["H", "L"];
                         }
-					    var dataWindow = makeDataWindow(truth, ['A', 'B', 'C'], variables, stageWidth-250);
-					    
-					    var dataButton=makeContractedButton(dataWindow);
+                        var sideBar = createSideBar2(modelClass, isMonty);
+                        variables = sideBar.Vars;
+					    var dataWindow = makeDataWindow(truth, domain, variables, stageWidth-250, modelClass, isMonty);
+
+					    var dataButton = makeContractedButton(dataWindow);
 					    dataButton.render(stage, {x:dataWindow.xPos, y:stageHeight-25})
-					    var betsWindow = makeCallWindow(user_data.myposts, ['A', 'B', 'C'], variables[variables.length-1], stageWidth-500);
+					    var betsWindow = makeCallWindow([], domain, variables[variables.length-1], stageWidth-500);
 
 					    //the last variable must always be the betting variable!
                         //MARK1
 					    var betButton=makeContractedButton(betsWindow);
 					    betButton.render(stage, {x:betsWindow.xPos, y:stageHeight-25});
 					    
-					    var putsWindow = makePutWindow([], ['A', 'B', 'C'], variables[variables.length-1], stageWidth-750);
+					    var putsWindow = makePutWindow([], domain, variables[variables.length-1], stageWidth-750);
 
 					    //the last variable must always be the betting variable!
 					    var putButton = makeContractedButton(putsWindow);
 					    putButton.render(stage, {x:putsWindow.xPos, y:stageHeight-25});
+					    
 
 					} 
 					else
@@ -225,33 +293,37 @@ Login = function()
 }(document, 'script', 'facebook-jssdk'));
      
 
-
 function getMe(width, height) 
 {
     FB.api('/me', 
 	{fields: 'id,name, picture.width(' + width + ').height(' + height + ')'}, 
 	function(response)
 	{
-	    if( !response.error ) 
-	    {
-		
+        //alert(JSON.stringify(response));
+	    //if( !response.error ) 
+	    //{
+		//alert("yo")
 		//friendCache.me = response;
 		//photo_url = friendCache.me.picture.data.url
+		
 		$.ajax({
 		    type: "post",
 		    url: '/ajax/picture',
 		    async: true,
-		    data:JSON.stringify({'id':response.id, 'url':response.picture.data.url, 'width':width, 'height':height}),
+		    data: JSON.stringify({'id':response.id, 'url':response.picture.data.url, 'width':width, 'height':height}),
 		    dataType: "json",
 		    contentType: "application/json",
-		    success: function(){} 
-    
+		    success: function(data){
+                welcome();
+            }
 		});
 		
-	    } 
-	    else 
-	    {
-		console.error('/me', response);
-	    }
+	    //} 
+	    //else 
+	    //{
+        //    console.error('/me', response);
+	    //}
 	});
 }
+
+

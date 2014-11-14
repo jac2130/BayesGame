@@ -226,7 +226,11 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
 {
     if (typeof defaultVals === 'undefined') 
     {
-        defaultVals = [20, 30, 50];
+        //defaultVals = [20, 30, 50];
+        for (var i=0; i<varnames.length; i++)
+        {
+            defaultVals.push(100/varnames.length);
+        }
     }
     verifyType(color, "string", color);
     var borderWidth = 1;
@@ -291,7 +295,6 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
     switcher.hists=[hist]
     switcher.cases=[]
     switcher.hists.map(function(hist) {switcher.cases.push([hist.conditions, hist.getVals()])})
-    //console.log(switcher.cases)
     cases=switcher.cases;
     cases.caseNumber=1; //we start by adding the second case
     switcher.cases=cases;
@@ -354,15 +357,6 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
 			       hist.barArea.moveIncr({x:0, y:gapHeight})
 			   });
 
-	
-	//switcher.hists.map(function(hist)
-	//		   {			       
-			       
-			       
-	//		   });
-
-	
-
 	for (var i=0; i<switcher.hists.length;i++ ) 
 	{
 	    
@@ -389,155 +383,159 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
     
     switcher.cases.addCase=function() 
     { 
-	switcher.caseList=[]
-	model[model.id][switcher.varKey]=[];
-	switcher.hists.map(function(hist)
-			   {			       
-			       if (hist.conditions.length)
-			       {
-				   var modelDict={}
-				   for (var k in hist.valDict){modelDict[k]=hist.valDict[k]/100}
-				   model[model.id][switcher.varKey].push([hist.conditions, modelDict]);
-			       }
-			       
-			   });
-	
-	
-	//this will be replaced by a check to see if the case
-	//is already part of the model.
-	/*if (checkQuery()) 
-	{
-	    alert("done") 
-	    return false
-	}*/
+        switcher.caseList = []
+        model[model.id][switcher.varKey]=[];
+        switcher.hists.map(function(hist)
+                   {			       
+                       if (hist.conditions.length)
+                       {
+                       var modelDict={}
+                       for (var k in hist.valDict){modelDict[k]=hist.valDict[k]/100}
+                       model[model.id][switcher.varKey].push([hist.conditions, modelDict]);
+                       }
+                       
+                   });
+        
+        //this will be replaced by a check to see if the case
+        //is already part of the model.
+        /*if (checkQuery()) 
+        {
+            alert("done") 
+            return false
+        }*/
 
-	var dictCheck=false
-	if (checkDict(switcher.menues, model[model.id][switcher.varKey]))
-	{ 
-	    dictCheck=true;
-	}
-	if (!dictCheck) {
-	    alert("you already specified this case!");
-	    return false
-	}
+        var dictCheck=false
+        if (checkDict(switcher.menues, model[model.id][switcher.varKey]))
+        { 
+            dictCheck=true;
+        }
+        if (!dictCheck) {
+            alert("you already specified this case!");
+            return false
+        }
 
-//must replace the above 
+//mu    st replace the above 
 
-	switcher.cases.caseNumber+=1
-	var nextPosY=55;
-	var caseNumber=switcher.cases.caseNumber;
-	var gapHeight=(graphHeight/caseNumber)/20
-	var fontSize=5*Math.log(gapHeight*10);
-	var histHeight=(graphHeight-gapHeight/2)/caseNumber;
-	switcher.cases=[]
-	switcher.cases.caseNumber=caseNumber;//have to add it again to the cases;
-	//here, I must add the values which originally came from the .activeChoice; of the menues
-	switcher.hists.map(function(hist) {switcher.cases.push([hist.conditions, hist.getVals()])})
-	var refreshMenues=switcher.menues;
-	//var lastChoice=[]
-	//switcher.menues.map(function(menu){lastChoice.push(menu.activeChoice)});
-	switcher.menues.map(function(menue) {menue.erase()});
-	switcher.menues=refreshMenues;
+        switcher.cases.caseNumber += 1
+        var nextPosY=55;
+        var caseNumber=switcher.cases.caseNumber;
+        var gapHeight=(graphHeight/caseNumber)/20
+        var fontSize=5*Math.log(gapHeight*10);
+        var histHeight=(graphHeight-gapHeight/2)/caseNumber;
+        switcher.cases=[]
+        switcher.cases.caseNumber=caseNumber;//have to add it again to the cases;
+        //here, I must add the values which originally came from the .activeChoice; of the menues
+        switcher.hists.map(function(hist) {switcher.cases.push([hist.conditions, hist.getVals()])})
+        var refreshMenues=switcher.menues;
+        //var lastChoice=[]
+        //switcher.menues.map(function(menu){lastChoice.push(menu.activeChoice)});
+        switcher.menues.map(function(menue) {menue.erase()});
+        switcher.menues=refreshMenues;
 
-	switcher.hists.map(function(hist) {hist.erase()});
-	switcher.hists=[];
-	
-	var valList=[];
-	var valObj={};
-	var ajaxObject={};
-	ajaxObject[bayesVar.varText]=[];
-	Id=0;
-	switcher.cases.map(function(vals){
-	    tempHist=makeHistFromVals(Id, bayesVar, switcher, gapHeight,vals, valList, valObj, ajaxObject, graphWidth, histHeight,fontSize)
-	    switcher.hists.push(tempHist)
-	    Id+=1
-	})
-	switcher.hists.map(function(hist)
-			   {
-			       hist.barArea.moveIncr({x:0, y:gapHeight})
-			   });
-
-	
-	var condString="P ("+ bayesVar.varText + " |"
-	
-	valList=[];
-	var valObj={};
-	switcher.hists[switcher.hists.length-1].conditions=[];
-	var vals=switcher.hists[switcher.hists.length-1].getVals()
-	//alert(vals)
-	for (var i=0;i< bayesVar.possibilities.length; i++)
-	{
-	    valObj[bayesVar.possibilities[i]]= vals[i];
-	}
-	
+        switcher.hists.map(function(hist) {hist.erase()});
+        switcher.hists=[];
+        
+        var valList=[];
+        var valObj={};
+        var ajaxObject={};
+        ajaxObject[bayesVar.varText] = [];
+        Id=0;
+        switcher.cases.map(function(vals)
+        {
+            tempHist = makeHistFromVals(Id, bayesVar, switcher, gapHeight,vals, valList, valObj, ajaxObject, graphWidth, histHeight,fontSize)
+            switcher.hists.push(tempHist)
+            Id+=1
+        })
+        switcher.hists.map(function(hist)
+        {
+            hist.barArea.moveIncr({x:0, y:gapHeight})
+        });
+        
+        var condString="P ("+ bayesVar.varText + " |";
+        
+        valList = [];
+        var valObj = {};
+        switcher.hists[switcher.hists.length-1].conditions = [];
+        var vals=switcher.hists[switcher.hists.length-1].getVals()
+        //alert(vals)
+        for (var i=0; i<bayesVar.possibilities.length; i++)
+        {
+            valObj[bayesVar.possibilities[i]] = vals[i];
+        }
+        
    
-	for (var i=0; i< switcher.menues.length; i++)
-	{
-	    //conds.push(switcher.menues[i].activeChoice)
-	    
-	    
-	    if ((i+3)%3===0) 
-	    {
-		valList.push([switcher.menues[i].activeChoice, switcher.menues[i+2].activeChoice]);
-		switcher.hists[switcher.hists.length-1].conditions.push([switcher.menues[i].activeChoice.toLowerCase().replace(" ", "_"), switcher.menues[i+2].activeChoice]);
-		
-	    }
-	    
-	    condString+= " " + switcher.menues[i].activeChoice; 
-	    if ((i+1)%3===0 && i> 0 && i<switcher.menues.length-1)
-	    {
-		condString+= ","
-	    }
-	}
+        for (var i=0; i< switcher.menues.length; i++)
+        {
+            //conds.push(switcher.menues[i].activeChoice)
 
-	//ajaxObject[bayesVar.varText][ajaxObject[bayesVar.varText].length-1]=[valList, valObj];
-	condString+=")";
-	var ValDict=switcher.hists[switcher.hists.length-1].valDict
-	var modelDict={}
-	for (var k in ValDict){modelDict[k]=ValDict[k]/100}
-	model[model.id][switcher.varKey].push([switcher.hists[switcher.hists.length-1].conditions, modelDict]);
-	
-	//here goes the ajax post call.
-	$.ajax({
-	    type: "post",
-	    url: '/ajax/model',
-	    async: true,
-	    data:JSON.stringify(model),
-	    dataType: "json",
-	    contentType: "application/json",
-	    success: function(user){alert(user.name)} 
-    
-	});
-	
-	//check=checkQuery();
-	
-	switcher.hists[switcher.hists.length-1].condText.erase();
-	switcher.hists[switcher.hists.length-1].condText= makeTextWidget(condString,fontSize, "Arial", "#666"  ) 
-	
-	//switcher.hists[switcher.hists.length-1].conditions=conds;
-	
-	switcher.hists[switcher.hists.length-1].condText.renderW(switcher.hists[switcher.hists.length-1], {x:switcher.width-switcher.hists[switcher.hists.length-1].condText.width-20, y:gapHeight})
+            if ((i+3)%3===0) 
+            {
+                valList.push([switcher.menues[i].activeChoice, switcher.menues[i+2].activeChoice]);
+                switcher.hists[switcher.hists.length-1].conditions.push([switcher.menues[i].activeChoice.toLowerCase().replace(" ", "_"), switcher.menues[i+2].activeChoice]);
+            }
+            
+            condString+= " " + switcher.menues[i].activeChoice; 
+            if ((i+1)%3 === 0 && i>0 && i<switcher.menues.length-1)
+            {
+                condString+= ",";
+            }
+        }
+
+        //ajaxObject[bayesVar.varText][ajaxObject[bayesVar.varText].length-1]=[valList, valObj];
+        condString += ")";
+        var ValDict = switcher.hists[switcher.hists.length-1].valDict;
+        var modelDict = {};
+        for (var k in ValDict)
+        {
+            modelDict[k] = ValDict[k]/100;
+        }
+        model[model.id][switcher.varKey].push([switcher.hists[switcher.hists.length-1].conditions, modelDict]);
+        
+        //here goes the ajax post call.
+        $.ajax({
+            type: "post",
+            url: '/ajax/model',
+            async: true,
+            data:JSON.stringify(model),
+            dataType: "json",
+            contentType: "application/json",
+            success: function(user){alert(user.name)} 
+        
+        });
+        
+        //check=checkQuery();
+        
+        switcher.hists[switcher.hists.length-1].condText.erase();
+        switcher.hists[switcher.hists.length-1].condText= makeTextWidget(condString,fontSize, "Arial", "#666"  ) 
+        
+        //switcher.hists[switcher.hists.length-1].conditions=conds;
+        
+        switcher.hists[switcher.hists.length-1].condText.renderW(switcher.hists[switcher.hists.length-1], {x:switcher.width-switcher.hists[switcher.hists.length-1].condText.width-20, y:gapHeight});
 
 
-	newHist=makeHist(defaultVals, ["A", "B", "C"], graphWidth, histHeight, 20, color);
-	//newHist.conditions=[];
-	//newHist.condList=[];
-	newHist.hideButton=makeHideButton(switcher, Id, histHeight/3);
+        newHist = makeHist(defaultVals, ["A", "B", "C"], graphWidth, histHeight, 20, color);
+        //newHist.conditions=[];
+        //newHist.condList=[];
+        newHist.hideButton=makeHideButton(switcher, Id, histHeight/3);
 
-	newHist.hideButton.renderW(newHist, {x:switcher.width+10, y:histHeight/3});
-	switcher.hists.push(newHist);
+        newHist.hideButton.renderW(newHist, {x:switcher.width+10, y:histHeight/3});
+        switcher.hists.push(newHist);
 
-	for (var i=0; i<switcher.hists.length;i++ ) 
-	{
-	    
-	    switcher.hists[i].renderW(switcher, {x:0, y:nextPosY}); 
-	    nextPosY+=histHeight;
-	};
-	switcher.menues.map(function(menue) {menue.renderW(switcher, {x:menue.x, y:10})});
+        for (var i=0; i<switcher.hists.length;i++ ) 
+        {
+            
+            switcher.hists[i].renderW(switcher, {x:0, y:nextPosY}); 
+            nextPosY += histHeight;
+        };
 
-	//if (checkQuery()){alert(checkQuery())}
-	//here I need to add the .activeChoice to the histograms.
-	//newHist.renderW(switcher, {x:0, y:nextPosY});
+        switcher.menues.map(function(menue)
+        {
+            menue.renderW(switcher, {x:menue.x, y:10})
+        });
+
+        //if (checkQuery()){alert(checkQuery())}
+        //here I need to add the .activeChoice to the histograms.
+        //newHist.renderW(switcher, {x:0, y:nextPosY});
     }
 //end of addCase
 
@@ -601,7 +599,6 @@ function makeTweaker(clickOutList, color, varnames, defaultVals)
     var caseNumText = makeTextWidget("0", 20);
     caseNumText.render(switcher.shape, {x: 20, y: 37});
 
-    console.log(switcher.color);
     var hist = makeHist(defaultVals, ["A", "B", "C"], 1500, 800, 20,
                         switcher.color);
     //hist.render(stage, {x: 100, y: 100});

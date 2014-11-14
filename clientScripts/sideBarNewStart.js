@@ -6,9 +6,6 @@ var VIEW_HEIGHT=800;
 
 function makeBetViewButton(bayesVar)
 {
-    
-    
-    
     var betViewButton=makeTextWidget("BETS", 15, "Arial", "#666");
     var callback ={
 	bayesVar:bayesVar,
@@ -249,7 +246,6 @@ function bayesVarFactory ()
 				       variable.varBarItem2.erase();
 				       if (variable.hasActiveView)
 				       {
-					   console.log(variable.activeView)
 					   variable.activeView.erase();
 					   variable.hasActiveView=false;
 				       }
@@ -257,7 +253,6 @@ function bayesVarFactory ()
 				       {
 					   if (miniHist)
 					   {
-					       console.log(variable.activeCircles[0])
 					       variable.activeCircles[0].showMiniHist();
 					   }
 					   else 

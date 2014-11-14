@@ -1,4 +1,31 @@
 // requires verify
+var getCharDebug = false;
+
+// event.type must be keypress
+function getChar(event)
+{
+    if (getCharDebug) {
+        alert("which: " + event.which + ", keycode: " + event.keyCode + ", charCode: " + event.charCode);
+    }
+    if (event.which == null) {
+        var retChar = String.fromCharCode(event.keyCode); // IE
+        return retChar;
+    } else if (event.which!=0 && event.charCode!=0) {
+        var retChar = String.fromCharCode(event.which);   // the rest
+        if (getCharDebug) {
+            alert(retChar);
+        }
+        return retChar;
+    } else {
+        return null // special key
+    }
+}
+
+function getTime()
+{
+    var d = new Date();
+    return d.getTime();
+}
 
 var object_create = Object.create;
 if (typeof object_create !== 'function') {
@@ -9,8 +36,9 @@ if (typeof object_create !== 'function') {
     };
 }
 
-function deepCopy(src, /* INTERNAL */ _visited) {
-    if(src == null || typeof(src) !== 'object'){
+function deepCopy(src, /* INTERNAL */ _visited)
+{
+    if (src == null || typeof(src) !== 'object') {
         return src;
     }
 
@@ -76,7 +104,6 @@ function deepCopyTest()
     var c = deepCopy(b);
     var d = deepCopy(b);
     c.a.a += 1;
-    console.log(d.a.a);
 }
 
 function makeObj (parentObj)
@@ -84,7 +111,8 @@ function makeObj (parentObj)
     return deepCopy(parentObj);
 }
 
-if (typeof require !== 'undefined') {
+if (typeof require !== 'undefined')
+{
     var verify = require("./verify.js");
     var verifyType = verify.verifyType;
 }
@@ -101,7 +129,6 @@ Array.prototype.deleteElemByIndex = function(elemIndex)
         elemIndex = this.length + elemIndex;
     }
     var newArr = [];
-    console.log("elemIndex: ", elemIndex);
     for (var index=0; index<this.length;index++)
     {
         if (index !== elemIndex) {
@@ -114,7 +141,6 @@ Array.prototype.deleteElemByIndex = function(elemIndex)
 Array.prototype.deleteFirstElem = function(elem)
 {
     var itemIndex = this.indexOf(elem);
-    console.log("itemIndex: ", itemIndex);
     var newArr;
     if (itemIndex !== -1) {
         newArr = this.deleteElemByIndex(itemIndex);
@@ -164,17 +190,18 @@ SetObj.add = function(item)
 }
 
 // removes in place, but also returns obj
-SetObj.remove = function (item) {
+SetObj.remove = function (item)
+{
     if (this.contains(item)) {
         var itemIndex = this.itemList.indexOf(item);
-        console.log(itemIndex);
         this.itemList = this.itemList.deleteElemByIndex(itemIndex);
     }
     return this;
 }
 
 // creates a new set 
-SetObj.union = function (set2) {
+SetObj.union = function (set2)
+{
     var newSet = Set();
     for (var i=0;i<this.itemList.length;i++) {
         newSet.add(this.itemList[i]);
@@ -185,7 +212,8 @@ SetObj.union = function (set2) {
     return newSet;
 }
 
-SetObj.intersection = function (set2) {
+SetObj.intersection = function (set2)
+{
     var newSet = Set();
     for (var i=0; i < this.itemList.length; i++) {
         if (set2.contains(this.itemList[i])) {
@@ -206,20 +234,14 @@ function Set(alist)
     }
 }
 
-function setTest () {
+function setTest ()
+{
     var a = Set([1,2,3]);
     a.add(4);
-    console.log(a);
     a.add(9);
-    console.log(a);
     a.remove(4);
-    console.log(a);
     a.remove(8);
-    console.log(a);
     var b = Set([4,5,3]);
-    console.log(b);
-    console.log(a.union(b));
-    console.log(a.intersection(b));
 }
 
 if (typeof module !== 'undefined') {

@@ -219,7 +219,6 @@ var Tutorial = {
     trigNum: 0,
     init: function(textBar) {
         this.textBar = textBar;
-        //console.log(this.stepsTextSeq[this.currentState])
         this.textBar.displayList(this.stepsTextSeq[this.currentState]);
     },
     trigger: function(triggerEvent) {

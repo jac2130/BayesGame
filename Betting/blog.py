@@ -20,6 +20,7 @@ from random import random
 import requests
 import pymongo
 import blogPostDAO
+import mClassDAO
 import pointsDAO
 import sessionDAO
 import pictureDAO
@@ -37,7 +38,13 @@ from time import sleep;
 import time
 import threading
 import thread
+import logInfo
+from logInfo import logInfo
+from mClassDAO import mClasses
 
+betting_variables = {}
+for mClass in mClasses:
+    betting_variables[mClass] = mClasses[mClass]['bettingVar']
 
 #Periods should be determined by the following:
 
@@ -45,7 +52,7 @@ import thread
 
 #the following will allow me to build graphs from the json strings that are
 #sent back when the model is build.
- 
+
 from bayesian.bbn import build_bbn_from_conditionals as build_graph
 from bayesian.bbn import *
 #here is the true model, which is a constant (the simulated truth)
@@ -82,97 +89,23 @@ results=g.query();
 __author__ = 'johannes castner'
 
 #because the above does nt yet work, for now, I'm using the below code to generate data:
- 
-def random_monty():
-    d={};
-    d['period']=0;
-    num=random()
-    if num<1.0/3:
-        d["prize_door"]="A"
-    elif num < 2.0/3:
-        d["prize_door"]="B"
-    else:
-        d["prize_door"]="C"
-    num=random()
-    if num<1.0/3:
-        d["contestant_door"]="A"
-    elif num < 2.0/3:
-        d["contestant_door"]="B"
-    else:
-        d["contestant_door"]="C"
-    if d["prize_door"]==d["contestant_door"]=="A":
-        num=random()
-        if num < 0.5:
-            d["monty_door"]="B"
-        else: d["monty_door"]="C"
-    elif d["prize_door"]==d["contestant_door"]=="B":
-        num=random()
-        if num < 0.5:
-            d["monty_door"]="A"
-        else: d["monty_door"]="C"
-    elif d["prize_door"]==d["contestant_door"]=="C":
-        num=random()
-        if num < 0.5:
-            d["monty_door"]="A"
-        else: d["monty_door"]="B"
-    elif (d["prize_door"]=="A" and d["contestant_door"]=="B"):
-        d["monty_door"]="C"
-    elif (d["prize_door"]=="A" and d["contestant_door"]=="C"):
-        d["monty_door"]="B"
-    elif (d["prize_door"]=="B" and d["contestant_door"]=="C"):
-        d["monty_door"]="A"
-    elif (d["prize_door"]=="B" and d["contestant_door"]=="A"):
-        d["monty_door"]="C"
-    elif (d["prize_door"]=="C" and d["contestant_door"]=="B"):
-        d["monty_door"]="A"
-    elif (d["prize_door"]=="C" and d["contestant_door"]=="A"):
-        d["monty_door"]="B"
-    return d
 
-
-def gen_next_period( threadName, delay):
-   count = 21
-   while True:
-      sleep(delay)
-      count += 1
-      new_point=random_monty();
-      new_point['period']=count;
-      data.add_data([new_point])
-      #print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
-
-def gen_first_twenty( threadName, delay):
-   count = 0
-   while count<21:
-      sleep(delay)
-      count += 1
-      new_point=random_monty();
-      new_point['period']=count;
-      data.add_data([new_point])
-      #print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
-
-try:
-    thread.start_new_thread( gen_first_twenty, ("Thread-2", 0.002, ) )
-    thread.start_new_thread( gen_next_period, ("Thread-1", 120, ) )
-   
-except:
-    print "Error: unable to start thread"
-
+# make treatments; (data generation and budget constraints)
 
 # Now we leave out the "prize_door" value for the last member in the sequence. This is the one players bet on. This value comes in, when the timer runs out.
 
-
 connection_string = "mongodb://localhost"
 connection = pymongo.MongoClient(connection_string)
-database = connection.blog 
-
+database = connection.blog
+mClass = mClassDAO.mClassDAO(database)
 pictures=pictureDAO.PictureDAO(database)
 posts = blogPostDAO.BlogPostDAO(database)
 puts  = putsDAO.PutsDAO(database)
 users = userDAO.UserDAO(database)
 models=modelDAO.ModelDAO(database)
 sessions = sessionDAO.SessionDAO(database)
-data =dataDAO.DataDAO(database)
-points=pointsDAO.PointsDAO(database) 
+data = dataDAO.DataDAO(database)
+points=pointsDAO.PointsDAO(database)
 # General Discussion on structure. This program implements a blog. This file is the best place to start to get
 # to know the code. In this file, which is the controller, we define a bunch of HTTP routes that are handled
 # by functions. The basic way that this magic occurs is through the decorator design pattern. Decorators
@@ -180,19 +113,18 @@ points=pointsDAO.PointsDAO(database)
 # the bottle.py decorators also put each callback into a route table.
 
 # These are the routes that the blog must handle. They are decorated using bottle.py
-
 # This route is the main page of the blog
 
 @bottle.route("/clock")
 def get_time():
-    return json.dumps([(120-int(round(time.time()%120)))//60, (120-int(round(time.time()%120)))%60]);
+    return data.getTimeUntilTwoMinuteMark()
 
 @bottle.route("/pointsRefresh/<user>")
 def points_refresh(user):
     point_object=points.get_points(user)
     return json.dumps({"points": point_object["points"], "shares":point_object["shares"]})
 
-@bottle.route("/<variable>/<period>")
+@bottle.route("/calls/<variable>/<period>")
 def blog_index(variable, period):
 
     cookie = bottle.request.get_cookie("session")
@@ -221,29 +153,64 @@ def query(i, path):
     query_dict=dict(tuple(elem.split(':')) for elem in path.split("/"))
     return models.query(_id=i, conditions=query_dict)
 
-@bottle.route("/truth")
-def blog_index():
-    samples=data.get_first_twenty();
-    return json.dumps(samples)
+@bottle.route("/hello/<user_id>")
+def blog_index(user_id):
+    print "hello"
+    return "hello world"
+
+@bottle.route("/truth/<user_id>")
+def blog_index(user_id):
+    if mClass.user_needs_updating(user_id):
+        mClass.assign_mClass(user_id)
+    model_name = mClass.get_user_mClass(user_id)
+
+    model_class= {'model_name': model_name,
+                  'betting_variable': mClasses[model_name]["bettingVar"],
+                  'vars': mClasses[model_name]["vars"],
+                  'domain': mClasses[model_name]["domain"]
+                  }
+
+    samples = data.get_first_twenty(model_class)
+    retData = {'model_class': model_class,
+               'samples': samples}
+    return json.dumps(retData)
 
 '''@bottle.post('/newData')
 def post_new_data():
     data.add_data([random_monty()])
     return'''
 
-@bottle.route("/newData")
-def index():
-    new_data=data.get_newest()
-    return json.dumps(new_data)
-   
+@bottle.route("/newData/<user_id>" )
+def index(user_id):
+    newMClassAssigned = False
+    if mClass.user_needs_updating(user_id):
+        mClass.assign_mClass(user_id)
+        newMClassAssigned = True
+    model_name = mClass.get_user_mClass(user_id)
+
+    model_class= {'model_name': model_name,
+                  'betting_variable': mClasses[model_name]["bettingVar"],
+                  'vars': mClasses[model_name]["vars"],
+                  }
+    samples = data.get_newest(model_class)
+    retData = {'samples': samples}
+    if newMClassAssigned:
+        retData['newModelClass'] = model_class;
+    else:
+        retData['newModelClass'] = None
+
+    #new_data = data.get_newest(model_class)
+    return json.dumps(retData)
 
 @bottle.post("/accept_put/<put_id>/<accepter_id>/<poster_id>")
 def accept_put(put_id, accepter_id,poster_id):
     postAll= bottle.request.json
+
     point_count = postAll["points"]
     puts.accept_put(put_id, accepter_id)
     points.accept_put(poster_id, accepter_id, point_count)
 # used to insert a person's facebook picture in the mongodb database. 
+    return json.dumps({})
 
 @bottle.post("/accept_call/<call_id>/<accepter_id>/<poster_id>")
 def accept_call(call_id, accepter_id,poster_id):
@@ -251,6 +218,11 @@ def accept_call(call_id, accepter_id,poster_id):
     point_count = postAll["points"]
     posts.accept_call(call_id, accepter_id)
     points.accept_call(poster_id, accepter_id, point_count)
+    return json.dumps({})
+
+@bottle.post("/new_user_points/<user_id>")
+def enter_new_user_points(user_id):
+    points.insert_entry(user_id, 1000, 10)
 
 @bottle.post('/picture')
 def post_new_picture():
@@ -261,14 +233,13 @@ def post_new_picture():
     height=postAll['height']
     pictures.add_picture(name, url, width, height)
    # print url, width, height
-    return
+    return json.dumps({})
 
 @bottle.route("/picture/<id>/<width>/<height>")
 def index(id, width, height):
     path=pictures.get_newest(id, width, height)
     bottle.response.content_type = 'image/jpeg'
     return requests.get(path).content
-   
 
 # used to process a comment on a blog post
 @bottle.post('/newcomment')
@@ -285,8 +256,8 @@ def post_new_comment():
     username = sessions.get_username(cookie)
     # it all looks good, insert the comment into the blog post and redirect back to the post viewer
     posts.add_comment(id, name, email, body, commentId)
+    return json.dumps({})
 
-    
 #
 # Post handler for setting up a new post.
 # Only works for logged in user.
@@ -312,8 +283,8 @@ def post_newpost():
     formatted_post = newline.sub("<p>", escaped_post)
 
     permalink = posts.insert_entry(title, formatted_post, comments, tags_array, username, userid, variable, period, opend)
-    
-    
+    return json.dumps({})
+
 @bottle.post('/newput')
 def post_newpost():
     postAll= bottle.request.json
@@ -336,17 +307,16 @@ def post_newpost():
     formatted_post = newline.sub("<p>", escaped_post)
 
     permalink = puts.insert_entry(title, formatted_post, comments, tags_array, username, userid, variable, period, opend)
+    return json.dumps({})
 
 # handles a login and places the time stamped data in the database. 
 @bottle.post('/login')
 def process_login():
-
     user= bottle.request.json
     username= user['id'];
     users.add_user(user);
     #print "user submitted ", username
 
-    
         # username is stored in the user collection in the _id key
     session_id = sessions.start_session(username)
     #print session_id;
@@ -355,22 +325,20 @@ def process_login():
         print "Error: there is no session id!!" 
 
     cookie = session_id
-
         # Warning, if you are running into a problem whereby the cookie being set here is
         # not getting set on the redirect, you are probably using the experimental version of bottle (.12).
         # revert to .11 to solve the problem.
     #print bottle.response.set_cookie;
     bottle.response.set_cookie("session", cookie)
+    return json.dumps({})
 
 @bottle.post('/model')
 def building_model():
+    model = bottle.request.json
+    user = model['id'];
+    models.add_model(model)
+    return json.dumps({})
 
-    model= bottle.request.json
-    user= model['id'];
-    models.add_model(model);
-    
-
-    
 @bottle.route("/has_query/<_id>")
 def blog_index(_id):
 
@@ -378,12 +346,11 @@ def blog_index(_id):
 
     return json.dumps(models.has_query(_id))
 
-    
-    
+
 @bottle.get('/user/:id/photo')
 def get_photo():
     return requests.get(db.getUser(id).photo_url)
-    
+
 
 @bottle.get('/internal_error')
 @bottle.view('error_template')

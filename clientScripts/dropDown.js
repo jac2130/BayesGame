@@ -36,7 +36,6 @@ function makeDropDownMenu(choices, width, height, color, defaultMessage, fontSiz
     var dropDownMenu = Object.create(DropDownMenu);
     dropDownMenu.choices = choices;
     dropDownMenu.fontSize=fontSize;
-    console.log(dropDownMenu);
     dropDownMenu.hasActive = false;
     dropDownMenu.expanded = false;
 
@@ -109,8 +108,6 @@ function makeDropDownItem(itemText, menuHeight, menuWidth, menuColor, menu)
     {
         if (menu.activeChoice !== this.widget.text.shape.text)
         {
-            console.log("currActive: ", menu.activeChoice);
-            console.log("setting active: ", this.widget.text.shape.text);
             menu.setActiveChoice(this.widget.text.shape.text);
         }
     });
@@ -143,8 +140,6 @@ DropDownMenu.disableActive = function()
             var dropDownMenu = this.widget.dropDownMenu;
             if (dropDownMenu.activeChoice !== this.widget.text.shape.text)
             {
-                console.log("currActive2: ", dropDownMenu.activeChoice);
-                console.log("setting active2: ", this.widget.text.shape.text);
                 dropDownMenu.setActiveChoice(this.widget.text.shape.text);
             }
         });
@@ -157,7 +152,6 @@ DropDownMenu.setActiveChoice = function(aChoice)
     var handleActiveItemClick = function(evt) {
         if (menuWidget.expanded) {
             var activeChoiceItem = menuWidget.getActiveChoiceItem();
-            console.log("background color: ", activeChoiceItem.background.color);
             activeChoiceItem.background.changeColor(activeChoiceItem.background.color);
             menuWidget.undisplayItems();
         } else {
@@ -169,7 +163,6 @@ DropDownMenu.setActiveChoice = function(aChoice)
 
     this.disableActive();
     this.activeChoice = aChoice;
-    console.log("active choice: ", this.activeChoice);
 
     if (this.activeChoice === this.defaultMessage) {
         this.defaultDDI.renderW(this, {x: 0, y: 0}, "ulCorner", 0);
@@ -182,7 +175,6 @@ DropDownMenu.setActiveChoice = function(aChoice)
     }
 
     var activeChoiceItem = menuWidget.getActiveChoiceItem();
-    console.log("activeChoiceItem: ", activeChoiceItem);
     activeChoiceItem.shape.removeAllEventListeners("click");
     activeChoiceItem.shape.on("click", handleActiveItemClick);
     this.undisplayItems();
@@ -216,7 +208,6 @@ DropDownMenu.undisplayItems = function()
     }
     var activeChoiceItem = this.getActiveChoiceItem();
     activeChoiceItem.renderW(this, Point(0,0), "ulCorner", 0);
-    console.log("background color: ", activeChoiceItem.background.color);
     activeChoiceItem.background.changeColor(activeChoiceItem.background.color);
 }
 
@@ -293,7 +284,6 @@ ScrollMenu.setActiveChoice = function(aChoice)
     var menuWidget = this;
     this.disableActive();
     this.activeChoice = aChoice;
-    console.log("active choice: ", this.activeChoice);
 
     
     for (var i=0; i < this.scrollItems.length; i++) {
@@ -302,9 +292,6 @@ ScrollMenu.setActiveChoice = function(aChoice)
             
         }
     }
-
     var activeChoiceItem = menuWidget.getActiveChoiceItem();
-    console.log("activeChoiceItem: ", activeChoiceItem);
-    
 }
 
