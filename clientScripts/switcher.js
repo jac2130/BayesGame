@@ -1,3 +1,64 @@
+numerize=function(arg){return (arg==="H" | arg==="A")}
+//return 1 if arg is "H", in the usual case, or if arg is "A" in the monty case. 
+
+function zip(arrays) {
+    return arrays[0].map(function(_,i){
+        return arrays.map(function(array){return array[i]})
+    });
+}
+
+NoisyOr=function(instance, signs, p){
+    tempProd=1;
+
+    for (i=0; i<instance.length; i++){
+	if (signs[i]==="+"){
+	    tempProd*=Math.pow((1-p), numerize(instance[i]));
+	}
+	else {
+	    tempProd*=Math.pow((1-p), 1-numerize(instance[i]));
+	}
+    }
+	
+    return 1-tempProd
+}
+
+values=function(obj)
+{
+    ls=[];
+    Object.keys(obj).map(function(key){ls.push(obj[key])})
+    return ls
+}
+
+sum = function(ls)
+{
+    total=0;
+    ls.map(function(it)
+	   {
+	    total+=it;   
+	   }
+	  );
+    return total
+}
+timesHundred=function(arr){
+    for(var i=0; i<arr.length; i++) {
+	arr[i] *= 100;
+    }
+    return arr
+}
+
+function allCombinations(listOfArrays) {
+    var res = [];
+    listOfArrays[0].map(function inner(i, val) {
+	var iter = i, current = val;
+	return function(x) {
+	    var next = current + x;
+	    if(iter == listOfArrays.length - 1) { res.push(next.split("")); }
+	    else { listOfArrays[i+1].map(inner(i + 1, next)); }
+	}
+    }(0, ""));
+    return res;
+}
+
 var check=false;
 var checkQuery=function() {
     
@@ -67,6 +128,7 @@ function makeAddButton(cases, size)
         "cases": cases,
         "call": function() {
             tutorial.trigger("caseAdded");
+	    //warn(JSON.stringify(this.cases))
             this.cases.addCase();
         }
     };
@@ -136,7 +198,9 @@ var makeHistFromVals=function(Id, bayesVar, switcher, gapHeight,vals, valList, v
 {
     values=vals[1];
     conditions=vals[0];
-    tempHist=makeHist(values, bayesVar.possibilities, graphWidth, histHeight, 20, bayesVar.color, conditions);
+    //alert("conditions: " + JSON.stringify(vals))  
+
+    tempHist=makeHist(values, bayesVar.possibilities, graphWidth, histHeight, 20, bayesVar.color, bayesVar, conditions);
     //tempHist.conditions=conditions;
     //tempHist.condList=[];
     condString="P ("+ bayesVar.varText + " |"
@@ -166,8 +230,12 @@ var makeHistFromVals=function(Id, bayesVar, switcher, gapHeight,vals, valList, v
     condString+=")";
     ajaxObject[bayesVar.varText].push([valList,valObj]); 
 			       
-
+    
     tempHist.condText= makeTextWidget(condString,fontSize, "Arial", "#666"  ) 
+    
+    tempHist.textBackground=makeRect(tempHist.condText.width, tempHist.condText.height, "white", 1, "white");
+    tempHist.textBackground.renderW(tempHist, {x:switcher.width-tempHist.condText.width-20, y:gapHeight});
+
     tempHist.condText.renderW(tempHist, {x:switcher.width-tempHist.condText.width-20, y:gapHeight})
     
     if (switcher.cases.caseNumber!=1){
@@ -220,71 +288,105 @@ function checkDict(menues, searchList){
     return dictCheck
 }
 
-
-
-function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaultVals)
+function makeSwitcher(bayesVar, graphWidth, graphHeight, color,
+                      varnames, fromSigns)
 {
-    if (typeof defaultVals === 'undefined') 
+    if (typeof fromSigns === 'undefined') 
     {
+	fromSigns=[];
         //defaultVals = [20, 30, 50];
         for (var i=0; i<varnames.length; i++)
         {
-            defaultVals.push(100/varnames.length);
+            fromSigns.push("+");
         }
     }
-    verifyType(color, "string", color);
-    var borderWidth = 1;
     
+    //isPositive=true;
+    verifyType(color, "string", color);
+    var borderWidth = 0;
     var switcher = Object.create(View);
+    switcher.bayesVar = bayesVar
     switcher.width=graphWidth;
     switcher.height=graphHeight;
     switcher.setShape(new createjs.Container());
-    switcher.background = makeRect(graphWidth, graphHeight, "#3b5998"/*"#3B4DD0"*/, borderWidth);
+    switcher.background = makeRect(graphWidth, graphHeight, "#ffffff"/*"#3b5998","#3B4DD0"*/, borderWidth);
     switcher.background.render(switcher.shape, {x:0, y:0});
 
     var histHeight=graphHeight-35;
-    var hist = makeHist(defaultVals, bayesVar.possibilities,
-                         graphWidth, histHeight, 20, color);
 
-    hist.renderW(switcher, {x:0, y:55});
+    //var hist = makeHist(defaultVals, bayesVar.possibilities,
+                         //graphWidth, histHeight, 20, color, bayesVar);
+
+    //hist.renderW(switcher, {x:0, y:55});
     switcher.varnames=varnames;
     nextVarXcoord=20;
     nameLengths=[]
-    menues=[] //make the menues part of the histograms. 
+    //menues=[] //make the menues part of the histograms. 
     //this is important to keep the conditions attached to the conditional
     //distributions, which are the histograms.
-    
+    domains=[]
     switcher.varnames.map( function(item) {nameLengths.push(makeTextWidget(item,22, "Arial", "#666"  ).width)})
     //var NameWidth=Math.max.apply(null, nameLengths)+30;
     for (var i=0; i< varnames.length;i++) 
     {
 	if (typeof(varnames[i])==="string")
 	{
-	    var varname=makeTextWidget(switcher.varnames[i], 28, "Arial", "white" )
-	    var NameWidth=varname.width;
+	    //var varname=makeTextWidget(switcher.varnames[i], 28, "Arial", "white" )
+	    //var NameWidth=varname.width;
 		//makDropDownMenu(switcher.varnames, NameWidth, 32, "white", switcher.varnames[i]);
-	    varname.x=nextVarXcoord
-	    varname.activeChoice=varname.shape.text;
-	    menues.push(varname)
+	    //varname.x=nextVarXcoord
+	    //varname.activeChoice=varname.shape.text;
+	    //menues.push(varname)
 	    //makeTextWidget(switcher.varnames[i],22, "Arial", "black" )
-	    varname.renderW(switcher, {x:varname.x, y:10})
+	    //varname.renderW(switcher, {x:varname.x, y:10})
 
-	    var equalSign=makeTextWidget("=", 28, "Arial", "white" )
+	  //  var equalSign=makeTextWidget("=", 28, "Arial", "white" )
 		//makeDropDownMenu(["=", "!="], 32, 32, "white")
-	    equalSign.x= nextVarXcoord+NameWidth+10
-	    equalSign.activeChoice=equalSign.shape.text;
-	    menues.push(equalSign)
-	    equalSign.renderW(switcher,{x:equalSign.x, y:10});
+	    //equalSign.x= nextVarXcoord+NameWidth+10
+	    //equalSign.activeChoice=equalSign.shape.text;
+	    //menues.push(equalSign)
+	    //equalSign.renderW(switcher,{x:equalSign.x, y:10});
+        //console.log(isMonty);
 	    
-	    var domain=makeDropDownMenu(["A", "B", "C"], 80, 32, "#8b9dc3", "Value");
-	    domain.x= nextVarXcoord+NameWidth+50
-	    menues.push(domain)
-	    domain.renderW(switcher,{x:domain.x, y:10});
+	    var ddmVals;
+        if (isMonty)
+        {
+            ddmVals = ["A", "B", "C"];
+        } else {
+            ddmVals = ["H", "L"];
+        }
+	    cases=[]
+	    modelCases=[]
+	    modelNames=[];
+	    varnames.map(function(name){modelNames.push(name.toLowerCase().replace(" ", "_"))})
+        //alert(ddmVals);
+          
+		
+		    //alert("positive, dude!")
+	    domains.push(ddmVals)
+	    crossDomain=allCombinations(domains)
+		    //alert(JSON.stringify(crossDomain))
+	    crossDomain.map(function(item){
+		cases.push([zip([varnames,item])])
+		modelCases.push([zip([modelNames,item])])
+	    })
+	    cases.map(function(item){item.push({"H":NoisyOr(crossDomain[cases.indexOf(item)], fromSigns, 1),"L":1-NoisyOr(crossDomain[cases.indexOf(item)], fromSigns, 1)})});
+	    modelCases.map(function(item){item.push({"H":NoisyOr(crossDomain[modelCases.indexOf(item)], fromSigns, 1),"L":1-NoisyOr(crossDomain[modelCases.indexOf(item)], fromSigns, 1)})});
+
+		    //alert(JSON.stringify(cases))
+		
+	    switcher.cases=cases;
+	    switcher.cases.caseNumber=crossDomain.length;
+
+	    //var domain=makeDropDownMenu(ddmVals, 80, 32, "#8b9dc3", "Value");
+	    //domain.x= nextVarXcoord+NameWidth+50
+	    //menues.push(domain)
+	    //domain.renderW(switcher,{x:domain.x, y:10});
  
-	    nextVarXcoord+=(150+NameWidth);
+	    //nextVarXcoord+=(150+NameWidth);
 	}
     }
-    switcher.menues=menues;
+    //switcher.menues=menues;
     /*hist.conditions=[] //this is now done in histogram.js
     hist.updateConditions=function()
     {
@@ -292,9 +394,49 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
 	switcher.menues.map(function(menu){hist.conditions.push(menu.activeChoice)});
     }
     hist.updateConditions()*/
-    switcher.hists=[hist]
-    switcher.cases=[]
-    switcher.hists.map(function(hist) {switcher.cases.push([hist.conditions, hist.getVals()])})
+    //var hist = makeHist(defaultVals, bayesVar.possibilities,
+                         //graphWidth, histHeight, 20, color, bayesVar);
+
+    //hist.renderW(switcher, {x:0, y:55});
+
+    switcher.hists=[]
+    //alert(hist.conditions)
+    
+    var nextPosY=55;
+    var caseNumber=switcher.cases.caseNumber;
+    var gapHeight=(graphHeight/caseNumber)/20
+    var fontSize=5*Math.log(gapHeight*10);
+    var histHeight=(graphHeight-gapHeight/2)/caseNumber;
+    
+    modelCases.map(function(Case){
+	//alert(JSON.stringify(Case))
+	
+	switcher.hists.push(makeHist(timesHundred(values(Case[Case.length-1])), bayesVar.possibilities,
+                         graphWidth, histHeight, 20, color, bayesVar, Case[0]));
+    })
+
+    var varKey=bayesVar.varText.toLowerCase().replace(" ", "_");
+    //alert(JSON.stringify(modelCases))
+    model[model.id][varKey]=modelCases;
+   
+    for (var i=0; i<switcher.hists.length;i++ ) 
+	{
+	    var condString="P ("+ bayesVar.varText + " |";
+	    //alert(JSON.stringify(switcher.hists[i].conditions))
+	    switcher.hists[i].conditions.map(function(cond){condString+= " " + cond[0] + " = " + cond[1] + ","})
+	    condString=condString.slice(0, condString.length-1) + ")"
+	    switcher.hists[i].condText= makeTextWidget(condString,fontSize, "Arial", "#666"  ) 
+            switcher.hists[i].textBackground=makeRect(switcher.hists[i].condText.width, switcher.hists[i].condText.height, "white", 1, "white");
+    switcher.hists[i].textBackground.renderW(switcher.hists[i], {x:switcher.width-switcher.hists[i].condText.width-20, y:gapHeight});
+        //switcher.hists[switcher.hists.length-1].conditions=conds;
+        
+            switcher.hists[i].condText.renderW(switcher.hists[i], {x:switcher.width-switcher.hists[i].condText.width-20, y:gapHeight});
+
+	    switcher.hists[i].renderW(switcher, {x:0, y:nextPosY}); 
+	    nextPosY+=histHeight;
+	};
+    //switcher.hists.map(function(hist) {switcher.cases.push([hist.conditions, hist.getVals()])})
+    //hist.conditions are something like this [["unemployment", "H"], ["production", "L"]]
     cases=switcher.cases;
     cases.caseNumber=1; //we start by adding the second case
     switcher.cases=cases;
@@ -336,10 +478,11 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
 	var valList=[];
 	var valObj={};
 	var ajaxObject={};
-	ajaxObject[bayesVar.varText]=[];
+	//ajaxObject[bayesVar.varText]=[];
 	Id=0;
 	model[model.id][switcher.varKey]=[];
 	switcher.cases.map(function(vals){
+	    //alert("cases: " + JSON.stringify(vals))
 	    tempHist=makeHistFromVals(Id, bayesVar, switcher, gapHeight,vals, valList, valObj, ajaxObject, graphWidth, histHeight,fontSize)
 	    switcher.hists.push(tempHist)
 	    if (tempHist.conditions.length)
@@ -373,7 +516,7 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
 	    data:JSON.stringify(model),
 	    dataType: "json",
 	    contentType: "application/json",
-	    success: function(user){alert(user.name)} 
+	    success: function(){} 
     
 	});
 	check=checkQuery();
@@ -392,6 +535,7 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
                        var modelDict={}
                        for (var k in hist.valDict){modelDict[k]=hist.valDict[k]/100}
                        model[model.id][switcher.varKey].push([hist.conditions, modelDict]);
+	
                        }
                        
                    });
@@ -410,13 +554,15 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
             dictCheck=true;
         }
         if (!dictCheck) {
-            alert("you already specified this case!");
+            warn("you already specified this case!");
             return false
         }
 
+	//alert(Object.keys(switcher.hists[0].valDict).length + "   " + switcher.hists[0].conditions.length);
 //mu    st replace the above 
-
+	if (switcher.hists.length < Math.pow(Object.keys(switcher.hists[0].valDict).length, switcher.hists[0].conditions.length) | switcher.hists[0].conditions.length===0) {
         switcher.cases.caseNumber += 1
+	    }
         var nextPosY=55;
         var caseNumber=switcher.cases.caseNumber;
         var gapHeight=(graphHeight/caseNumber)/20
@@ -442,6 +588,7 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
         Id=0;
         switcher.cases.map(function(vals)
         {
+	    //alert("HERE: " + JSON.stringify(vals))
             tempHist = makeHistFromVals(Id, bayesVar, switcher, gapHeight,vals, valList, valObj, ajaxObject, graphWidth, histHeight,fontSize)
             switcher.hists.push(tempHist)
             Id+=1
@@ -499,7 +646,7 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
             data:JSON.stringify(model),
             dataType: "json",
             contentType: "application/json",
-            success: function(user){alert(user.name)} 
+            success: function(){} 
         
         });
         
@@ -512,14 +659,26 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
         
         switcher.hists[switcher.hists.length-1].condText.renderW(switcher.hists[switcher.hists.length-1], {x:switcher.width-switcher.hists[switcher.hists.length-1].condText.width-20, y:gapHeight});
 
-
-        newHist = makeHist(defaultVals, ["A", "B", "C"], graphWidth, histHeight, 20, color);
-        //newHist.conditions=[];
+        var histVals;
+        if (isMonty)
+        {
+            histVals = ["A", "B", "C"];
+        }
+        else
+        {
+            histVals = ["H", "L"];
+        }
+	if (switcher.hists.length < Math.pow(histVals.length, switcher.hists[0].conditions.length)) {
+	//alert(switcher.hists.length)
+	    
+            newHist = makeHist(defaultVals, histVals, graphWidth, histHeight, 20, color, switcher.bayesVar);
+            //newHist.conditions=[];
         //newHist.condList=[];
-        newHist.hideButton=makeHideButton(switcher, Id, histHeight/3);
+            newHist.hideButton=makeHideButton(switcher, Id, histHeight/3);
 
-        newHist.hideButton.renderW(newHist, {x:switcher.width+10, y:histHeight/3});
-        switcher.hists.push(newHist);
+            newHist.hideButton.renderW(newHist, {x:switcher.width+10, y:histHeight/3});
+            switcher.hists.push(newHist);
+	} 
 
         for (var i=0; i<switcher.hists.length;i++ ) 
         {
@@ -545,8 +704,8 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color, varnames, defaul
     //switcher.hideCase=function(Id){
 
     //}
-    switcher.addButton = makeAddButton(switcher.cases);
-    switcher.addButton.render(switcher.shape, {x:nextVarXcoord, y:10});
+    //switcher.addButton = makeAddButton(switcher.cases);
+    //switcher.addButton.render(switcher.shape, {x:nextVarXcoord, y:10});
     return switcher
 }
 
@@ -600,7 +759,7 @@ function makeTweaker(clickOutList, color, varnames, defaultVals)
     caseNumText.render(switcher.shape, {x: 20, y: 37});
 
     var hist = makeHist(defaultVals, ["A", "B", "C"], 1500, 800, 20,
-                        switcher.color);
+                        switcher.color, switcher.bayesVar);
     //hist.render(stage, {x: 100, y: 100});
     switcher.smallHists = hist.smallHists;
     switcher.cases = makeCases(switcher.shape, var1DDM, var2DDM, hist,
@@ -620,3 +779,12 @@ function makeTweaker(clickOutList, color, varnames, defaultVals)
 
     return switcher;
 }
+
+function multiply (array) {
+        var sum=1;
+        for (var i=0; i<array.length; i++) {
+            sum = sum * array[i];
+        } 
+        return sum;
+    }
+

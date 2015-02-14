@@ -189,6 +189,15 @@ var Widget = {
         return Point(this.shape.x, this.shape.y);
     },
 
+    isRendered: function()
+    {
+        if (this.shape.parent === null) {
+            return false;
+        } else {
+            return true;
+        }
+    },
+
     getParent: function ()
     {
         if (typeof this.shape.parent === 'undefined') {
@@ -496,7 +505,92 @@ function makeDeleteCross(width, height, color, thickness)
     return cross;
 }
 
+function makePositiveSign(width, height, color, thickness)
+{
+    if (typeof thickness=='undefined') {
+	thickness=2;
+    }
+    if (typeof color === 'undefined') {
+        color = "#009900";
+    }
+    if (typeof height === 'undefined') {
+        height = width;
+    }
+    
+    var point1 = {x: width/2, y: height};
+    var point2 = {x: width/2, y: 0};
+    var point3 = {x: 0, y: height/2}
+    var point4 = {x: width, y: height/2}
+    var cross = Object.create(Widget);
+    cross.shape = new createjs.Shape();
+    cross.color=color;
+    cross.drawPositiveCross=function(width, height, color, thickness)
+    {
+    var g = cross.shape.graphics.beginStroke(color);
+    g.setStrokeStyle(thickness)
+    g.moveTo(point1.x, point1.y).lineTo(point2.x, point2.y);
+    g.moveTo(point3.x, point3.y).lineTo(point4.x, point4.y);
+    g.endStroke();
+    }
+    cross.drawPositiveCross(width, height, color, thickness);
+    cross.shape.regX = cross.shape.x = width;
+    cross.shape.regY = cross.shape.y = height;
+    
+    cross.defaultRefPos = {x: 0, y: 0};
+    cross.thickness=thickness;
+    cross.width = width;
+    cross.height = height;
+    cross.changeColor=function(newColor)
+    {
+	this.shape.graphics.clear();
+	this.drawPositiveCross(this.width, this.height, newColor, this.thickness);
+	//this=makeDeleteCross(this.width, this.height, newColor, this.thickness);
+    }
 
+    return cross;
+}
+
+function makeNegativeSign(width, height, color, thickness)
+{
+    if (typeof thickness=='undefined') {
+	thickness=2;
+    }
+    if (typeof color === 'undefined') {
+        color = "#FF0000";
+    }
+    if (typeof height === 'undefined') {
+        height = width;
+    }
+    
+    var point1 = {x: 0, y: height/2}
+    var point2 = {x: width, y: height/2}
+    var cross = Object.create(Widget);
+    cross.shape = new createjs.Shape();
+    cross.color=color;
+    cross.drawNegativeCross=function(width, height, color, thickness)
+    {
+    var g = cross.shape.graphics.beginStroke(color);
+    g.setStrokeStyle(thickness)
+    g.moveTo(point1.x, point1.y).lineTo(point2.x, point2.y);
+    g.endStroke();
+    }
+    cross.drawNegativeCross(width, height, color, thickness);
+    cross.shape.regX = cross.shape.x = width;
+    cross.shape.regY = cross.shape.y = height;
+    
+    cross.defaultRefPos = {x: 0, y: 0};
+    cross.thickness=thickness;
+    cross.width = width;
+    cross.height = height;
+    cross.changeColor=function(newColor)
+    {
+	this.shape.graphics.clear();
+	this.drawNegativeCross(this.width, this.height, newColor, this.thickness);
+	//this=makeDeleteCross(this.width, this.height, newColor, this.thickness);
+    }
+
+    return cross;
+}
 
 function makeEquiTriangle(sideLen, color, rotAngle, 
                           borderWidth, borderColor)
@@ -610,19 +704,28 @@ function setKeyboardHandlers(keyboardHandlerList)
 {
     $(document).keydown(function(e)
     {
+        //alert(e.keyCode);
         if (e.keyCode === 8) {
             e.preventDefault();
             for (var i=0; i<keyboardHandlerList.length; i++)
             {
                 keyboardHandlerList[i].handleBackspace();
             }
+        }
 
+        if (e.keyCode === 13)
+        {
+            for (var i=0; i<keyboardHandlerList.length; i++)
+            {
+                keyboardHandlerList[i].handleEnter();
+            }
         }
     });
 
     document.getElementsByTagName('body')[0].onkeypress = function (event)
     {
         var inpChar = getChar(event || window.event);
+        //alert(inpChar);
         for (var i=0; i<keyboardHandlerList.length; i++)
         {
             keyboardHandlerList[i].handleInputChar(inpChar);

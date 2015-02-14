@@ -1,3 +1,5 @@
+scoreTagDrawn = false;
+
 function welcome()
 {
     var welcomeScreen = WidgetHL();
@@ -10,51 +12,57 @@ function welcome()
     welcomeScreen.pic.y=100;
     welcomeScreen.pic.scaleX*=0.54;
     welcomeScreen.pic.scaleY*=0.54;
-    welcomeScreen.shape.addChild(welcomeScreen.pic);
+    /*try {
+	//welcomeScreen.shape.addChild(welcomeScreen.pic);
+	}
+    catch (err) { alert("something")
+	
+    }*/
     welcomeScreen.nextButton = makeButton(">", 50, 50);
     var callback = {
         "welcomeScreen": welcomeScreen,
         "call": function() {
             this.welcomeScreen.erase();
-	    user.score=0; 
+            user.score=0; 
             user.points=150;
             user.shares=10;
-	    scoreWindow=WidgetHL();
-            scoreWindow.background=makeRect(91,20,"#3b5998", 0, 1, 3);
+            scoreWindow = WidgetHL();
+            scoreWindow.background=makeRect(91,20,'#FFFFFF'/*"#3b5998"*/, 0, 1, 3);
             scoreWindow.background.renderW(scoreWindow, Point(0, 0));
-            scoreWindow.title = makeTextWidget(" Total Score " , 12, "Arial", "#ffffff");
+            scoreWindow.title = makeTextWidget(" Total Score " , 12, "Arial", "#666");
             scoreWindow.title.renderW(scoreWindow, Point(14, 3));
 
-	    //alert(scoreLength)
+            //alert(scoreLength)
             scoreWindow.renderW(topLayer, Point(stageWidth*0.0040, stageHeight*0.875));
-	    scoreTag = WidgetHL();
-	    scoreTag.shape = new createjs.Shape();
-	    scoreTag.score=makeTextWidget(user.score, 12, "Arial", "#666");
-	    var scoreLength = JSON.stringify(scoreTag.score.shape.text).length*7
-	    var globalScoreTag = scoreTag.shape.graphics.beginFill("white");
+            scoreTagDrawn = true;
+            scoreTag = WidgetHL();
+            scoreTag.shape = new createjs.Shape();
+            scoreTag.score=makeTextWidget(user.score, 12, "Arial", "#666");
+            var scoreLength = JSON.stringify(scoreTag.score.shape.text).length*7
+            var globalScoreTag = scoreTag.shape.graphics.beginFill("white");
 	    
             globalScoreTag.beginStroke("black").setStrokeStyle(0.5);
 
-	    globalScoreTag.moveTo(10, 8).lineTo(10, 14);
-	    globalScoreTag.lineTo(6, 17)
-	    globalScoreTag.lineTo(10, 20)
-	    globalScoreTag.lineTo(10, 26)
-	    globalScoreTag.lineTo(10 + scoreLength + 16, 26)
-	    globalScoreTag.lineTo(10 + scoreLength + 16, 8).closePath();
-    
+            globalScoreTag.moveTo(10, 8).lineTo(10, 14);
+            globalScoreTag.lineTo(6, 17)
+            globalScoreTag.lineTo(10, 20)
+            globalScoreTag.lineTo(10, 26)
+            globalScoreTag.lineTo(10 + scoreLength + 16, 26)
+            globalScoreTag.lineTo(10 + scoreLength + 16, 8).closePath();
+
             globalScoreTag.endStroke("black");
-	    globalScoreTag.endFill();
-	    
-	    //scoreTag.addChild(scoreTag.score, Point(5, 5))
-	    
-	    scoreTag.renderW(topLayer, Point(scoreWindow.shape.x+88, scoreWindow.shape.y - 7))
+            globalScoreTag.endFill();
+
+            // scoreTag.addChild(scoreTag.score, Point(5, 5))
+
+            scoreTag.renderW(topLayer, Point(scoreWindow.shape.x+88, scoreWindow.shape.y - 7))
             scoreTag.score.renderW(topLayer, Point(scoreWindow.shape.x+106, scoreWindow.shape.y + 3))
-	    
-	    pointWindow=WidgetHL();
-            pointWindow.background=makeRect(358,30,"#3b5998", 0, 1, 3);
+	    //betQueryWindow=WidgetHL();
+            pointWindow=WidgetHL();
+            pointWindow.background=makeRect(358,30,/*"#3b5998"*/'#FFFFFF', 0, 1, 3);
             pointWindow.background.renderW(pointWindow, Point(0, 0));
-            pointWindow.points=makeTextWidget(user.points +"      points", 15, "Arial", "#ffffff");
-            pointWindow.shares=makeTextWidget(user.shares +"      shares", 15, "Arial", "#ffffff");
+            pointWindow.points=makeTextWidget(user.points +"      points", 15, "Arial", "#666");
+            pointWindow.shares=makeTextWidget(user.shares +"      shares", 15, "Arial", "#666");
             pointWindow.points.renderW(pointWindow, Point(5, 5));
             pointWindow.shares.renderW(pointWindow, Point(150, 5));
             pointWindow.renderW(topLayer, Point(stageWidth-368, 10));
@@ -95,11 +103,12 @@ function welcome()
     welcomeScreen.arrow = makeArrow2(170, 43);
     welcomeScreen.arrow.render(welcomeScreen.shape, Point(700, 175));
     welcomeScreen.render(topLayer.shape, Point(0, 0));
-}//end of welcome function. 
+} //end of welcome function. 
 
+obtainedTruth = false;
 truth=[]; 
 user={}; //should be global variables. 
-//alert(JSON.stringify(GraphJson))
+// alert(JSON.stringify(GraphJson))
 friendCache = {};
 Login = function() 
 //window.fbAsyncInit = function() 
@@ -126,6 +135,8 @@ Login = function()
 				model={};
 				model.id=user.id
 				model[user.id]= GraphJson;
+				storedModel=JSON.parse(JSON.stringify(model)); //this makes a copy of the model. When the model is updated, storedModel will be updated along with other opperations.  Thus, storedModel can briefly be different from model. 
+				//alert(JSON.stringify(storedModel))
 				getMe(180, 180);
 			 
 
@@ -173,11 +184,11 @@ Login = function()
 				    type: "post",
 				    url: '/ajax/login',
 				    async: true,
-				    data:JSON.stringify(user),
+				    data: JSON.stringify(user),
 				    dataType: "json",
 				    contentType: "application/json",
 				    success: function(){
-                        alert("logged in!");
+                        //alert("logged in!");
                     } 
 				});
 
@@ -190,22 +201,22 @@ Login = function()
 				    dataType: "json",
 				    contentType: "application/json",
 				    success: function(){
-                        alert("sent model");
+                       // alert("sent model");
                     } 
     
 				});
 
-				$.ajax({
-				    type: "post",
-				    url: '/ajax/new_user_points/' + user.id,
-				    async: true,
-				    //data:JSON.stringify({}),
-				    dataType: "json",
-				    contentType: "application/json",
-				    success: function(){
-                        alert("sent new user points");
-                    } 
-				});
+                //$.ajax({
+				//    type: "post", 
+				//    url: '/ajax/new_user_points/' + user.id,
+				//    async: true,
+				//    //data:JSON.stringify({}),
+				//    dataType: "json",
+				//    contentType: "application/json",
+				//    success: function(){
+                //        alert("sent new user points");
+                //    } 
+				//});
 
 				$.ajax({
 				    type: "GET",
@@ -216,15 +227,129 @@ Login = function()
 				    success: function(data){
 					if (data) 
 					{
-                        var modelClass = data['model_class'];
+                        obtainedTruth = true;
+                        // alert(JSON.stringify(data))
+                        modelClass = data['model_class'];
                         truth = data['samples'];
+                        isAdmin = data['isAdmin'];
+                        treatmentNum = data['treatmentNum'];
+			//user.score= data['score'];
+			//user.points= data['points'];
+			//user.shares= data['shares'];
+
+                        if (isAdmin)
+                        {
+			    beginDemoButton = makeButton("SIMPLE", 210, 25);
+			    beginDemoButton.callback = {
+				call: function() {
+				    $.ajax({
+					type: "GET",
+					url: '/ajax/beginDemo',
+					async: true,
+                    
+					dataType: "json",
+					success: function(data) {
+					    
+					}
+				    });
+				    
+				}
+			    }
+			    makeClickable(beginDemoButton, beginDemoButton.callback)
+			    beginDemoButton.render(stage, {x:650, y:150})
+
+			    endDemoButton = makeButton("COMPLEX", 210, 25);
+			    endDemoButton.callback = {
+				call: function() {
+				    $.ajax({
+					type: "GET",
+					url: '/ajax/endDemo',
+					async: true,
+                    
+					dataType: "json",
+					success: function(data) {
+					    
+					}
+				    });
+				    
+				}
+			    }
+			    makeClickable(endDemoButton, endDemoButton.callback)
+			    endDemoButton.render(stage, {x:650, y:200})
+
+
+			    beginFreeButton = makeButton("Begin Model Building", 210, 25);
+			    beginFreeButton.callback = {
+				call: function() {
+				    $.ajax({
+					type: "GET",
+					url: '/ajax/beginFreePeriod',
+					async: true,
+                    
+					dataType: "json",
+					success: function(data) {
+					    
+					}
+				    });
+				    
+				}
+			    }
+			    makeClickable(beginFreeButton, beginFreeButton.callback)
+			    beginFreeButton.render(stage, {x:650, y:250})
+			    
+			    beginBetting = makeButton("Begin Betting", 210, 25);
+
+			    beginBetting.callback = {
+				call: function() {
+				    $.ajax({
+					type: "GET",
+					url: '/ajax/endFreePeriod',
+					async: true,
+                    
+					dataType: "json",
+					success: function(data) {
+					    
+					}
+				    });
+				    
+				}
+			    }
+			    makeClickable(beginBetting, beginBetting.callback)
+	
+			    beginBetting.render(stage, {x:650, y:300})
+			    
+			    emptyMclasses = makeButton("Empty Models", 210, 25);
+
+			    emptyMclasses.callback = {
+				call: function() {
+				    $.ajax({
+					type: "GET",
+					url: '/ajax/emptyData',
+					async: true,
+                    
+					dataType: "json",
+					success: function(data) {
+					    
+					}
+				    });
+				    
+				}
+			    }
+			    makeClickable(emptyMclasses, emptyMclasses.callback)
+	
+			    emptyMclasses.render(stage, {x:650, y:350})
+
+			    //beginFreePeriod
+                        }
+
+                        //alert(JSON.stringify(truth))
                         var bettingVar = modelClass['betting_variable'];
                         //truth = truth.concat(data);
-                        var isMonty;
-                        if (modelClass['model_name'] == 'monty')
+                        //var isMonty;
+                        if (modelClass['model_name'] === 'monty')
                         {
                             isMonty = true;
-                            if (truth[truth.length-1]['monty_door']==='A')
+                            if (truth[truth.length-1]['monty_door'] === 'A')
                             {
                                 share_val = 'B';
                             }
@@ -242,26 +367,33 @@ Login = function()
                         } else {
                             domain = ["H", "L"];
                         }
-                        var sideBar = createSideBar2(modelClass, isMonty);
-                        variables = sideBar.Vars;
-					    var dataWindow = makeDataWindow(truth, domain, variables, stageWidth-250, modelClass, isMonty);
+					    var sideBar = createSideBar2(modelClass, isMonty);
+					    var rightX=170;//stageWidth-300;
+					    variables = sideBar.Vars;
+					    dataWindow = makeDataWindow(truth, domain, variables, rightX, modelClass);
+                        //dataWindow.render(stage, Point(100, 100));
 
 					    var dataButton = makeContractedButton(dataWindow);
-					    dataButton.render(stage, {x:dataWindow.xPos, y:stageHeight-25})
-					    var betsWindow = makeCallWindow([], domain, variables[variables.length-1], stageWidth-500);
+                        dataButton.render(topLayer.shape, {x:dataWindow.xPos, y: stageHeight-25});
+                        //console.log(dataButton.callback);
+                        dataButton.callback.call();
+
+					    betsWindow = makeCallWindow([], domain, variables[variables.length-1], rightX+dataWindow.width-250);
 
 					    //the last variable must always be the betting variable!
-                        //MARK1
-					    var betButton=makeContractedButton(betsWindow);
-					    betButton.render(stage, {x:betsWindow.xPos, y:stageHeight-25});
-					    
-					    var putsWindow = makePutWindow([], domain, variables[variables.length-1], stageWidth-750);
+					    betButton=makeContractedButton(betsWindow);
+					    betButton.render(topLayer.shape, {x:betsWindow.xPos, y:75});
+                        //console.log(betButton.callback);
+                        betButton.callback.call();
+
+                        putsWindow = makePutWindow([], domain, variables[variables.length-1], rightX + dataWindow.width-500);
+                        //putsWindow.render(stage, Point(50, 50))
 
 					    //the last variable must always be the betting variable!
-					    var putButton = makeContractedButton(putsWindow);
-					    putButton.render(stage, {x:putsWindow.xPos, y:stageHeight-25});
-					    
-
+					    putButton = makeContractedButton(putsWindow);
+					    putButton.render(topLayer.shape, {x:putsWindow.xPos, y:75});
+                        //console.log(putButton.callback);
+                        putButton.callback.call();
 					} 
 					else
 					{

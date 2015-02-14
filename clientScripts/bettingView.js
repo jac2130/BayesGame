@@ -8,7 +8,7 @@ function makeView(graphWidth, graphHeight, bayesVar)
     view.width=graphWidth;
     view.height=graphHeight;
     view.setShape(new createjs.Container());
-    view.background = makeRect(graphWidth, graphHeight, "#EBEEF4", borderWidth);
+    view.background = makeRect(graphWidth, graphHeight, "#ffffff"/*"#EBEEF4"*/, borderWidth);
     view.background.render(view.shape, {x:0, y:0});
     view.bayesVar=bayesVar;
     return view
@@ -43,15 +43,15 @@ function makeQueryView(width, height, bayesVar)
 	}
     }
     //alert(JSON.stringify(varNames))
-    var borderWidth = 1;
+    var borderWidth = 0;
     var queryView = Object.create(View);
     queryView.hasHist=false;
     queryView.width=width;
     queryView.height=height;
     queryView.setShape(new createjs.Container());
-    queryView.background = makeRect(width, height, "#EBEEF4", borderWidth);
+    queryView.background = makeRect(width, height, "#ffffff"/*"#EBEEF4"*/, borderWidth);
     queryView.background.render(queryView.shape, {x:0, y:55});
-    queryView.bar=makeRect(width + 2*borderWidth, 55, "#3b5998"/*"#3B4DD0"*/, 0, 1, 3);
+    queryView.bar=makeRect(width + 2*borderWidth, 55, "#ffffff"/*"#3b5998","#3B4DD0"*/, 0, 1, 3);
     queryView.bar.render(queryView.shape, {x:0, y:0});
     queryView.bayesVar=bayesVar;
     //var queryView = makeView(width, height, bayesVar)
@@ -75,7 +75,7 @@ function makeQueryView(width, height, bayesVar)
     {
 	if (typeof(varNames[i])==="string" && varNames[i]!==bayesVar.varName)
 	{
-	    var varname=makeTextWidget(queryView.varnames[i], 28, "Arial", "white" )
+	    var varname=makeTextWidget(queryView.varnames[i], 28, "Arial", "#666" )
 	    var NameWidth=varname.width;
 		//makDropDownMenu(switcher.varnames, NameWidth, 32, "white", switcher.varnames[i]);
 	    varname.x=nextVarXcoord
@@ -84,14 +84,20 @@ function makeQueryView(width, height, bayesVar)
 	    //makeTextWidget(switcher.varnames[i],22, "Arial", "black" )
 	    varname.renderW(queryView, {x:varname.x, y:10})
 
-	    var equalSign=makeTextWidget("=", 28, "Arial", "white" )
+	    var equalSign=makeTextWidget("=", 28, "Arial", "#666" )
 		//makeDropDownMenu(["=", "!="], 32, 32, "white")
 	    equalSign.x= nextVarXcoord+NameWidth+10
 	    equalSign.activeChoice=equalSign.shape.text;
 	    menues.push(equalSign)
 	    equalSign.renderW(queryView,{x:equalSign.x, y:10});
-	    
-	    var domain=makeDropDownMenu(["A", "B", "C"], 80, 32, "#8b9dc3", "Value");
+	    var ddmVals;
+        if (isMonty)
+        {
+            ddmVals = ["A", "B", "C"];
+        } else {
+            ddmVals = ["H", "L"];
+        }
+	    var domain=makeDropDownMenu(ddmVals, 80, 32, "#ffffff"/*"#8b9dc3"*/, "Value");
 	    domain.x= nextVarXcoord+NameWidth+50
 	    menues.push(domain)
 	    domain.renderW(queryView,{x:domain.x, y:10});
@@ -117,6 +123,7 @@ function makeQueryView(width, height, bayesVar)
             {
                 if (queryView.menues[i+2].activeChoice!=="Value"){//in the case that it has been specified
                     queryPath+="/" + queryView.menues[i].activeChoice.toLowerCase().replace(/\s+/g, '_') + ":"+ queryView.menues[i+2].activeChoice;
+                    //alert(queryView.bayesVar.varName)
                     conditions[queryView.bayesVar.varName.toLowerCase().replace(/\s+/g, '_')][queryView.menues[i].activeChoice.toLowerCase().replace(/\s+/g, '_')]= queryView.menues[i+2].activeChoice;
                 } else {
                     warn("Some values have still not been selected");
@@ -124,10 +131,16 @@ function makeQueryView(width, height, bayesVar)
                 }
             }
         }
+        console.log(user.id);
+        console.log(queryPath);
         
 
         //alert(queryPath);
-        index=varNames.indexOf(queryView.bayesVar.varName);
+        //
+        console.log("varModelNames: " + varModelNames);
+        console.log("varName: " + queryView.bayesVar.varName);
+        index = varNames.indexOf(queryView.bayesVar.varName);
+	console.log(queryPath);
         $.ajax({
             type: "GET",
             url: '/ajax/query/'+ user.id + queryPath,
@@ -145,6 +158,9 @@ function makeQueryView(width, height, bayesVar)
                 {
                     //alert(JSON.stringify(data[varModelNames[index]]))//do your stuff with the JSON data;
                     queryView.menues.map(function(item){item.erase()})
+                    console.log(data);
+                    console.log(varModelNames);
+                    console.log(index);
                     var queryHist = makeQueryHist(data[varModelNames[index]], queryView.width, queryView.height, queryView.bayesVar.color, conditions)
                     if (queryView.hasHist)
                     {
@@ -190,14 +206,12 @@ function makeDataView(width, height, bayesVar)
 	    bar=makeRect(98,50, bayesVar.color);
 	    bar.render(dataView.shape, {x:50 + i*100, y:Yish});
 	}
-	makeTextWidget(pos, 50, "Arial", "#555").render(dataView.shape, {x:10, y:Yish});
+	makeTextWidget(pos, 50, "Arial", "#666").render(dataView.shape, {x:10, y:Yish});
 
 	makeTextWidget(valCount[pos], 50, "Arial", "#666").render(dataView.shape, {x:80+valCount[pos]*100, y:Yish});
 	Yish+=60;
 	
     });
-
-    
 
     var dataSwitch = makeTextWidget("DATA", 30, "Arial", "#ffffff");
     dataSwitch.render(dataView.shape, {x:0, y:-32});
@@ -205,17 +219,16 @@ function makeDataView(width, height, bayesVar)
     var modelSwitch = makeModelViewButton(bayesVar);
     modelSwitch.render(dataView.shape, {x:100, y:-35});
     
-    var bettingSwitch=makeBetViewButton(bayesVar);
+    var bettingSwitch = makeBetViewButton(bayesVar);
     bettingSwitch.render(dataView.shape, {x:230, y:-35});
     dataView.name="DATA"
     return dataView
 }
 
-
 function makeModelView(width, height, bayesVar)
 {
     var modelView = WidgetHL();
-    
+
     bayesVar.probSetter.render(modelView.shape, {x:0, y:0});
     bayesVar.probSetter.modelView = modelView;
     var querySwitch = makeQueryViewButton(bayesVar);
@@ -223,7 +236,7 @@ function makeModelView(width, height, bayesVar)
 
     var modelSwitch = makeTextWidget("MODEL", 30, "Arial", "#ffffff");
     modelSwitch.render(modelView.shape, {x:0, y:-32});
-    
+
     //var bettingSwitch=makeBetViewButton(bayesVar);
     //bettingSwitch.render(modelView.shape, {x:230, y:-35});
     modelView.name="MODEL"
@@ -296,28 +309,28 @@ function makeBetButton(betView)
 	'truth':truth,
         "call": function() {
             var theBet=this.bet.activeChoice;
-	    var points=this.points.activeChoice;
-	    var betView=this.betView;
-	    var bayesVar=betView.bayesVar;
-	    if (bayesVar.possibilities.indexOf(theBet)>=0 && points in range(91))
-	    { 
-		$.ajax({
-		    type: "post",
-		    url: '/ajax/newpost',
-		    async: true,
-		    data:JSON.stringify({"variable":bayesVar.varName.replace(/\s+/g, ''), 
-"username":user.name, "userid":user.id, "subject":theBet, 'body':points, 'comments':[], 'period': this.truth[this.truth.length-1].period}),
-		    dataType: "json",
-		    contentType: "application/json",
-		    success: function(user){alert(user.name)} 
-    
-		});
+            var points=this.points.activeChoice;
+            var betView=this.betView;
+            var bayesVar=betView.bayesVar;
+            if (bayesVar.possibilities.indexOf(theBet)>=0 && points in range(91))
+            { 
+            $.ajax({
+                type: "post",
+                url: '/ajax/newpost',
+                async: true,
+                data:JSON.stringify({"variable":bayesVar.varName.replace(/\s+/g, ''), 
+    "username":user.name, "userid":user.id, "subject":theBet, 'body':points, 'comments':[], 'period': this.truth[this.truth.length-1].period}),
+                dataType: "json",
+                contentType: "application/json",
+                success: function(user){alert(user.name)} 
+        
+            });
 
 		//delete betting view and create new one.
 		var width=betView.width;
 		var height=betView.height;
 		var bayesVar=betView.bayesVar;
-		var betView=makeBettingView(width, height, bayesVar);
+		var betView = makeBettingView(width, height, bayesVar);
 		makeActiveView(betView, bayesVar)
 		
 	    }
@@ -339,7 +352,7 @@ function makeBlackFade(view)
     blackFade.background.render(blackFade.shape, {x:0, y:80}); //rendering should happen after makeBlackFade is called 
     view.renderW(blackFade, {x:200, y:100});
 
-    blackFade.background.shape.on("dblclick", function (evt)
+    blackFade.background.shape.on("click", function (evt)
 	{
 	    //this.currentOne must be a bayesVar with an activeView, 
 	    //which is attached to the blackFade (this).
@@ -349,7 +362,6 @@ function makeBlackFade(view)
 	});
     return blackFade;
 }
-
 
 function makeBettingView(graphWidth, graphHeight, bayesVar)
 {
@@ -400,10 +412,10 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
     betView.addPost = function(post)
     {
         var postItem = WidgetHL();
-	postItem.post = post;
+        postItem.post = post;
         post.postItem = postItem;
-	this.Posts.push(post)
-	post.betView=this;
+        this.Posts.push(post)
+        post.betView=this;
 
         postItem.postButton = makeRect(betWidth,betHeight,"#3B4DD0", 4, "#460595", 50);
         postItem.postButton.renderW(postItem, {x:280, y:20});
@@ -413,21 +425,21 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
 	postItem.text = makeTextWidget("Enter counter bet:", 26, "Arial", "#ffffff");
 	postItem.text.renderW(postItem, {x:310, y:20});
 
-        postItem.bet = makeTextWidget(post.title, 46, "Arial", "#ffffff");
+    postItem.bet = makeTextWidget(post.title, 46, "Arial", "#ffffff");
 	postItem.betEdge=makeRect(65,betHeight-20,"#666", 4, "#666", 50);
 	postItem.betEdge.renderW(postItem, {x:-220, y:20});
 	postItem.betBackground=makeRect(425,betHeight-20,"#666", 4, "#666");
 	postItem.betBackground.renderW(postItem, {x:-190, y:20});
 	postItem.bet.renderW(postItem, {x:-200, y:30});
-	if (post.userid)
-	{
-	    post.pic=new createjs.Bitmap(THIS_DOMAIN + "/ajax/picture/" + post.userid + "/5/5");
-	    post.pic.x=-150;
-	    post.pic.y=20;
-	    post.pic.scaleX*=0.3;
-	    post.pic.scaleY*=0.3;
-	    postItem.shape.addChild(post.pic);
-	}
+	//if (post.userid)
+	//{
+	//    post.pic=new createjs.Bitmap(THIS_DOMAIN + "/ajax/picture/" + post.userid + "/5/5");
+	//    post.pic.x=-150;
+	//    post.pic.y=20;
+	//    post.pic.scaleX*=0.3;
+	//    post.pic.scaleY*=0.3;
+	//    postItem.shape.addChild(post.pic);
+	//}
 
 	postItem.points = makeTextWidget(post.body, 46, "Arial", "#666");
 	postItem.pointsBackground=makeRect(65,betHeight,"#ffffff", 4, "#460595", 50);
@@ -483,8 +495,8 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
 	postItem.menu = makeDropDownMenu(["A", "B", "C"], 210, 45, "white","Select Counter Bet")
 	postItem.menu.renderW(postItem, {x:310, y:60});
 
-	postItem.counterButton=makeCounterButton(postItem.menu, postItem.post, postItem.post.betView)
-	postItem.counterButton.renderW(postItem, {x:530, y:70});
+    //postItem.counterButton=makeCounterButton(postItem.menu, postItem.post, postItem.post.betView)
+	//postItem.counterButton.renderW(postItem, {x:530, y:70});
 
 	//postItem.render(this.shape, {x:700, y:postItem.place});
         nextYPosition += distBetweenYs;
@@ -498,34 +510,33 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
     
     dataType: "json",
     success: function(data){
-	user_data=data//do your stuff with the JSON data;
-	posts=user_data.myposts;
-	postItems=[]
+	user_data = data; //do your stuff with the JSON data;
+	posts = user_data.myposts;
+	postItems = [];
 	for (var i=0; i <posts.length; i++)
-{
-    postItem = betView.addPost(posts[i])
-    postItems.push(postItem)
-	  
-}
+    {
+        postItem = betView.addPost(posts[i])
+        postItems.push(postItem)
+    }
 	for (var i=(posts.length-1);i>=0;i--)
-{
-    postItems[i].render(betView.shape, {x:700, y:postItems[i].place});	    
-}
+    {
+        postItems[i].render(betView.shape, {x:700, y:postItems[i].place});	    
+    }
  
 	}})
 
     $.ajax({
-	type: "GET",
-	url: '/ajax/puts/'+ betView.bayesVar.varName.replace(/\s+/g, '') + '/' + 0,
-	async: true,
-    
-	dataType: "json",
-	success: function(data){
-	    user_data2=data//do your stuff with the JSON data;
-	    puts=user_data2.myputs;
-
-	    
-	}})
+        type: "GET",
+        url: '/ajax/puts/'+ betView.bayesVar.varName.replace(/\s+/g, '') + '/' + 0,
+        async: true,
+        
+        dataType: "json",
+        success: function(data){
+            user_data2=data//do your stuff with the JSON data;
+            puts=user_data2.myputs;
+            
+    }
+    })
     
     betView.name="BETS"
     return betView;

@@ -36,16 +36,116 @@ EMPTY_CALLBACK = {
     call: function() {}
 }
 
+function makePlusButton(window, size, callback)
+{
+    if (typeof size === 'undefined') 
+    {
+        size = 25;
+    }
+    if (typeof callback === 'undefined') 
+    {
+        var callback = {
+            "window": window,
+            "call": function() {
+		//tutorial.trigger("caseAdded");
+		//warn(JSON.stringify(this.cases))
+		this.window.erase();
+            }
+	};
+    }  
+    var plusButton = Object.create(Widget);
+    plusButton.setShape(new createjs.Container());
+    //arrowWid.background = makeRect(30, 30, "#F2F2F2", 2);
+    plusButton.background = makeRect(size, size, "white", 1, '#009900', 100);
+    plusButton.background.render(plusButton.shape, {x: 0, y: 0});
+    
+    plusButton.text = makePositiveSign(size*0.5,size*0.5, "#009900", size/10);
+    plusButton.text.renderW(plusButton, {x: size*0.25, y: size*0.25});
+
+    
+    makePlusClickable(plusButton, callback);
+    return plusButton;
+}
+
+function makeMinusButton(window, size, callback)
+{
+    if (typeof size === 'undefined') 
+    {
+        size = 25;
+    }
+    if (typeof callback === 'undefined') 
+    {
+        var callback = {
+            "window": window,
+            "call": function() {
+		//tutorial.trigger("caseAdded");
+		//warn(JSON.stringify(this.cases))
+		this.window.erase();
+            }
+	};
+    }  
+    var minusButton = Object.create(Widget);
+    minusButton.setShape(new createjs.Container());
+    //arrowWid.background = makeRect(30, 30, "#F2F2F2", 2);
+    minusButton.background = makeRect(size, size, "white", 1, '#FF0000', 100);
+    minusButton.background.render(minusButton.shape, {x: 0, y: 0});
+    
+    minusButton.text = makeNegativeSign(size*0.5,size*0.5, "#FF0000", size/10);
+    minusButton.text.renderW(minusButton, {x: size*0.25, y: size*0.25});
+
+    makeMinusClickable(minusButton, callback);
+    return minusButton;
+}
+
+function makePositiveButton(window, size, callback)
+{
+    if (typeof size === 'undefined') 
+    {
+        size = 35;
+    }
+    if (typeof callback === 'undefined') 
+    {
+        var callback = {
+            "window": window,
+            "call": function() {
+		//tutorial.trigger("caseAdded");
+		//warn(JSON.stringify(this.cases))
+		this.window.erase();
+            }
+	};
+    }
+    var plusButton = makeButton("+", size, size);
+    
+    makePlusClickable(plusButton, callback);
+    return plusButton;
+}
+
+function makeNegativeButton(window, size)
+{
+    if (typeof size === 'undefined') 
+    {
+        size = 35;
+    }
+    var minusButton = makeButton("", size, size);
+    var callback = {
+        "window": window,
+        "call": function() {
+            //tutorial.trigger("caseAdded");
+	    //warn(JSON.stringify(this.cases))
+            this.window.erase();
+        }
+    };
+    makeMinusClickable(minusButton, callback);
+    return minusButton;
+}
+
 // for this function, callback is an object with the method "call()"
 function makeClickable(widget, callback)
 {
     widget.shape.on("mouseover", function(evt) {
-        if (mousePressed) {
-            this.widget.background.changeColor("#f0f0f0");
-        } else {
             this.widget.background.changeColor("#666");
             this.widget.text.changeColor("#ffffff");
-        }
+        
     });
     widget.shape.on("mouseout", function(evt) {
         this.widget.background.changeColor("#ffffff");
@@ -66,6 +166,64 @@ function makeClickable(widget, callback)
         } else {
             widget.background.changeColor("#ffffff");
 	    this.widget.text.changeColor("#666");
+        }
+    });
+}
+
+function makePlusClickable(widget, callback)
+{
+    widget.shape.on("mouseover", function(evt) {
+            this.widget.background.changeColor("#009900");
+            this.widget.text.changeColor("#ffffff");
+    });
+    widget.shape.on("mouseout", function(evt) {
+        this.widget.background.changeColor("#ffffff");
+	this.widget.text.changeColor("#009900");
+    });
+    widget.shape.on("mousedown", function(evt) {
+        this.widget.background.changeColor("black");
+	this.widget.text.changeColor("#ffffff");
+        mousePressed = true;
+    });
+    widget.shape.on("pressup", function(evt) {
+        var widget = this.widget;
+        mousePressed = false;
+        if (mouseOnWidget(widget, evt.stageX, evt.stageY)) {
+            callback.call();
+            widget.background.changeColor("#009900");
+	    this.widget.text.changeColor("#ffffff");
+        } else {
+            widget.background.changeColor("#ffffff");
+	    this.widget.text.changeColor("#009900");
+        }
+    });
+}
+
+function makeMinusClickable(widget, callback)
+{
+    widget.shape.on("mouseover", function(evt) {
+            this.widget.background.changeColor("#FF0000");
+            this.widget.text.changeColor("#ffffff");
+    });
+    widget.shape.on("mouseout", function(evt) {
+        this.widget.background.changeColor("#ffffff");
+	this.widget.text.changeColor("#FF0000");
+    });
+    widget.shape.on("mousedown", function(evt) {
+        this.widget.background.changeColor("black");
+	this.widget.text.changeColor("#ffffff");
+        mousePressed = true;
+    });
+    widget.shape.on("pressup", function(evt) {
+        var widget = this.widget;
+        mousePressed = false;
+        if (mouseOnWidget(widget, evt.stageX, evt.stageY)) {
+            callback.call();
+            widget.background.changeColor("#FF0000");
+	    this.widget.text.changeColor("#ffffff");
+        } else {
+            widget.background.changeColor("#ffffff");
+	    this.widget.text.changeColor("#FF0000");
         }
     });
 }

@@ -1,4 +1,69 @@
 // requires shapeLib
+function marginalDist(effect, cause)
+{
+    var localModel = model[user.id][effect];
+    var keys = Object.keys(localModel[0][1]);
+    keys.sort();
+    var output = {};
+    output[cause]={};
+    for (i=0; i<keys.length; i++)
+	{
+	    output[cause][keys[i]]={};
+	    var outKeys=Object.keys(localModel[0][1]);
+	    outKeys.map(function(outKey)
+			{
+			    output[cause][keys[i]][outKey]=0;
+			})
+	    
+	    localModel.map(function(item)
+			  {
+			      //alert(item[0])
+			      item[0].map(function(jtem){
+				  if (jtem.indexOf(cause)===0 && jtem.indexOf(keys[i])===1)
+				      {
+					  outKeys.map(function(outKey)
+						      {
+							  output[cause][keys[i]][outKey]+= item[1][outKey];
+						      })
+					  
+					  //alert(JSON.stringify(item[1])) 
+				      }
+			      })
+			    //  if (item[0].indexOf([cause, keys[i]]) >= 0){
+				 // alert(item)
+			  //}    
+			  })
+	    
+	}
+    return output[cause]
+    //alert(JSON.stringify(keys))
+    //alert(JSON.stringify(localModel[0][1]))
+}
+
+function relationSign(effect, cause)
+{
+    var marginal=marginalDist(effect, cause);
+    var keysCause = Object.keys(marginal);
+    keysCause.sort();
+    keysCause.reverse();
+    var highCause = keysCause.pop();
+    var keysEffect = Object.keys(marginal[highCause])
+    keysEffect.sort();
+    var highEffect = keysEffect[0];
+    var test = false;
+    keysCause.map(function(k)
+		 {
+		     test+=(marginal[highCause][highEffect]< marginal[k][highEffect])
+		 })
+    if (test)
+	{
+	    return "-"
+	}
+    else 
+	{
+	    return "+"
+	}
+}
 
 function createHist()
 {
@@ -19,10 +84,10 @@ function makeQueryHist(valObj, graphWidth, graphHeight, barColor, conditions)
     valLabels.map(function(key){valArr.push(valObj[key])});
     //alert(JSON.stringify(valArr));
     var gapWidth = graphHeight/50;
-    var borderWidth = 1;
+    var borderWidth = 0;
     var queryHist = Object.create(QueryHist);
     queryHist.setShape(new createjs.Container());
-    queryHist.background = makeRect(graphWidth, graphHeight, '#EBEEF4', borderWidth);
+    queryHist.background = makeRect(graphWidth, graphHeight, "#ffffff"/*'#EBEEF4'*/, borderWidth);
     queryHist.background.render(queryHist.shape, {x:0, y:0});
 
     var barAreaWidth  = graphWidth - 30;
@@ -106,21 +171,21 @@ function makeQueryBar(barHeight, barWidth, barColor, value, label, hist)
     return queryBar;
 }
 
-
 var Histogram = Object.create(Widget);
 
 function makeHist(valArr, valLabels, graphWidth, graphHeight,
-                  gapWidth, barColor, conditions)
+                  gapWidth, barColor, bayesVar, conditions)
 {
     if (typeof conditions === 'undefined')
     {
         conditions = [];
     }
+    //alert("new conditions: " + JSON.stringify(conditions))
     var gapWidth = graphHeight/50;
-    var borderWidth = 1;
+    var borderWidth = 0;
     var hist = Object.create(Histogram);
     hist.setShape(new createjs.Container());
-    hist.background = makeRect(graphWidth, graphHeight, '#EBEEF4'/*"#f0f0f0"*/, borderWidth);
+    hist.background = makeRect(graphWidth, graphHeight, "#ffffff"/*'#EBEEF4',"#f0f0f0"*/, borderWidth);
     hist.background.render(hist.shape, {x:0, y:0});
 
     var barAreaWidth  = graphWidth - 30;
@@ -129,6 +194,7 @@ function makeHist(valArr, valLabels, graphWidth, graphHeight,
     hist.barArea.background = makeRect(barAreaWidth, barAreaHeight, "rgba(0, 0, 0, 0)");
     hist.barArea.render(hist.shape, {x: 30, y: gapWidth});
     hist.barArea.background.renderW(hist.barArea, {x: 0, y: 0});
+    hist.bayesVar = bayesVar;
 
     var numItems = Math.min(valArr.length, valLabels.length);
     var itemWidth = (barAreaHeight - (numItems-1)*gapWidth)/numItems;
@@ -149,6 +215,7 @@ function makeHist(valArr, valLabels, graphWidth, graphHeight,
 
     hist.valBars = [];
     hist.conditions = conditions; 
+    
     hist.valDict = {}; //this is one of two items (the other being the conditions)
         //that needs to be send back to the server in order to construct and alter 
         //the bayes Net in python (from which queries can be made).
@@ -157,8 +224,14 @@ function makeHist(valArr, valLabels, graphWidth, graphHeight,
 
     for (var i=0; i<numItems; i++)
     {
-        var valBar = makeValBar(itemWidth, valArr[i]/100*maxBarLength,
-                                barColor, valArr[i], valLabels[i], hist);
+        var valBarVal;
+        if (valArr[i] < 0.01) {
+            valBarVal = 0.01;
+        } else {
+            valBarVal = valArr[i];
+        }
+        var valBar = makeValBar(itemWidth, valBarVal/100*maxBarLength,
+                                barColor, valBarVal, valLabels[i], hist);
         hist.valDict[valLabels[i]] = valArr[i];
         hist.valBars.push(valBar);
     };
@@ -265,8 +338,35 @@ function makeValBar(barHeight, barWidth, barColor, value, label, hist)
             getLinks = true;
         }
         this.valBar.value += valChange;
+	
         this.valBar.hist.valDict[this.valBar.label] += valChange;
         //send back to the server via Ajax!
+        //alert(this.valBar.hist.conditions)
+        //console.log("array: " + JSON.stringify(Array(model[user.id][this.valBar.hist.bayesVar.varText.toLowerCase().replace(" ", "_")])))
+  
+        var currVarText = this.valBar.hist.bayesVar.varText.toLowerCase().replace(" ", "_")
+
+        //console.log(JSON.stringify(this.valBar.hist.conditions));
+        //console.log(JSON.stringify(model[user.id][currVarText]));
+
+        for (i=0; i < model[user.id][currVarText].length; i++) {
+            if (JSON.stringify(model[user.id][currVarText][i][0])===JSON.stringify(this.valBar.hist.conditions))
+            {
+		//alert(JSON.stringify(this.valBar.hist.valDict))
+                //alert(JSON.stringify(model[user.id][currVarText][i][1]))
+                for (j = 0; j<Object.keys(this.valBar.hist.valDict).length; j++)
+                {
+                    model[user.id][currVarText][i][1][Object.keys(this.valBar.hist.valDict)[j]] = this.valBar.hist.valDict[Object.keys(this.valBar.hist.valDict)[j]]/100.0;
+                }
+
+            }
+
+        }
+	this.valBar.hist.bayesVar.activeCircles.map(function(node){
+	    adjustSignsNode2(node);
+	})
+        //alert("model: " + JSON.stringify() + "\n\nconditions: " + JSON.stringify(this.valBar.hist.conditions))
+
         if (this.valBar.value < 0) {
             this.valBar.value = 0;
             this.valBar.hist.valDict[this.valBar.label] = 0;
@@ -336,20 +436,20 @@ function makeValBar(barHeight, barWidth, barColor, value, label, hist)
         //this updated valDict should be sent back to the server:
         //ajax call here.
         this.valBar.valLabelText.changeText("" + Math.round(this.valBar.value));
-        if (getLinks)
-        {
-            if (this.valBar.hist.isMini) {
-                var bigBar = this.getCorresBig();
-                //console.log("bigBar: ", bigBar);
-                bigBar.setWidth(newWidth, getLinks);
-            } else {
-                var smallBars = this.getCorresSmall();
-                //console.log("smallBars: ", smallBars);
-                for (var i=0; i < smallBars.length; i++) {
-                    smallBars[i].setWidth(newWidth, false);
-                };
-            }
-        }
+        //if (getLinks)
+        //{
+        //    if (this.valBar.hist.isMini) {
+        //        var bigBar = this.getCorresBig();
+        //        //console.log("bigBar: ", bigBar);
+        //        bigBar.setWidth(newWidth, getLinks);
+        //    } else {
+        //        var smallBars = this.getCorresSmall();
+        //        //console.log("smallBars: ", smallBars);
+        //        for (var i=0; i < smallBars.length; i++) {
+        //            smallBars[i].setWidth(newWidth, false);
+        //        };
+        //    }
+        //}
     }
 
     valBar.bar.shape.on("mousedown", function(evt) {
@@ -366,6 +466,8 @@ function makeValBar(barHeight, barWidth, barColor, value, label, hist)
         if (this.valBar.hist.shape.scaleX === 0) {
             alert("divide by zero error!");
         }
+        this.valBar.hist.bayesVar;
+
         var widthChange = -(this.pressX - evtStageX)/this.valBar.hist.shape.scaleX/0.5;
 
         //if (isDef(this.valBar.hist.modelView))
@@ -379,6 +481,23 @@ function makeValBar(barHeight, barWidth, barColor, value, label, hist)
         var newVal = this.valBar.value;
         var amtToAdjust = -(newVal - oldVal);
         this.valBar.hist.autoAdjust(this.valBar, amtToAdjust);
+
+        var hist = this.valBar.hist;
+        hist.bayesVar.varName; //convert to python format
+        hist.conditions;
+        for (var i=0; i<hist.valBars.length; i++)
+        {
+            var valBar = hist.valBars[i];
+            valBar.value;
+            valBar.label;
+        }
+
+        if (isDef(hist.conditions)) {
+
+        } else {
+
+        }
+
     }
 
     valBar.namelabelText.shape.on("mousedown", function(evt) {

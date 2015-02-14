@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<style>
+body {
+    overflow-x: hidden;
+}
+
+#canvasId {
+    position: fixed;
+    top: 10px;
+    z-index:2;
+}
+.fb-like {
+    position:absolute;
+    top:40px;
+    left: 10px;
+    z-index:3;
+}
+.randomdiv {
+    background-color: green;
+}
+</style>
+</head>
+<body onload="main();">
+
+<div id="fbl" class="fb-like" data-send="true" data-width="450" data-layout="button_count" data-show-faces="true"></div>
+
+<link rel="stylesheet" href="Betting/css/style.css">
+
+<link rel="shortcut icon" href="/icon.ico" >
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.createjs.com/createjs-2013.12.12.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="http://code.createjs.com/easeljs-0.4.2.min.js"></script>
+<script src="http://code.createjs.com/tweenjs-0.2.0.min.js"></script>
+<script src="//connect.facebook.net/en_US/all.js"></script>
+
+<script src="clientScriptsNew/social.js" type="text/javascript" charset="utf-8"></script>
+
+<script src="clientScriptsNew/deepCopy.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/verify.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/jslib.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/shapeLib.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/button.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/scroll.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/histgram.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/dropDown.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/switcher.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/textBox.js" type="text/javascript" charset="utf-8"></script>
+
+<script src="clientScriptsNew/bayesVar.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/arrowNodes.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/sideBar.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/modelView.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/tutorial.js" type="text/javascript" charset="utf-8"></script>
+
+<script src="clientScriptsNew/welcome.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/data.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScriptsNew/bettingView.js" type="text/javascript" charset="utf-8"></script>
+
+<script>
+
+function displayTestSwitcher()
+{
+    var switcher = makeSwitcher(clickOutList, "orange");
+    switcher.render(stage, Point(100, 70));
+}
+
+function displayTestHist()
+{
+    var hist = makeHist([20, 30, 50], ["A", "B", "C"],
+                         700, 400, 20, "orange");
+    hist.shape.scaleX = 0.5;
+    hist.shape.scaleY = 0.5;
+    hist.render(stage, Point(100, 70));
+}
+
+function displayTestBettingView()
+{
+    betview = makeBettingView(1400, 800);//, bayesVar);
+    betview.shape.scaleX = 0.5;
+    betview.shape.scaleY = 0.5;
+    var blackFade = makeBlackFade(betview);    
+    blackFade.render(stage, {x:0, y:0})
+}
+
+var debug = false;
+var circleActive = false;
+
+function main()
+{
+    var layers = layerStage(2);
+    fullStage = stage;
+    stage = layers[0].shape;
+    topLayer = layers[1];
+    stage.mouseMoveOutside = true;
+
+    stage.on("click", function(event) {
+        if (circleActive) {
+            var pt = activeCircle.shape.globalToLocal(event.stageX, event.stageY);
+            if (!activeCircle.shape.hitTest(pt.x, pt.y))
+            {
+                activeCircle.unhlCircle();
+                circleActive = false;
+            }
+        }
+    });
+
+    setBackground(stage, "#FFFFFF");
+
+    var tutorialBar = makeTutorialBar();
+    tutorialBar.renderW(topLayer, {x: 310, y: 0});
+
+    var contesVar = makeBayesVar("Contestant Door", "Contestant Door",
+                             ["A", "B", "C"]);
+    var montyVar = makeBayesVar("Monty Door", "Monty Door",
+                             ["A", "B", "C"]);
+    var prizeVar = makeBayesVar("Prize Door", "Prize Door",
+                             ["A", "B", "C"]);
+
+    var bayesVars = [contesVar, montyVar, prizeVar];
+    var sideBar = makeSideBar(bayesVars);
+    sideBar.render(stage, {x:0, y:0});
+    var barRect = makeRect(108, 800, /*"#3B4DD0"*/ '#3b5998');
+    barRect.render(stage, {x:150, y:0});
+
+    var loginScreen = makeLoginScreen();
+    logInScreen.renderW(topLayer, Point(0, 0));
+    //facebookLogin();
+
+    var testHist = makeHist([20, 30, 50], ["A", "B", "C"],
+         BAYES_HIST_WIDTH, BAYES_HIST_HEIGHT, 20, "orange");
+
+    testHist.render(stage, Point(100, 100));
+    createjs.Ticker.setFPS(45);
+    createjs.Ticker.addEventListener("tick", function(event) {
+        fullStage.update();
+    });
+}
+
+</script>
+
+<canvas id="canvasId" height="600" width="800"></canvas>
+
+<div id="fb-root"></div>
+</body>
+</html>

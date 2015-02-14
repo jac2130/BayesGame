@@ -34,7 +34,7 @@ class BlogPostDAO:
         self.posts = database.posts
 
     # inserts the blog entry and returns a permalink for the entry
-    def insert_entry(self, title, post, comments, tags_array, author, userid, variable, period, opend):
+    def insert_entry(self, title, post, comments, tags_array, author, userid, group, period, opend):
         print "inserting blog entry", title, post
 
         # fix up the permalink to not include whitespace
@@ -45,9 +45,9 @@ class BlogPostDAO:
         permalink = exp.sub('', temp_title)
 
         # Build a new post
-        post = {"variable":variable,
+        post = {"group": group,
                 "title": title,
-                "open":opend,
+                "open": opend,
                 "author": author,
                 "userid":userid,
                 "price": int(post),
@@ -68,16 +68,18 @@ class BlogPostDAO:
         return permalink
 
     # returns an array of num_posts posts, reverse ordered
-    def get_posts(self, variable, period):
+    def get_posts(self, group, period, demo_mode):
 
         cursor = []         # Placeholder so blog compiles before you make your changes
 
         # XXX HW 3.2 Work here to get the posts
         for i in range(10):print period
         l = []
-        cursor=self.posts.find({'variable': variable, 'period':period, 'open':1}).sort('price',-1)
+        if demo_mode:
+            cursor=self.posts.find({'period':period, 'open':1}).sort('price',-1)
+        else:
+            cursor=self.posts.find({'group': group, 'period':period, 'open':1}).sort('price',-1)
         for post in cursor:
-            
             post['date'] =str(time.time())  # fix up date
             post['id']=str(post['_id']);
             post['price'] = str(post['price'])
@@ -121,9 +123,15 @@ class BlogPostDAO:
 
     def accept_call(self, id, accepter_id):
         call=self.get_post_by_id(id)
-        
+
         call["open"]=False;
         call['accepted']=accepter_id
+        self.posts.update({'_id':call['_id']}, {"$set": call}, upsert=False)
+
+    def computer_accept(self, id):
+        call = self.get_put_by_id(id)
+        call["open"] = False;
+        call['accepted'] = -1
         self.posts.update({'_id':call['_id']}, {"$set": call}, upsert=False)
 
     # add a comment to a particular blog post
@@ -133,8 +141,7 @@ class BlogPostDAO:
         print comment;
         if (email != ""):
             comment['email'] = email
-        
-        
+
         try:
             last_error = {'n':-1}           # this is here so the code runs before you fix the next line
             # XXX HW 3.3 Work here to add the comment to the designated post

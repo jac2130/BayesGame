@@ -18,12 +18,13 @@ __author__ = 'aje'
 #
 #
 
+
 import sys
 import re
 import datetime
 import time
 from bson.objectid import ObjectId
-import pymongo 
+import pymongo
 
 # The Blog Post Data Access Object handles interactions with the Posts collection
 class PutsDAO:
@@ -34,7 +35,7 @@ class PutsDAO:
         self.puts = database.puts
 
     # inserts the blog entry and returns a permalink for the entry
-    def insert_entry(self, title, post, comments, tags_array, author, userid, variable, period, opend):
+    def insert_entry(self, title, post, comments, tags_array, author, userid, group, period, opend):
         print "inserting blog entry", title, post
 
         # fix up the permalink to not include whitespace
@@ -45,9 +46,9 @@ class PutsDAO:
         permalink = exp.sub('', temp_title)
 
         # Build a new post
-        put = {"variable":variable,
+        put = { "group": group,
                 "title": title,
-                "open":opend,
+                "open": opend,
                 "author": author,
                 "userid":userid,
                 "price": int(post),
@@ -68,16 +69,17 @@ class PutsDAO:
         return permalink
 
     # returns an array of num_posts posts, reverse ordered
-    def get_puts(self, variable, period):
-
+    def get_puts(self, group, period, demo_mode):
         cursor = []         # Placeholder so blog compiles before you make your changes
 
         # XXX HW 3.2 Work here to get the posts
         #for i in range(10):print period
         l = []
-        cursor=self.puts.find({'variable': variable, 'period':period, 'open':1}).sort('price', pymongo.ASCENDING)
+        if demo_mode:
+            cursor = self.puts.find({'period': period, 'open': 1}).sort('price', pymongo.ASCENDING)
+        else:
+            cursor = self.puts.find({'group': group, 'period':period, 'open':1}).sort('price', pymongo.ASCENDING)
         for put in cursor:
-            
             put['date'] =str(time.time())  # fix up date
             put['id']=str(put['_id']);
             put['price']=str(put['price'])
@@ -93,10 +95,8 @@ class PutsDAO:
             l.append(put) 
         return l
 
-
     # find a post corresponding to a particular permalink
     def get_put_by_permalink(self, permalink):
-
         put = None
         # XXX Work here to retrieve the specified post
         put=self.puts.find_one({'permalink':permalink})
@@ -104,11 +104,9 @@ class PutsDAO:
         if put is not None:
             # fix up date
             put['date'] = put['date'].strftime("%A, %B %d %Y at %I:%M%p")
-
         return put
 
     def get_put_by_id(self, item_id):
-
         #put = None
         #Work here to retrieve the specified post
         put=self.puts.find_one({'_id':ObjectId(item_id)})
@@ -122,20 +120,23 @@ class PutsDAO:
 
     def accept_put(self, id, accepter_id):
         put=self.get_put_by_id(id)
-        
         put["open"]=False;
         put['accepted']=accepter_id
+        self.puts.update({'_id':put['_id']}, {"$set": put}, upsert=False)
+
+    def computer_accept(self, id):
+        put=self.get_put_by_id(id)
+        put["open"]=False;
+        put['accepted'] = -1
         self.puts.update({'_id':put['_id']}, {"$set": put}, upsert=False)
 
     # add a comment to a particular blog post
     def add_comment(self, id, name, email, body, commentId):
 
         comment = {'author': name, 'body': body, 'id':commentId}
-        print comment;
         if (email != ""):
             comment['email'] = email
-        
-        
+
         try:
             last_error = {'n':-1}           # this is here so the code runs before you fix the next line
             # XXX HW 3.3 Work here to add the comment to the designated post
@@ -145,14 +146,5 @@ class PutsDAO:
             return last_error['n']          # return the number of documents updated
 
         except:
-            print "Could not update the collection, error"
-            print "Unexpected error:", sys.exc_info()[0]
             return 0
-
-
-
-
-
-
-
 

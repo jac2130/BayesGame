@@ -6,10 +6,13 @@ from mClassDAO import mClasses
 from pprint import pprint
 import json
 from bayesian.bbn import build_bbn_from_conditionals as build_graph
+import computerValueDAO
+
 connection = pymongo.MongoClient()
 database = connection.blog
 
 data = dataDAO.DataDAO(database)
+computerValue = computerValueDAO.ComputerValueDAO(database)
 
 #build_graph(yaml.load(json.dumps(l[-1][str(_id)]))) the object we will have in modelDAO
 
@@ -167,6 +170,14 @@ def random_intermediate(p=0.5):
     d=causes("consumer_spending", ["interest_rate", "general_motors"], d, p, neg=set(["interest_rate"]))
     return d
 
+def random_simple(p=0.5):
+    d={}
+    d['period']=0;
+    d=indepVar("interest_rate", p, d)
+    d=indepVar("bank_income", p, d)
+    d=causes("general_motors", ["interest_rate", "bank_income"], d, p, neg=set(["interest_rate"]))
+    return d 
+
 def random_complex(p=0.5):
     d={}
     d['period']=0;
@@ -242,6 +253,13 @@ def gen_next_period(modelName, count):
         new_point = random_monty()
     elif modelName == "banking":
         new_point = random_banking()
+    elif modelName == "demo":
+        new_point = random_demo()
+    elif modelName == "complex":
+        new_point = random_complex()
+    elif modelName == "simple":
+        new_point = random_simple()
+
     else: raise ValueError ("invalid thread_name")
     new_point['period'] = count + 1
     new_point['modelClass'] = modelName
@@ -256,6 +274,12 @@ def gen_first_twenty(modelName):
             new_point = random_monty()
         elif modelName == "banking":
             new_point = random_banking()
+        elif modelName == "demo":
+            new_point = random_demo()
+        elif modelName == "simple":
+            new_point = random_simple()
+        elif modelName == "complex":
+            new_point = random_complex()
         else: raise ValueError ("invalid thread_name")
         new_point['period'] = count + 1
         new_point['modelClass'] = modelName
@@ -269,32 +293,35 @@ def getClockTime():
     minutes, seconds = json.loads(timeJSON)
     return 60*minutes + seconds
 
-modelNames = ['monty', 'banking']
+#modelNames = ['monty', 'banking', 'demo']
 #betting_variables={"monty":"prize_door", "banking":'bank_2'}
+modelNames = mClasses.keys()
 
 for modelName in modelNames:
     gen_first_twenty(modelName)
-pprint(data.get_first_twenty({'model_name': 'banking'}))
+#pprint(data.get_first_twenty({'model_name': 'demo'}))
 
 count = 20
 prevTime = getClockTime()
 genTime = 10
 currTimeInSecs = -1
-'''while True:
+while True:
     timeInSecs=-1
     timeInSecs = getClockTime()
-    #timeUntilNext = (prevTime + 10) - time.time()
-    #if timeInSecs < prevTime - genTime:
-    if timeInSecs % genTime == 0 and currTimeInSecs != timeInSecs:
-        currTimeInSecs = timeInSecs
-        print "rerun"
+    if timeInSecs != prevTime:
+        timeUpdated = True
+    else:
+        timeUpdated = False
+    if timeInSecs == 0 and timeUpdated:
+        #print "rerun"
         for modelName in modelNames:
-            print count
+            #print count
             gen_next_period(modelName, count)
-        pprint(data.get_first_twenty({'model_name': 'banking'}))
+            computerValue.newRandomValue()
+        #pprint(data.get_first_twenty({'model_name': 'demo'}))
         count += 1
-        prevTime = timeInSecs
-    print timeInSecs
-    print
+    prevTime = timeInSecs
+    #print timeInSecs
+    #print
     time.sleep(0.1)
-'''
+

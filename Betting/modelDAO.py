@@ -53,9 +53,9 @@ class ModelDAO:
         queries the newest graph and returns the query object.
         '''
         j=self.get_newest(_id)
- 	try: 
+        try: 
             return json_convert(j.query(**conditions))
- 	except: 
+        except: 
             #print "sorry the model is not fully defined yet"
             return json.dumps("You have not yet fully specified your model");
 
@@ -67,5 +67,3 @@ class ModelDAO:
             return 1*True
         else: 
             return 0
-        
-        

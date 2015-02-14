@@ -1,0 +1,14 @@
+var circleMoving = false;
+
+function calcArrowLen(fromCircle, toCircle)
+{
+    var deltaY = -toCircle.shape.y - -fromCircle.shape.y;
+    var deltaX = toCircle.shape.x - fromCircle.shape.x;
+    var devec = devectorize([deltaX, deltaY]);
+    veclen = devec[0];
+    var arrowLen = veclen - fromCircle.radius - toCircle.radius;
+}
+
+function connectCircles2(fromCircle, toCircle, sgn)
+{
+    alert(sgn

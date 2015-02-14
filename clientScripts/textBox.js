@@ -26,6 +26,7 @@ function makeTextBox(height, bkgdColor, textColor)
     textBox.inputBar = makeRect(barWidth, textSize, "#555555");
     //textBox.adjustBarPos();
     textBox.prevTime = getTime();
+    textBox.hasEnterCallback = false;
 
     textBox.adjustBarPos = function()
     {
@@ -36,12 +37,12 @@ function makeTextBox(height, bkgdColor, textColor)
         this.inputBar.renderW(this, Point(inputBarPos, yBuf));
         this.inputBarRendered = true;
     }
-    
+
     textBox.getNumChars = function()
     {
         return this.text.getText().length;
     }
-    
+
     textBox.removeInputBar = function()
     {
         if (this.inputBarRendered)
@@ -50,7 +51,7 @@ function makeTextBox(height, bkgdColor, textColor)
             this.inputBarRendered = false;
         }
     }
-    
+
     textBox.flickerTimer = function()
     {
         if (this.isActive)
@@ -65,7 +66,7 @@ function makeTextBox(height, bkgdColor, textColor)
             }
         }
     }
-    
+
     textBox.handleInputChar = function(inpChar)
     {
         if (textBox.isActive)
@@ -74,12 +75,31 @@ function makeTextBox(height, bkgdColor, textColor)
                 this.text.changeText(this.text.getText() + inpChar);
             }
             this.adjustBarPos();
-            if (event.keyCode === 13) {
-                textBox.handleDeactivate();
-            }
         }
     }
-    
+
+    textBox.registerEnterCallback = function(enterCallback)
+    {
+        this.enterCallback = enterCallback;
+        this.hasEnterCallback = true;
+    }
+
+    textBox.clear = function()
+    {
+        this.text.changeText("");
+        this.adjustBarPos();
+    }
+
+    textBox.handleEnter = function()
+    {
+        if (textBox.isActive && this.hasEnterCallback)
+        {
+            this.enterCallback.enteredText = this.text.getText();
+            this.enterCallback.call();
+            this.clear();
+        }
+    }
+
     textBox.handleBackspace = function()
     {
         if (textBox.isActive)
@@ -89,7 +109,7 @@ function makeTextBox(height, bkgdColor, textColor)
             this.adjustBarPos();
         }
     }
-    
+
     textBox.handleDeactivate = function()
     {
         if (textBox.isActive)
@@ -120,7 +140,7 @@ function makeTextBox(height, bkgdColor, textColor)
                 textBox.numVal = 100;
             }
         }
-        alert(textBox.numVal);
+        //alert(textBox.numVal);
         return textBox.numVal;
     }
 

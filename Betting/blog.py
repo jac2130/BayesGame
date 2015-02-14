@@ -1,5 +1,3 @@
-
-#
 # Copyright (c) 2014 
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 #
 
 from random import random
@@ -40,14 +37,14 @@ import threading
 import thread
 import logInfo
 from logInfo import logInfo
-from mClassDAO import mClasses
+from mClassDAO import mClasses, currMClass
+import computerValueDAO
 
-betting_variables = {}
-for mClass in mClasses:
-    betting_variables[mClass] = mClasses[mClass]['bettingVar']
+#betting_variables = {}
+#for mClass in mClasses:
+#    betting_variables[mClass] = mClasses[mClass]['bettingVar']
 
 #Periods should be determined by the following:
-
 #int(120-round(time()%120))
 
 #the following will allow me to build graphs from the json strings that are
@@ -85,7 +82,6 @@ results=g.query();
 #samples = g.draw_samples(results, 1000);
 '''
 
-
 __author__ = 'johannes castner'
 
 #because the above does nt yet work, for now, I'm using the below code to generate data:
@@ -106,6 +102,7 @@ models=modelDAO.ModelDAO(database)
 sessions = sessionDAO.SessionDAO(database)
 data = dataDAO.DataDAO(database)
 points=pointsDAO.PointsDAO(database)
+cvd = computerValueDAO.ComputerValueDAO(database)
 # General Discussion on structure. This program implements a blog. This file is the best place to start to get
 # to know the code. In this file, which is the controller, we define a bunch of HTTP routes that are handled
 # by functions. The basic way that this magic occurs is through the decorator design pattern. Decorators
@@ -119,32 +116,88 @@ points=pointsDAO.PointsDAO(database)
 def get_time():
     return data.getTimeUntilTwoMinuteMark()
 
+free_period = True
+@bottle.route("/beginFreePeriod")
+def beginFreePeriod():
+    global free_period
+    free_period = True
+    cookie = bottle.request.get_cookie("session")
+    user_id = sessions.get_username(cookie)
+    admin_users = []
+    return user_id
+
+@bottle.route("/endFreePeriod")
+def endFreePeriod():
+    global free_period
+    free_period = False
+    cookie = bottle.request.get_cookie("session")
+    user_id = sessions.get_username(cookie)
+    admin_users = []
+    return user_id
+
+@bottle.route("/hasNewData/<model_class>/<period>")
+def hasNewData(model_class, period):
+    latest_period = data.get_latest_period(model_class)
+    if latest_period > int(period):
+        return '1'
+    else:
+        return '0'
+
+@bottle.route("/isFreePeriod")
+def isFreePeriod():
+    return {"free_period": free_period}
+
+demo_mode = True
+@bottle.route("/endDemo")
+def end_demo():
+    global demo_mode
+    demo_mode = False
+    cookie = bottle.request.get_cookie("session")
+    user_id = sessions.get_username(cookie)
+    admin_users = []
+    return user_id
+
+@bottle.route("/emptyData")
+def empty_mclasses():
+    mClass.empty_data()
+    return
+
+@bottle.route("/beginDemo")
+def reset_demo():
+    global demo_mode
+    demo_mode = True
+    cookie = bottle.request.get_cookie("session")
+    user_id = sessions.get_username(cookie)
+    admin_users = []
+    return user_id
+
 @bottle.route("/pointsRefresh/<user>")
 def points_refresh(user):
     point_object=points.get_points(user)
     return json.dumps({"points": point_object["points"], "shares":point_object["shares"]})
 
-@bottle.route("/calls/<variable>/<period>")
-def blog_index(variable, period):
+@bottle.route("/calls/<treatmentNum>/<period>")
+def blog_index(treatmentNum, period):
 
     cookie = bottle.request.get_cookie("session")
 
     username = sessions.get_username(cookie)
 
     # even if there is no logged in user, we can show the blog
-    l = posts.get_posts(variable, int(period))
+    l = posts.get_posts(int(treatmentNum), int(period), demo_mode)
+
     #print "printing myposts: " +str(l);
     return json.dumps(dict(myposts=l, username=username))
 
-@bottle.route("/puts/<variable>/<period>")
-def blog_index(variable, period):
+# adding user_id
+@bottle.route("/puts/<treatmentNum>/<period>")
+def blog_index(treatmentNum, period):
 
     cookie = bottle.request.get_cookie("session")
-
     username = sessions.get_username(cookie)
 
     # even if there is no logged in user, we can show the blog
-    l = puts.get_puts(variable, int(period))
+    l = puts.get_puts(int(treatmentNum), int(period), demo_mode)
     #print "printing myposts: " +str(l);
     return json.dumps(dict(myputs=l, username=username))
 
@@ -155,24 +208,42 @@ def query(i, path):
 
 @bottle.route("/hello/<user_id>")
 def blog_index(user_id):
-    print "hello"
     return "hello world"
 
 @bottle.route("/truth/<user_id>")
 def blog_index(user_id):
-    if mClass.user_needs_updating(user_id):
-        mClass.assign_mClass(user_id)
-    model_name = mClass.get_user_mClass(user_id)
+    # if mClass.user_needs_updating(user_id):
+    #     mClass.assign_mClass(user_id)
+    # model_name = mClass.get_user_mClass(user_id)
 
-    model_class= {'model_name': model_name,
-                  'betting_variable': mClasses[model_name]["bettingVar"],
-                  'vars': mClasses[model_name]["vars"],
-                  'domain': mClasses[model_name]["domain"]
-                  }
+    #group_id = mClass.assign_group_if_not_already(user_id)
+    #model_name, points_assigned = mClass.get_group_treatment(group_id)
+
+    treatmentNum, model_name, points_assigned = mClass.assign_treatment_if_not_already(user_id)
+    points.insert_entry(user_id, points_assigned, 10)
+    #model_name = currMClass
+
+    if demo_mode:
+        model_name = "simple"
+
+    model_class = {
+        'model_name': model_name,
+        'betting_variable': mClasses[model_name]["bettingVar"],
+        'vars': mClasses[model_name]["vars"],
+        'domain': mClasses[model_name]["domain"]
+    }
+    if user_id in set(["121211", "100006471334363"]):
+        isAdmin=True
+    else:
+        isAdmin=False
 
     samples = data.get_first_twenty(model_class)
     retData = {'model_class': model_class,
-               'samples': samples}
+               'isAdmin': isAdmin,
+               'samples': samples,
+               'points': points_assigned,
+               'treatmentNum': treatmentNum,
+               }
     return json.dumps(retData)
 
 '''@bottle.post('/newData')
@@ -180,26 +251,32 @@ def post_new_data():
     data.add_data([random_monty()])
     return'''
 
-@bottle.route("/newData/<user_id>" )
-def index(user_id):
-    newMClassAssigned = False
-    if mClass.user_needs_updating(user_id):
-        mClass.assign_mClass(user_id)
-        newMClassAssigned = True
-    model_name = mClass.get_user_mClass(user_id)
+@bottle.route("/newData/<treatmentNum>" )
+def index(treatmentNum):
+    #newMClassAssigned = False
+    #if mClass.user_needs_updating(user_id):
+    #    mClass.assign_mClass(user_id)
+    #    newMClassAssigned = True
+    #model_name = mClass.get_user_mClass(user_id)
+    #model_name = currMClass
 
-    model_class= {'model_name': model_name,
-                  'betting_variable': mClasses[model_name]["bettingVar"],
-                  'vars': mClasses[model_name]["vars"],
-                  }
+    model_name, _ = mClass.get_treatment_from_num(int(treatmentNum))
+    if demo_mode:
+        model_name = "simple"
+
+    model_class = {
+        'model_name': model_name,
+        'betting_variable': mClasses[model_name]["bettingVar"],
+        'vars': mClasses[model_name]["vars"],
+    }
     samples = data.get_newest(model_class)
-    retData = {'samples': samples}
-    if newMClassAssigned:
-        retData['newModelClass'] = model_class;
-    else:
-        retData['newModelClass'] = None
+    retData = samples
+    #retData = {'samples': samples}
+    #if newMClassAssigned:
+    #    retData['newModelClass'] = model_class;
+    #else:
+    #    retData['newModelClass'] = None
 
-    #new_data = data.get_newest(model_class)
     return json.dumps(retData)
 
 @bottle.post("/accept_put/<put_id>/<accepter_id>/<poster_id>")
@@ -220,9 +297,9 @@ def accept_call(call_id, accepter_id,poster_id):
     points.accept_call(poster_id, accepter_id, point_count)
     return json.dumps({})
 
-@bottle.post("/new_user_points/<user_id>")
-def enter_new_user_points(user_id):
-    points.insert_entry(user_id, 1000, 10)
+#@bottle.post("/new_user_points/<user_id>")
+#def enter_new_user_points(user_id):
+#    points.insert_entry(user_id, 1000, 10)
 
 @bottle.post('/picture')
 def post_new_picture():
@@ -232,7 +309,6 @@ def post_new_picture():
     width=postAll['width']
     height=postAll['height']
     pictures.add_picture(name, url, width, height)
-   # print url, width, height
     return json.dumps({})
 
 @bottle.route("/picture/<id>/<width>/<height>")
@@ -269,7 +345,8 @@ def post_newpost():
     comments=postAll['comments']
     username=postAll['username']
     userid=postAll['userid']
-    variable=postAll["variable"]
+    #variable=postAll["variable"]
+    treatmentNum = postAll['treatmentNum']
     period=postAll["period"]
     # extract tags
     #tags = cgi.escape(tags)
@@ -281,8 +358,18 @@ def post_newpost():
     # substitute some <p> for the paragraph breaks
     newline = re.compile('\r?\n')
     formatted_post = newline.sub("<p>", escaped_post)
+    #formatted_post
 
-    permalink = posts.insert_entry(title, formatted_post, comments, tags_array, username, userid, variable, period, opend)
+    permalink = posts.insert_entry(title, formatted_post, comments, tags_array, username, userid, treatmentNum, period, opend)
+
+    #computerShareValue = cvd.getComputerValue()
+    #print "formatted_post: ", formatted_post
+    #print "formatted isinstance ", isinstance(formatted_post, int)
+    #pointVal = int(formatted_post)
+    #if pointVal > computerShare:
+    #    points.computer_accept_call(userid, pointVal)
+    #    posts.computer_accept()
+
     return json.dumps({})
 
 @bottle.post('/newput')
@@ -293,7 +380,8 @@ def post_newpost():
     comments=postAll['comments']
     username=postAll['username']
     userid=postAll['userid']
-    variable=postAll["variable"]
+    # variable=postAll["variable"]
+    treatmentNum = postAll['treatmentNum']
     period=postAll["period"]
     # extract tags
     #tags = cgi.escape(tags)
@@ -306,7 +394,15 @@ def post_newpost():
     newline = re.compile('\r?\n')
     formatted_post = newline.sub("<p>", escaped_post)
 
-    permalink = puts.insert_entry(title, formatted_post, comments, tags_array, username, userid, variable, period, opend)
+    permalink = puts.insert_entry(title, formatted_post, comments, tags_array, username, userid, treatmentNum, period, opend)
+
+    #computerShareValue = cvd.getComputerValue()
+    #print "formatted_post: ", formatted_post
+    #print "formatted isinstance ", isinstance(formatted_post, int)
+    #pointVal = int(formatted_post)
+    #if pointVal > computerShare:
+    #    computer_accept_put(userid, pointVal)
+
     return json.dumps({})
 
 # handles a login and places the time stamped data in the database. 
@@ -315,11 +411,8 @@ def process_login():
     user= bottle.request.json
     username= user['id'];
     users.add_user(user);
-    #print "user submitted ", username
-
         # username is stored in the user collection in the _id key
     session_id = sessions.start_session(username)
-    #print session_id;
 
     if session_id is None:
         print "Error: there is no session id!!" 
@@ -357,10 +450,7 @@ def get_photo():
 def present_internal_error():
     return {'error':"System has encountered a DB error"}
 
-
-
 #######################
-
 
 # Helper Functions
 
@@ -379,7 +469,6 @@ def extract_tags(tags):
             cleaned.append(tag)
 
     return cleaned
-
 
 # validates that the user information is valid for new signup, return True of False
 # and fills in the error string if there is an issue

@@ -9,19 +9,24 @@ function calcArrowLen(fromCircle, toCircle)
     var arrowLen = veclen - fromCircle.radius - toCircle.radius;
 }
 
-function connectCircles2(fromCircle, toCircle)
+function connectCircles2(fromCircle, toCircle, sgn)
 {
+    //alert(sgn)
     var arrowLen = getArrowLenFromCircles(fromCircle, toCircle);
     var arrowTheta = calcThetaFromCircles(fromCircle, toCircle);
     var arrowPos = trianglePosRelCircle2(fromCircle, arrowTheta);
     var arrowAngle = 90 - arrowTheta;
 
-    var arrow = makeArrow2(arrowLen, arrowAngle);
+    var arrow = makeArrow2(arrowLen, arrowAngle, sgn);
     arrow.render(stage, arrowPos);
+    //signTag=makePositiveSign(20, 20, "#009900", 1)
+    //signTag.renderW(arrow, {x: (-toCircle.shape.x)/2, y:(-toCircle.shape.y)/2});
 
     fromCircle.toNodes.push([toCircle, arrow]);
     toCircle.fromNodes.push([fromCircle, arrow]);
+    toCircle.fromSigns.push(sgn);
     arrow.fromNode = fromCircle;
+    //arrow.sgn=sgn;
     arrow.toNode = toCircle;
 
     //var fromnames=[]
@@ -38,7 +43,8 @@ function connectCircles2(fromCircle, toCircle)
       //              1400, 800, 20, toCircle.bayesVar.color);
        // toCircle.bayesVar.isMultiVar = false;
     //}
-
+    fromSigns=toCircle.fromSigns;
+    //alert(JSON.stringify(fromSigns))
     fromVars = arrow.toNode.bayesVar.getFromVars();
     //alert(fromVars)
     fromNames=[]
@@ -55,14 +61,15 @@ function connectCircles2(fromCircle, toCircle)
 
     var smallHists = currHist.smallHists;
     var possibilities = arrow.toNode.bayesVar.possibilities;
+    //alert(JSON.stringify(possibilities))
     var valArr = [];
     for (var i=0; i<possibilities.length; i++)
     {
         valArr.push(100/possibilities.length);
     }
-    
+    //alert(valArr)
     arrow.toNode.bayesVar.probSetter = makeSwitcher(arrow.toNode.bayesVar, 1400, 800, 
-            arrow.toNode.bayesVar.color, fromNames, valArr);
+            arrow.toNode.bayesVar.color, fromNames, fromSigns);
     //activating the view. This makes this view the active one. This should be 
     //eventually replaced with an if statement saying that if the current 
     //active view is the model view this should replace it. 
@@ -82,7 +89,8 @@ function connectCircles2(fromCircle, toCircle)
     arrow.toNode.bayesVar.isMultiVar = true;
     
     arrow.shape.on("dblclick", function(evt) {
-        disconnectCircles(this.widget.fromNode, this.widget.toNode, tutorial);
+	//alert("now, I'm a disconnectin'")
+        disconnectCircles(this.widget.fromNode, this.widget.toNode);
     });
     currHist = arrow.toNode.bayesVar.probSetter.getCurrHist();
     return arrow;
@@ -122,6 +130,7 @@ function makeBayesCircle(radius, color)
     circle.highlighted = false;
     circle.justAdded = false;
     circle.fromNodes = [];
+    circle.fromSigns=[];
     circle.toNodes = [];
 
     circle.hlCircle = function()
@@ -207,7 +216,8 @@ function makeBayesCircle(radius, color)
         if (circleActive) {
             if (activeCircle !== this.widget && !isConnected(activeCircle, this.widget)) {
                 //connectCircles(activeCircle, this.widget);
-                connectCircles2(activeCircle, this.widget);
+		sign(activeCircle, this.widget)
+                
             }
             circleActive = false;
             activeCircle.unhlCircle();
@@ -238,11 +248,13 @@ function makeBayesCircle(radius, color)
 
 function disconnectCircles(fromCircle, toCircle)
 {
+    //alert("I'm a tryin' to disconnect")
     if (!isConnected(fromCircle, toCircle)) { return; }
     for (var i=0; i < toCircle.fromNodes.length; i++) {
         if (toCircle.fromNodes[i][0] === fromCircle) {
             stage.removeChild(toCircle.fromNodes[i][1].shape);
             toCircle.fromNodes = toCircle.fromNodes.deleteElemByIndex(i);
+	    toCircle.fromSigns = toCircle.fromSigns.deleteElemByIndex(i);
             break;
         }
     };
@@ -255,18 +267,35 @@ function disconnectCircles(fromCircle, toCircle)
 
     var fromVars = toCircle.bayesVar.getFromVars();
     var poss = toCircle.bayesVar.possibilities;
+   //alert(JSON.stringify(poss))
+    var valArr = [];
+    for (var i=0; i<poss.length; i++)
+    {
+        valArr.push(100/poss.length);
+    }
     var fromnames=[]
+    var fromSigns = toCircle.fromSigns;
     if (fromVars.length > 0) {
         for (var i=0;i<fromVars.length; i++){
             fromnames.push(fromVars[i].varText)
         }
         toCircle.bayesVar.probSetter = makeSwitcher(toCircle.bayesVar, 1400, 800,
-                toCircle.bayesVar.color, fromnames);
+                toCircle.bayesVar.color, fromnames, fromSigns);
 
         toCircle.bayesVar.isMultiVar = true;
     } else {
-        toCircle.bayesVar.probSetter = makeHist([20, 30, 50], poss,
-                    1400, 800, 20, toCircle.bayesVar.color);
+        toCircle.bayesVar.probSetter = makeHist(valArr, poss,
+                    1400, 800, 20, toCircle.bayesVar.color, toCircle.bayesVar);
+	modelVals=[];
+	valArr.map(function(item){modelVals.push(item/100)})
+	var tempHold=zip([poss,modelVals])
+	var itemsAndProbs={}
+
+	tempHold.map(function(item){itemsAndProbs[item[0]]=item[1]})
+	var varKey=toCircle.bayesVar.varText.toLowerCase().replace(" ", "_");
+	model[user.id][varKey]=[[[],itemsAndProbs]];
+	//alert(JSON.stringify(model))
+	//[[[],{"H":0.5,"L":0.5}]] //[50, 50]
         toCircle.bayesVar.isMultiVar = false;
     }
     //the active view must be changed as well again.
@@ -278,8 +307,12 @@ function disconnectCircles(fromCircle, toCircle)
 
 var Arrow2 = Object.create(Widget);
 
-function makeArrow2(arrowLen, arrowAngle)
+function makeArrow2(arrowLen, arrowAngle, sgn)
 {
+    if (typeof sgn === 'undefined') 
+    {
+        sgn = "";
+    }
     var arrow = Object.create(Arrow2);
     arrow.setShape(new createjs.Container());
     var triangleHeight = 20;
@@ -287,11 +320,33 @@ function makeArrow2(arrowLen, arrowAngle)
     arrow.arrowRect = makeArrowRect(rectLen, arrowAngle);
     arrow.arrowRect.render(arrow.shape, {x:0, y:0}, 
             {x:arrow.arrowRect.width/2, y:arrow.arrowRect.height});
-
+    
     //var triangleRelPos = arrow.getTrianglePos(rectLen);
     arrow.triangle = makeArrowTriangle(triangleHeight);
     arrow.triangle.render(arrow.shape, {x:0, y:-rectLen});
-
+    if (sgn!==""){
+	if (sgn==="+"){
+	    arrow.sign=makePositiveSign(10, 10, "#009900", 2)
+	    
+	}
+	else {
+	    arrow.sign=makeNegativeSign(10, 10, "#FF0000", 2)
+	}
+	arrow.sign.render(arrow.shape, {x:-15, y:-arrowLen/2});
+    }
+    arrow.changeSign = function(s){
+	arrow.sign.erase();
+	if (s!==""){
+	    if (s==="+"){
+		arrow.sign=makePositiveSign(10, 10, "#009900", 2)
+	    
+	    }
+	    else {
+		arrow.sign=makeNegativeSign(10, 10, "#FF0000", 2)
+	    }
+	    arrow.sign.render(arrow.shape, {x:-15, y:-arrowLen/2});
+	}
+    }
     arrow.shape.rotation += arrowAngle;
     return arrow;
 }
@@ -327,6 +382,8 @@ Arrow2.adjustArrow = function(fromCircle, toCircle)
     this.setLen(arrowLen);
     this.setAngle(arrowAngle);
     this.move(arrowPos);
+    this.sign.erase();
+    this.sign.render(this.shape, {x:-15, y:-arrowLen/2});
 }
 
 // todo
@@ -374,10 +431,11 @@ function makeArrowTriangle(triangleHeight)
 
 function moveNode2(node, nodePos)
 {
+    
     node.shape.x = nodePos[0];
     node.shape.y = nodePos[1];
-    node.miniHist.shape.x = nodePos[0] + node.miniHist.offset.x;
-    node.miniHist.shape.y = nodePos[1] + node.miniHist.offset.y;
+    //node.miniHist.shape.x = nodePos[0] + node.miniHist.offset.x;
+    //node.miniHist.shape.y = nodePos[1] + node.miniHist.offset.y;
     for (var i=0;i<node.fromNodes.length;i++) {
         var fromNode = node.fromNodes[i][0];
         var arrow = node.fromNodes[i][1];
@@ -388,6 +446,23 @@ function moveNode2(node, nodePos)
         var arrow = node.toNodes[i][1];
         arrow.adjustArrow(node, toNode);
     }
+}
+
+function adjustSignsNode2(node)
+{
+    //node.shape.x = nodePos[0];
+    //node.shape.y = nodePos[1];
+    //node.miniHist.shape.x = nodePos[0] + node.miniHist.offset.x;
+    //node.miniHist.shape.y = nodePos[1] + node.miniHist.offset.y;
+    var toName= node.bayesVar.varName.toLowerCase().replace(" ", "_");
+    for (var i=0;i<node.fromNodes.length;i++) {
+        var fromNode = node.fromNodes[i][0];
+	var fromName = fromNode.bayesVar.varName.toLowerCase().replace(" ", "_");
+        var arrow = node.fromNodes[i][1];
+	var sign = relationSign(toName, fromName);
+        arrow.changeSign(sign);
+    }
+    
 }
 
 function trianglePosRelCircle2(fromCircle, angleTheta)

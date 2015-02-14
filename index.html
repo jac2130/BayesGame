@@ -20,6 +20,7 @@ body {
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="http://code.createjs.com/createjs-2013.12.12.min.js" type="text/javascript" charset="utf-8"></script>
 <script src="http://code.createjs.com/easeljs-0.4.2.min.js"></script>
+<!--<script src="lib/EaselJS/lib/easeljs-0.8.0.combined.js"></script>-->
 <script src="http://code.createjs.com/tweenjs-0.2.0.min.js"></script>
 <script src="//connect.facebook.net/en_US/all.js"></script>
 
@@ -35,7 +36,7 @@ body {
 <script src="clientScripts/arrowNodes.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/sideBar.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/button.js" type="text/javascript" charset="utf-8"></script>
-<script src="clientScripts/tutorial.js" type="text/javascript" charset="utf-8"></script>
+<!-- <script src="clientScripts/tutorial.js" type="text/javascript" charset="utf-8"></script> -->
 <script src="clientScripts/histgram.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/dropDown.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/switcher.js" type="text/javascript" charset="utf-8"></script>
@@ -74,6 +75,7 @@ var circleActive = false;
 
 function main()
 {
+    $.ajaxSetup({cache: false});
     var layers = layerStage(2);
     fullStage = stage;
     stage = layers[0].shape;
@@ -93,10 +95,10 @@ function main()
 
     setBackground(stage, "#FFFFFF");
 
-    tutorial = Object.create(Tutorial);
-    var textBar = makeTextBar();
-    textBar.render(topLayer.shape, {x:310, y:0});
-    tutorial.init(textBar);
+    // tutorial = Object.create(Tutorial); 
+    // var textBar = makeTextBar();
+    // textBar.render(topLayer.shape, {x:310, y:0});
+    // tutorial.init(textBar); 
 
     GraphJson.userId=user.id;
 

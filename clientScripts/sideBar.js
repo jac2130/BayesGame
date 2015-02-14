@@ -5,6 +5,17 @@ var VIEW_HEIGHT = 800;
 
 var GraphJson = {"user": user.id} 
 
+function varNameToText(str)
+{
+    var resWords = str.split("_");
+    resWordsTitle = [];
+    resWords.map(function(resWord) {
+        resWordsTitle.push(toTitleCase(resWord));
+    });
+    return resWordsTitle.join(' ');
+}
+
+
 function makeHistBar(hist)
 {
     var height = 45;
@@ -138,7 +149,7 @@ function makeModelViewButton(bayesVar)
 
 function bayesVarFactory ()
 {
-    var colors = ["#3B4DD0"  /*"#3b5998"*/,  "yellow", "red", "green", "purple", "brown",
+    var colors = [ "red" /*"#3b5998"*/,  "yellow", "#3B4DD0", "green", "purple", "brown",
                   "DarkRed", "GoldenRod"];
     var BayesVar = {};
     var numVars = 0;
@@ -161,7 +172,7 @@ function bayesVarFactory ()
         }
 
         newBayesVar.probSetter = makeHist(valArr, possibilities,
-                                  1400, 800, 20, newBayesVar.color);
+                                  1400, 800, 20, newBayesVar.color, newBayesVar);
 
 	    // adding the innitial variable object to the graph object.
 	    var modelDict = {}
@@ -180,77 +191,79 @@ function bayesVarFactory ()
 
         newBayesVar.addCircle = function ()
         {
+	    if (this.varCircles.length < 1){
             var newVarCircle = makeBayesCircle(20, this.color);
             newVarCircle.bayesVar = this;
-
-            newVarCircle.makeMiniHist = function(vals) 
-            { 
-                this.miniHistShown = false;
-                this.miniHist = makeHist(vals, 
-					this.bayesVar.possibilities,
-					700, 400, 20, this.bayesVar.color);
-                this.miniHist.width = 700;
-                this.miniHist.borderWidth = 1;
-                this.miniHist.barButton = makeHistBar(this.miniHist);
-                this.miniHist.barButton.render(this.miniHist.shape, {x:0, y:-45})
-
-                this.miniHist.killButton = makeTextWidget("x", 60, "Arial", '#f7f7f7'/*"#f0f0f0"*/);
-        /*Now I'm creating the kill switch that allows erasing the little histogram */
-                this.miniHist.killButton.miniHist = this.miniHist;
-                this.miniHist.killButton.bayesCircle = this;
-                this.miniHist.killButton.call = function() 
-                {
-                    if (this.bayesCircle.miniHistShown)
-                    {
-                        this.bayesCircle.miniHistShown=false;
-                        stage.removeChild(this.miniHist.shape)
-                    }
-                }
-                this.miniHist.killButton.render(this.miniHist.shape, {x:10, y:0});
-   
-                this.miniHist.shape.on("mouseover", function(evt)
-                {
-					this.widget.killButton.changeColor("#666");
-				})
-                        /*Actual interaction with the button*/
-                this.miniHist.killButton.shape.on("mouseover", function(evt)
-				{
-                    this.widget.changeColor("red");
-                    this.widget.changeFont("120px " + "Arial");
-				});
-                this.miniHist.killButton.shape.on("mouseout", function(evt)
-				{
-                    this.widget.changeColor("#666");
-                    this.widget.changeFont("60px " + "Arial");
-				});
-                this.miniHist.killButton.shape.on("mousedown", function(evt)
-				{
-                    this.widget.changeColor("red");
-                    this.widget.changeFont("120px " + "Arial");
-                    mousePressed = true;
-			    });
-                this.miniHist.killButton.shape.on("pressup", function(evt)
-				{
-					 this.widget.changeColor("red");
-					 this.widget.changeFont("240px " + "Arial");
-					 this.widget.call();
-				});
 	    
-                this.miniHist.shape.on("mouseout", function(evt)
-				{
-					this.widget.killButton.changeColor('#f7f7f7'/*"#f0f0f0"*/);
-				});
-                this.miniHist.shape.scaleX = 0.2;
-                this.miniHist.shape.scaleY = 0.2;
-                this.miniHist.offset = {x:-30, y:35};
-                this.miniHist.isMini = true;
-                this.miniHist.bigHist = this.bayesVar.probSetter;
-                
-                this.miniHist.bigHist.smallHists.push(this.miniHist);
-                return this.miniHist;
-            }
 
-            newVarCircle.showMiniHist = function()
+//            newVarCircle.makeMiniHist = function(vals) 
+//            { 
+//                this.miniHistShown = false;
+//                this.miniHist = makeHist(vals, 
+//					this.bayesVar.possibilities,
+//					700, 400, 20, this.bayesVar.color);
+//                this.miniHist.width = 700;
+//                this.miniHist.borderWidth = 1;
+//                this.miniHist.barButton = makeHistBar(this.miniHist);
+//                this.miniHist.barButton.render(this.miniHist.shape, {x:0, y:-45})
+
+//                this.miniHist.killButton = makeTextWidget("x", 60, "Arial", '#f7f7f7'/*"#f0f0f0"*/);
+        /*Now I'm creating the kill switch that allows erasing the little histogram */
+//                this.miniHist.killButton.miniHist = this.miniHist;
+//                this.miniHist.killButton.bayesCircle = this;
+//                this.miniHist.killButton.call = function() 
+//                {
+//                    if (this.bayesCircle.miniHistShown)
+//                    {
+//                        this.bayesCircle.miniHistShown=false;
+//                        stage.removeChild(this.miniHist.shape)
+//                    }
+//                }
+//                this.miniHist.killButton.render(this.miniHist.shape, {x:10, y:0});
+   
+//                this.miniHist.shape.on("mouseover", function(evt)
+//                {
+					//this.widget.killButton.changeColor("#666");
+//				})
+                        /*Actual interaction with the button*/
+//                this.miniHist.killButton.shape.on("mouseover", function(evt)
+//				{
+//                    this.widget.changeColor("red");
+//                    this.widget.changeFont("120px " + "Arial");
+//				});
+//                this.miniHist.killButton.shape.on("mouseout", function(evt)
+//				{
+//                    this.widget.changeColor("#666");
+//                    this.widget.changeFont("60px " + "Arial");
+//				});
+//                this.miniHist.killButton.shape.on("mousedown", function(evt)
+//				{
+//                    this.widget.changeColor("red");
+//                    this.widget.changeFont("120px " + "Arial");
+//                    mousePressed = true;
+//			    });
+//                this.miniHist.killButton.shape.on("pressup", function(evt)
+//				{
+//					 this.widget.changeColor("red");
+//					 this.widget.changeFont("240px " + "Arial");
+//					 this.widget.call();
+//				});
+	    
+  //              this.miniHist.shape.on("mouseout", function(evt)
+//				{
+					//this.widget.killButton.changeColor('#f7f7f7'/*"#f0f0f0"*/);
+//				});
+  //              this.miniHist.shape.scaleX = 0.2;
+  //              this.miniHist.shape.scaleY = 0.2;
+  //              this.miniHist.offset = {x:-30, y:35};
+  //              this.miniHist.isMini = true;
+  //              this.miniHist.bigHist = this.bayesVar.probSetter;
+                
+  //           this.miniHist.bigHist.smallHists.push(this.miniHist);
+ //             return this.miniHist;
+ //           }
+
+/*            newVarCircle.showMiniHist = function()
             {
                 this.miniHistShown = true;
                 var histX = this.shape.x+this.miniHist.offset.x;
@@ -258,7 +271,7 @@ function bayesVarFactory ()
                 this.miniHist.render(stage, Point(histX, histY));
             }
 
-            newVarCircle.makeMiniHist([20, 30, 50]);
+            newVarCircle.makeMiniHist([20, 30, 50]); */
 	    
             var circleShape = newVarCircle.shape;
 
@@ -266,6 +279,7 @@ function bayesVarFactory ()
             {
                 this.widget.ready = true;
                 var globalPt = this.parent.localToGlobal(this.x, this.y);
+		this.widget.miniHistShown=false;
                 if (!this.widget.miniHistShown)
                 {
                     //alert(this.widget.miniHistShown);
@@ -294,9 +308,9 @@ function bayesVarFactory ()
                         this.widget.circle.expanded = false;
                     }
                     });
-                    option.shape.on("click", function(evt) {
-                        this.widget.circle.showMiniHist();		    
-                    });
+                    //option.shape.on("click", function(evt) {
+                    //    this.widget.circle.showMiniHist();		    
+                   // });
                     this.widget.expanded = true;
 
                     option.render(stage, {x:globalPt.x-10, y:globalPt.y});
@@ -305,87 +319,98 @@ function bayesVarFactory ()
 
 	        circleShape.on("rollover", function(evt)
             {
-                if (this.widget.ready && !this.widget.miniHistShown)
-                {
-                    var option = Object.create(Widget);
-                    option.setShape(new createjs.Container());
+		
+		    
+			this.widget.miniHistShown=false
+			if (this.widget.ready && !this.widget.miniHistShown)
+			{
+			    var option = Object.create(Widget);
+			    option.setShape(new createjs.Container());
 
-                    this.widget.option = option;
-                    option.triangle = makeTriangle(12, 6, 0.5, "black", 90, 
-                                 1, "black");
-                    var message=makeTextWidget(this.widget.bayesVar.varName, 12, "Arial", "#ffffff");
+			    this.widget.option = option;
+			    option.triangle = makeTriangle(12, 6, 0.5, "black", 90, 
+							   1, "black");
+			    var message=makeTextWidget(this.widget.bayesVar.varName, 12, "Arial", "#ffffff");
                     
-                    option.modelTag = makeRect(message.width+20,24, "black");
-                    option.modelTag.renderW(option, {x:38, y:-14})
-                    message.renderW(option, {x:43, y:-9});
+			    option.modelTag = makeRect(message.width+20,24, "black");
+			    option.modelTag.renderW(option, {x:38, y:-14})
+			    message.renderW(option, {x:43, y:-9});
                     
-                    option.triangle.renderW(option, {x:38, y:-7});
+			    option.triangle.renderW(option, {x:38, y:-7});
                        
-                    option.circle=this.widget;
+			    option.circle=this.widget;
                     //option.rollover=false;
-                    this.widget.expanded = true;
+			    this.widget.expanded = true;
 
-                    var globalPt = this.parent.localToGlobal(this.x, this.y);
-                    option.render(stage, {x:globalPt.x-10, y:globalPt.y});
+			    var globalPt = this.parent.localToGlobal(this.x, this.y);
+			    option.render(stage, {x:globalPt.x-10, y:globalPt.y});
 
-                    option.shape.on("rollover", function(evt)
-                    {
-                        this.widget.render(stage, {x:globalPt.x-10, y:globalPt.y});
-                    });
+			    option.shape.on("rollover", function(evt)
+					    {
+						this.widget.render(stage, {x:globalPt.x-10, y:globalPt.y});
+					    });
 
-                    option.shape.on("rollout", function(evt)
-                    {
-                        this.widget.rollover = false;
-                        this.widget.erase();
-                        if (this.widget.circle.expanded)
-                        {
-                            this.widget.erase();
-                            this.widget.circle.expanded = false;
-                        }
-                    });
+			    option.shape.on("rollout", function(evt)
+					    {
+						this.widget.rollover = false;
+						this.widget.erase();
+						if (this.widget.circle.expanded)
+						{
+						    this.widget.erase();
+						    this.widget.circle.expanded = false;
+						}
+					    });
 
-                    option.shape.on("click", function(evt)
+                 /*   option.shape.on("click", function(evt)
                     {
                         this.widget.circle.showMiniHist();		    
-                    });
-                }
-	        });; //this is what I'm working on!
+                    });*/
+			}
+		    
+	    });; //this is what I'm working on!
 	        circleShape.on("rollout", function(evt)
             {
-                if (this.widget.expanded)
-                {
-                    this.widget.option.erase();
-                    this.widget.expanded = false;
-                }
-	        });
+		
+		if (this.widget.expanded)
+		{
+		    this.widget.option.erase();
+		    this.widget.expanded = false;
+		}
+	    
+	    });
 	        
 
             circleShape.on("mousedown", function (evt)
             {
-                if (this.widget.expanded)
-                {
-                    this.widget.option.erase();
-                    this.widget.expanded = false;
-                }
-                var globalPt = this.parent.localToGlobal(this.x, this.y);
+		if (this.widget.expanded)
+		{
+		    this.widget.option.erase();
+		    this.widget.expanded = false;
+		}
+		
+		var globalPt = this.parent.localToGlobal(this.x, this.y);
 		    
 		    //each new coordinate (globalPt) should be recorded to MongoDB.
-                this.parent.removeChild(this);
-                this.widget.render(stage, {x:globalPt.x, y:globalPt.y});
-                stage.addChild(this);
+		this.parent.removeChild(this);
+		this.widget.render(stage, {x:globalPt.x, y:globalPt.y});
+		stage.addChild(this);
 		     
 		    		
-                this.widget.bayesVar.activeCircles.push(this.widget)
-                this.widget.justAdded = true;
-            }, null, true);
+		this.widget.bayesVar.activeCircles.push(this.widget)
+		this.widget.justAdded = true;
+	    
+	    }, null, true);
 
             circleShape.on("dblclick", function (evt)
             {
-                makeActiveView(this.widget.bayesVar.activeView, this.widget.bayesVar);
+		
+		makeActiveView(this.widget.bayesVar.activeView, this.widget.bayesVar);
+	    
             });
 
             this.varCircles.push(newVarCircle)
             return newVarCircle;
+		}
         }
 
         newBayesVar.removeCircle = function (varCircle)
@@ -431,7 +456,7 @@ var makeBayesVar = bayesVarFactory();
 function createSideBar2(modelClass, isMonty)
 {
     var sideBar = WidgetHL();
-    sideBar.barRect = makeRect(108, 800, /*"#3B4DD0"*/ '#3b5998');
+    sideBar.barRect = makeRect(10, 800, /*"#3B4DD0"*/ '#3b5998');
     sideBar.barRect.render(stage, {x:150, y:0});
 
     var nextYPosition = 70;
@@ -462,6 +487,7 @@ function createSideBar2(modelClass, isMonty)
 
         varBarItem.varBarButton.renderW(varBarItem, {x:30, y:20});
         varBarItem2.varBarButton.renderW(varBarItem2, {x:30, y:20});
+	    //var bayesVarName = bayesVar.varText.replace("_", " ").toUpperCase();
 
         varBarItem.text = makeTextWidget(bayesVar.varText, 16, "Arial", 
                                          "#666");
@@ -555,25 +581,27 @@ function createSideBar2(modelClass, isMonty)
 			if (!circleMoving)
 			{
 				var varCircle = this.widget.bayesVar.addCircle();
+			    if (varCircle!== undefined){
 				this.widget.varCircle = varCircle;
 				var varText = this.widget.bayesVar.varText;
 				varCircle.renderW(this.widget, Point(55, 45));
 
 				this.widget.expanded = true;
 
-				tutorial.trigger("sideBarIconHover", varText);
+				//tutorial.trigger("sideBarIconHover", varText);
 				varCircle.shape.on("mousedown", function (evt) 
 				{
 					sideBar.variablesDragged += 1
 					var varText = this.widget.bayesVar.varText;
-					tutorial.trigger("circleDrag", varText);
+					//tutorial.trigger("circleDrag", varText);
 				}, null, true);
 
 				varCircle.shape.on("click", function (evt) 
 				{
 					var varText = this.widget.bayesVar.varText;
-					tutorial.trigger("circleClicked", varText);
+					//tutorial.trigger("circleClicked", varText);
 				});
+			    }
 		    }
         });
 
@@ -597,13 +625,14 @@ function createSideBar2(modelClass, isMonty)
     var mClassVars = modelClass['vars'];
     var bayesVars = [];
     mClassVars.map(function(mClassVar) {
+        var varName = varNameToText(mClassVar);
         var domain;
         if (isMonty) {
             domain = ["A", "B", "C"];
         } else {
             domain = ["H", "L"];
         }
-        var newBayesVar = makeBayesVar(mClassVar, mClassVar, domain);
+        var newBayesVar = makeBayesVar(varName, varName, domain);
         bayesVars.push(newBayesVar);
     });
 
@@ -628,6 +657,7 @@ function createSideBar2(modelClass, isMonty)
     sideBar.render(stage, {x:0, y:0});
     //alert(JSON.stringify(user));
     //the facebook user object must be created (facebook login must happen) before the sideBar is created.
-    return sideBar.Vars;
+    //console.log(sideBar.Vars);
+    return sideBar;
 }
 

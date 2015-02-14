@@ -4,6 +4,10 @@ import string
 import hashlib
 import pymongo
 import time
+import sys
+print sys.path
+
+print "something"
 from mClassDAO import mClasses
 import json
 
@@ -28,6 +32,14 @@ class DataDAO:
             print "oops, data is already taken"
             return False
         return True
+
+    def get_latest_period(self, model_name):
+        latest_entry = list(self.data.find({'model_class': model_name}).sort('entry_time',-1).limit(1))
+        if latest_entry:
+            print latest_entry[0]
+            return latest_entry[0]['data'][0]['period']
+        else:
+            raise ValueError("model with name of " + model_name + " has no data")
 
     def get_newest(self, model_class):
 

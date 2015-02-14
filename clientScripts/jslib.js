@@ -1,6 +1,11 @@
 // requires verify
 var getCharDebug = false;
 
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
 // event.type must be keypress
 function getChar(event)
 {
