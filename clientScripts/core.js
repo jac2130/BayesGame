@@ -7,7 +7,7 @@ function welcome()
     welcomeScreen.tutorialCover.render(welcomeScreen.shape, Point(260, 0));
     welcomeScreen.background=makeRect(stageWidth, stageHeight, "rgba(0, 0, 0, 0.75)");
     welcomeScreen.background.render(welcomeScreen.shape, Point(0, 0));
-    welcomeScreen.pic = new createjs.Bitmap(THIS_DOMAIN + "/ajax/picture/" + user.id + "/180/180");
+    welcomeScreen.pic = new createjs.Bitmap("/ajax/picture/" + user.id + "/180/180");
     welcomeScreen.pic.x=150;
     welcomeScreen.pic.y=100;
     welcomeScreen.pic.scaleX*=0.54;

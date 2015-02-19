@@ -1,4 +1,4 @@
-var THIS_DOMAIN="http://bettingisbelieving.com"
+// var THIS_DOMAIN="http://bettingisbelieving.com"
 var View = Object.create(Widget);
 
 function makeView(graphWidth, graphHeight, bayesVar)
@@ -433,7 +433,7 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
 	postItem.bet.renderW(postItem, {x:-200, y:30});
 	//if (post.userid)
 	//{
-	//    post.pic=new createjs.Bitmap(THIS_DOMAIN + "/ajax/picture/" + post.userid + "/5/5");
+	//    post.pic=new createjs.Bitmap("/ajax/picture/" + post.userid + "/5/5");
 	//    post.pic.x=-150;
 	//    post.pic.y=20;
 	//    post.pic.scaleX*=0.3;
@@ -476,7 +476,7 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
 
 		    if (post.comments[i].id)
 		    {
-			post.comments[i].pic=new createjs.Bitmap(THIS_DOMAIN + "/ajax/picture/" + post.comments[i].id + "/5/5");
+			post.comments[i].pic=new createjs.Bitmap("/ajax/picture/" + post.comments[i].id + "/5/5");
 			post.comments[i].pic.x=60;
 			post.comments[i].pic.y=150 + i*80;
 			post.comments[i].pic.scaleX*=0.5;
