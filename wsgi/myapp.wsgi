@@ -333,9 +333,10 @@ def process_login(args, data):
     #user = bottle.request.json
     #username = user['id'];
     username = int(data['id']);
-    print "username: ", username
+    #print "username: ", username
     users.add_user(user);
-        # username is stored in the user collection in the _id key
+
+    # username is stored in the user collection in the _id key
     session_id = sessions.start_session(username)
 
     if session_id is None:
@@ -348,6 +349,9 @@ def process_login(args, data):
     #print bottle.response.set_cookie;
     bottle.response.set_cookie("session", cookie)
     return json.dumps({})
+
+def no_fb_login(args, data):
+    return json.dumps({'user_id': user_id})
 
 def building_model(args, data):
     model = bottle.request.json
@@ -385,6 +389,17 @@ handlerDict = {
         'has_query': hasQuery,
 }
 
+# user environ['HTTP_COOKIE'] to access
+def getUserIdFromCookie(http_cookie):
+    cookie = Cookie.SimpleCookie()
+    #cookieInfo = {'user_id': 'asdfasdf'}
+    cookie.load(http_cookie)
+    cookieInfo = json.loads(cookie['access_token'].value)
+    if 'user_id' in cookieInfo:
+        return str(cookieInfo['user_id'])
+    else:
+        return None
+
 def application(environ, start_response):
     status = '200 OK'
     #output = 'Hello World!'
@@ -396,6 +411,12 @@ def application(environ, start_response):
     handlerWord = pathNames[0]
     args = pathNames[1:]
     data = environ['wsgi.input'].read()
+    userId = getUserIdFromCookie(environ['HTTP_COOKIE'])
+    if userId == None:
+        pass
+
+    data['user_id'] = user_id
+
     output = handlerDict[handlerWord](args, data)
 
     response_headers = [('Content-type', 'text/plain'),
