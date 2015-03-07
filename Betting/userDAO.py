@@ -67,6 +67,8 @@ class UserDAO:
 
         return True
 
-
+    def get_ids(self):
+        user_ids=set([user['id'] for user in self.users.find()])
+        return user_ids
     
         

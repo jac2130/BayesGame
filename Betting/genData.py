@@ -1,7 +1,7 @@
 import dataDAO
 import time
 import pymongo
-from random import random
+from random import random, shuffle
 from mClassDAO import mClasses
 from pprint import pprint
 import json
@@ -151,10 +151,14 @@ def random_demo(p=0.5):
     '''
     d={};
     d['period']=0;
-    d=indepVar("interest_rate", p, d)
-    d=one_cause("unemployment", "interest_rate", p, d)
-    d=one_cause("production", "unemployment", p, d, set(["unemployment"]))
-    d=causes("exports", ["production", "interest_rate", "unemployment"], d, p, set(["unemployment"]))
+    names= ["A", "B", "C", "D"];
+    shuffle(names); #randomly assign labels
+    n1, n2, n3, n4 = names;
+
+    d=indepVar(n1, p, d)
+    d=one_cause(n2, n1, p, d)
+    d=one_cause(n3, n2, p, d, set([n2]))
+    d=causes(n4, [n3, n1, n2], d, p, set([n2]))
     return d
 
 

@@ -4,11 +4,12 @@ var putWindowDebug = false;
 var callWindowDebug = false;
 var betWindowDebug = false;
 
-function makePrediction(variable, t, width)
+function makePrediction(variable, t, width, color)
 {
     if (typeof(width) === "undefined"){
 	width = 40;
     }
+    
     var height = width*2.5;
     var predictionCanvas = Object.create(Widget);
         
@@ -19,19 +20,23 @@ function makePrediction(variable, t, width)
     predictionCanvas.background.render(predictionCanvas.shape, {x:width/2, y:0})
     var names=[];
     var conds={};
-    var queryPath="";
+    
     var returnList=[];
 
     variables.map(function(variab){names.push(variab.varName.replace(" ", "_").toLowerCase())});
 
-    names.map(function(na){
-	if (na !== variable){
-	    queryPath+="/"+na+":"+truth[t][na]
-	    conds[na] = truth[t][na];
-	}
-    })
     //return JSON.stringify(conds)
-    predictionCanvas.prediction = function(){
+    predictionCanvas.prediction = function(predicted, color){
+	if (typeof(color) === "undefined"){
+	    color = "red";
+	}
+	var queryPath="";
+	names.map(function(na){
+	    if (na !== predicted){
+		queryPath+="/"+na+":"+truth[t][na]
+		conds[na] = truth[t][na];
+	    }
+	})
 	$.ajax({
 	    type: "GET",
 	    url: '/ajax/query/'+ user.id + queryPath,
@@ -42,7 +47,7 @@ function makePrediction(variable, t, width)
 	    {
 		if (typeof(data)==="object"){
 		    var predVals=[];
-		    var curKeys=Object.keys(data[variable]).sort();
+		    var curKeys=Object.keys(data[predicted]).sort();
 		    var len =curKeys.length;
 		    var coordX=6;//(1.0/len*2)*width;
 		   
@@ -59,11 +64,11 @@ function makePrediction(variable, t, width)
 			//predictionCanvas.tags[curKeys[i]].rect
 		    });
 		    for (var i=0; i < len; i++){
-			predVals.push(data[variable][curKeys[i]]);
+			predVals.push(data[predicted][curKeys[i]]);
 			predictionCanvas.tags[curKeys[i]]=makeTextWidget(curKeys[i], 10, "Arial", "#666");
-			predictionCanvas.tags[curKeys[i]].rect=makeRect((width-10)/len, 0.70*height*data[variable][curKeys[i]], "red", 1, "#FFFFFF", 3);
+			predictionCanvas.tags[curKeys[i]].rect=makeRect((width-10)/len, 0.70*height*data[predicted][curKeys[i]], color, 1, "#FFFFFF", 3);
 	//(betQueryWindow.height-120)*currentData[key]	
-predictionCanvas.tags[curKeys[i]].rect.render(predictionCanvas.shape, {x:coordX-(width-10)/(4*len), y:height*(1-0.7*data[variable][curKeys[i]])-20});
+predictionCanvas.tags[curKeys[i]].rect.render(predictionCanvas.shape, {x:coordX-(width-10)/(4*len), y:height*(1-0.7*data[predicted][curKeys[i]])-20});
 			predictionCanvas.tags[curKeys[i]].render(predictionCanvas.shape, {x:coordX, y:height-20});
 			coordX+=(1.0/len)*width;
 		    }
@@ -363,7 +368,12 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
 	circ.varName=name;
 	circ.render(betQueryWindow.shape, {x:circ.xCoord, y:betQueryWindow.height-25});
 	condCircles.push(circ);
-	
+	circ.shape.on("click", function (evt)
+            {
+		predictionVar=this.widget.varName;
+                //warn("See your prediction of " + this.widget.varName)
+            });
+
 	var condTag = Object.create(Widget);
         
         condTag.setShape(new createjs.Container());
@@ -382,7 +392,15 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
 	condTags.push(condTag)
 	xCoord+=5*radius;
     });
-
+    var betCirc=makeCircle(radius, colors[bettingVar], 0, colors[bettingVar])
+    betCirc.xCoord=xCoord;
+    betCirc.varName=bettingVar;
+    betCirc.render(betQueryWindow.shape, {x:betCirc.xCoord, y:betQueryWindow.height-25});
+    betCirc.shape.on("click", function (evt)
+            {
+		predictionVar=this.widget.varName;
+                //warn("See your prediction of " + this.widget.varName)
+            });
     /*condCircles.map(function(circ){
 	circ.render(betQueryWindow.shape, {x:circ.xCoord, y:5});
 
@@ -436,7 +454,7 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
             })
             dat.xCoord = xCoord;
 	    //makeRect(200, 20, "green").renderW(view.innerFrame, {x: 130, y: yCoord})
-	    pred=makePrediction("interest_rate", index)
+	    pred=makePrediction(predictionVar, index, 40, colors[predictionVar])
 	    //pred.prediction();
 	    pred.renderW(view.innerFrame, {x: xCoord-10, y: 115})
 	    predictions.push(pred)
@@ -543,7 +561,7 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
 
 		//alert(condText)
 		//var queryPath="/unemployment:H/production:H/exports:H"
-		predictions.map(function(pred){pred.prediction()});
+		predictions.map(function(pred){pred.prediction(predictionVar, colors[predictionVar])});
 		$.ajax({
 		    type: "GET",
 		    url: '/ajax/query/'+ user.id + queryPath,
