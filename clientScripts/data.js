@@ -6,8 +6,9 @@ var betWindowDebug = false;
 
 function makePrediction(variable, t, width)
 {
-    if (typeof(width) === "undefined"){
-	width = 40;
+    if (typeof(width) === "undefined")
+    {
+        width = 40;
     }
     var height = width*2.5;
     var predictionCanvas = Object.create(Widget);
@@ -15,67 +16,75 @@ function makePrediction(variable, t, width)
     predictionCanvas.setShape(new createjs.Container());
 
     predictionCanvas.background = makeRect(1, height/2, "#666", 1, "#FFFFFF", 3);
-     predictionCanvas.tags={};
+    predictionCanvas.tags = {};
     predictionCanvas.background.render(predictionCanvas.shape, {x:width/2, y:0})
-    var names=[];
-    var conds={};
-    var queryPath="";
-    var returnList=[];
+    var names = [];
+    var conds = {};
+    var queryPath = "";
+    var returnList = [];
 
-    variables.map(function(variab){names.push(variab.varName.replace(" ", "_").toLowerCase())});
+    variables.map(function(variab)
+    {
+        names.push(variab.varName.replace(" ", "_").toLowerCase());
+    });
 
-    names.map(function(na){
-	if (na !== variable){
-	    queryPath+="/"+na+":"+truth[t][na]
-	    conds[na] = truth[t][na];
-	}
-    })
+    names.map(function(na)
+    {
+        if (na !== variable)
+        {
+            queryPath += "/" + na + ":" + truth[t][na]
+            conds[na] = truth[t][na];
+        }
+    });
+
     //return JSON.stringify(conds)
-    predictionCanvas.prediction = function(){
-	$.ajax({
-	    type: "GET",
-	    url: '/ajax/query/'+ user.id + queryPath,
-	    async: true,
-	    
-	    dataType: "json",
-	    success: function(data)
-	    {
-		if (typeof(data)==="object"){
-		    var predVals=[];
-		    var curKeys=Object.keys(data[variable]).sort();
-		    var len =curKeys.length;
-		    var coordX=6;//(1.0/len*2)*width;
-		   
-		    curKeys.map(function(key){
-			if (typeof(predictionCanvas.tags[key])!=="undefined"){
-			    predictionCanvas.tags[key].erase();
-			    //console.log("done");
-			    if (typeof(predictionCanvas.tags[key].rect)!=="undefined"){
-				predictionCanvas.tags[key].rect.erase();
-				//console.log("done");
-			    }
-			}
-			
-			//predictionCanvas.tags[curKeys[i]].rect
-		    });
-		    for (var i=0; i < len; i++){
-			predVals.push(data[variable][curKeys[i]]);
-			predictionCanvas.tags[curKeys[i]]=makeTextWidget(curKeys[i], 10, "Arial", "#666");
-			predictionCanvas.tags[curKeys[i]].rect=makeRect((width-10)/len, 0.70*height*data[variable][curKeys[i]], "red", 1, "#FFFFFF", 3);
-	//(betQueryWindow.height-120)*currentData[key]	
-predictionCanvas.tags[curKeys[i]].rect.render(predictionCanvas.shape, {x:coordX-(width-10)/(4*len), y:height*(1-0.7*data[variable][curKeys[i]])-20});
-			predictionCanvas.tags[curKeys[i]].render(predictionCanvas.shape, {x:coordX, y:height-20});
-			coordX+=(1.0/len)*width;
-		    }
-		    
-		} 
-	    }
-	});
+    predictionCanvas.prediction = function()
+    {
+        $.ajax({
+            type: "GET",
+            url: '/js/query' + queryPath,
+            async: true,
+            
+            dataType: "json",
+            success: function(data)
+            {
+                if (typeof(data)==="object")
+                {
+                    var predVals = [];
+                    var curKeys = Object.keys(data[variable]).sort();
+                    var len = curKeys.length;
+                    var coordX = 6;
+                   
+                    curKeys.map(function(key)
+                    {
+                        if (typeof(predictionCanvas.tags[key])!=="undefined")
+                        {
+                            predictionCanvas.tags[key].erase();
+                            if (typeof(predictionCanvas.tags[key].rect)!=="undefined")
+                            {
+                                predictionCanvas.tags[key].rect.erase();
+                            }
+                        }
+                    });
+
+                    for (var i=0; i<len; i++)
+                    {
+                        predVals.push(data[variable][curKeys[i]]);
+                        predictionCanvas.tags[curKeys[i]] = makeTextWidget(curKeys[i], 10, "Arial", "#666");
+                        predictionCanvas.tags[curKeys[i]].rect=makeRect((width-10)/len, 0.70*height*data[variable][curKeys[i]], "red", 1, "#FFFFFF", 3);
+                //(betQueryWindow.height-120)*currentData[key]	
+                        predictionCanvas.tags[curKeys[i]].rect.render(predictionCanvas.shape, {x:coordX-(width-10)/(4*len), y:height*(1-0.7*data[variable][curKeys[i]])-20});
+                        predictionCanvas.tags[curKeys[i]].render(predictionCanvas.shape, {x:coordX, y:height-20});
+                        coordX += (1.0/len)*width;
+                    }
+                    
+                } 
+            }
+        });
     }
 
-    return predictionCanvas
+    return predictionCanvas;
 }
-
 
 function getTime()
 {
@@ -89,11 +98,15 @@ function capitalizeEachWord(str) {
     });
 }
 
-function getIntersect(arr1, arr2) {
+function getIntersect(arr1, arr2)
+{
     var temp = [];
-    for(var i = 0; i < arr1.length; i++){
-        for(var k = 0; k < arr2.length; k++){
-            if(arr1[i] == arr2[k]){
+    for(var i = 0; i < arr1.length; i++)
+    {
+        for(var k = 0; k < arr2.length; k++)
+        {
+            if (arr1[i] == arr2[k])
+            {
                 temp.push( arr1[i]);
                 break;
             }
@@ -112,67 +125,59 @@ function makeBetButton2(betView)
         'truth':truth,
         "call": function()
         {
-            //var theBet = this.bet.activeChoice;
-            //var points = this.points.activeChoice;
             var betView = this.betView;
-            //var theBet = this.betView.pointsInp.getNumVal();
-            var theBet = share_val;
+            var valToBetOn = share_val;
             var points = "" + this.betView.pointsInp.getNumVal();
-	    //alert(points)
             var bayesVar = betView.bayesVar;
-	    var vars = modelClass.vars;
-	    var queryPath="";
-	    var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
-	    var bettingVar=modelClass['betting_variable'];
+            var vars = modelClass.vars;
+            var queryPath = "";
+            var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
+            var bettingVar = modelClass['betting_variable'];
 
-	    conditionalVarNames.map(function(na){
-		queryPath+="/"+na+":"+truth[truth.length-1][na];
-	    });
-            //alert(truth[truth.length-1].period);
+            conditionalVarNames.map(function(na)
+            {
+                queryPath += "/" + na + ":" + truth[truth.length-1][na];
+            });
 	   
-	    $.ajax({
-		type: "GET",
-		url: '/ajax/query/'+ user.id + queryPath,
-		async: true,
-		
-		dataType: "json",
-		success: function(data)
-		{
-		    if (typeof(data)==="object"){
-			var prediction = data[bettingVar];
-			var currentKeys=Object.keys(prediction);
-			currentKeys.sort();
-			threshHold=Math.round(prediction[currentKeys[0]]*100);
-			//alert(threshHold)
-			if (points in range(threshHold + 1))
-			    {
-				$.ajax({
-				    type: "post",
-				    url: '/ajax/newpost',
-				    async: true,
-				    data:JSON.stringify({"treatmentNum": treatmentNum, 
-							 "username":user.name, "userid":user.id, "subject":theBet, 'price':points, 'open': 1, 'comments':[], 'period': truth[truth.length-1].period}),
-				    dataType: "json",
-				    contentType: "application/json",
-				    success: function(){} 
-        
-				});
-			    }
-			else {warn("You must choose a value for your buying offer, \n\nthat is below " + JSON.stringify(threshHold) + " points,\n\nor you must change your model!")};
-			}
-		    else {warn(JSON.stringify(data))}
-		}
-
-	    });
-	    
-
-            
-            
-            
-            //betView.refresh(truth);
-            
-            
-            
+            $.ajax({
+                type: "GET",
+                url: '/js/query' + queryPath,
+                async: true,
+                
+                dataType: "json",
+                success: function(data)
+                {
+                    if (typeof(data) === "object")
+                    {
+                        var prediction = data[bettingVar];
+                        var currentKeys=Object.keys(prediction);
+                        currentKeys.sort();
+                        threshHold=Math.round(prediction[currentKeys[0]]*100);
+                        //alert(threshHold)
+                        if (points in range(threshHold + 1))
+                        {
+                            $.ajax({
+                                type: "post",
+                                url: '/js/newpost',
+                                async: true,
+                                data:JSON.stringify({"user_id": user.id, "treatmentNum": treatmentNum, "valToBetOn": valToBetOn, 'price': points, 'period': truth[truth.length-1].period}),
+                                            dataType: "json",
+                                dataType: "json",
+                                contentType: "application/json",
+                                success: function(){} 
+                            });
+                        }
+                        else
+                        {
+                            warn("You must choose a value for your buying offer, \n\nthat is below " + 
+                                    JSON.stringify(threshHold) + " points,\n\nor you must change your model!");
+                        }
+                    }
+                    else {
+                        warn(JSON.stringify(data));
+                    }
+                }
+            });
             this.betView.pointsInp.clear();
         }
     };
@@ -187,60 +192,63 @@ function makePutButton(betView)
     var callback = {
         'betView': betView,
         'truth': truth,
-        "call": function() {
+        "call": function()
+        {
             var betView = this.betView;
-            //var thePut = this.betView.pointsInp.getNumVal();
-            //var thePut = "A";
-            var thePut = share_val;
+            var valToBetOn = share_val;
             var points = "" + this.betView.pointsInp.getNumVal();
             var bayesVar = betView.bayesVar;
-	    var vars = modelClass.vars;
-	    var queryPath="";
-	    var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
-	    var bettingVar=modelClass['betting_variable'];
+            var vars = modelClass.vars;
+            var queryPath = "";
+            var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
+            var bettingVar=modelClass['betting_variable'];
 
-	    conditionalVarNames.map(function(na){
-		queryPath+="/"+na+":"+truth[truth.length-1][na];
-	    });
-            //alert(truth[truth.length-1].period);
+            conditionalVarNames.map(function(na)
+            {
+                queryPath += "/" + na + ":" + truth[truth.length-1][na];
+            });
+                //alert(truth[truth.length-1].period);
 	   
-	    $.ajax({
-		type: "GET",
-		url: '/ajax/query/'+ user.id + queryPath,
-		async: true,
-		
-		dataType: "json",
-		success: function(data)
-		{
-		    if (typeof(data)==="object"){
-			var prediction = data[bettingVar];
-			var currentKeys=Object.keys(prediction);
-			currentKeys.sort();
-			var threshHold=Math.round(prediction[currentKeys[0]]*100);			
-			var greaterVal = range(101).slice(threshHold, 101);
-			var truthVal=(greaterVal.contains(parseInt(points)));
-			//alert(points in range(101).slice(threshHold, 101))
-			if (truthVal===true) 
-			    {
-			
-				$.ajax({
-				    type: "post",
-				    url: '/ajax/newput',
-				    async: true,
-				    data:JSON.stringify({"treatmentNum": treatmentNum, 
-							 "username":user.name, "userid":user.id, "subject":thePut, 'price':points, 'open': 1, 'comments':[], 'period': truth[truth.length-1].period}),
-				    dataType: "json",
-				    contentType: "application/json",
-				    success: function(){} 
-        
-				});
-			    }
-			else {warn("You must choose a value for your selling offer, \n\nthat is above " + JSON.stringify(threshHold) + " points,\n\nor you must change your model!")};
-			}
-		    else {warn(JSON.stringify(data))}
-		}
+            $.ajax({
+                type: "GET",
+                url: '/js/query' + queryPath,
+                async: true,
+                
+                dataType: "json",
+                success: function(data)
+                {
+                    if (typeof(data)==="object")
+                    {
+                        var prediction = data[bettingVar];
+                        var currentKeys = Object.keys(prediction);
+                        currentKeys.sort();
+                        var threshHold = Math.round(prediction[currentKeys[0]]*100);			
+                        var greaterVal = range(101).slice(threshHold, 101);
+                        var truthVal = (greaterVal.contains(parseInt(points)));
+                        if (truthVal === true) 
+                        {
+                            $.ajax({
+                                type: "post",
+                                url: '/js/newput',
+                                async: true,
+                                data:JSON.stringify({"user_id": user.id, "treatmentNum": treatmentNum, "valToBetOn": valToBetOn, 'price': points, 'period': truth[truth.length-1].period}),
+                                            dataType: "json",
+                                contentType: "application/json",
+                                success: function(){} 
+                            });
+                        }
+                        else
+                        {
+                            warn("You must choose a value for your selling offer, \n\nthat is above " + JSON.stringify(threshHold) + " points,\n\nor you must change your model!");
+                        }
+                    }
+                    else
+                    {
+                        warn(JSON.stringify(data));
+                    }
+                }
 
-	    });
+            });
 	    
             this.betView.pointsInp.clear();
         }
@@ -290,24 +298,25 @@ function makeBarButton(inpWindow, yPos)
     barButton.text=makeTextWidget(inpWindow.text, 15,"Arial", "#666");
     barButton.text.render(barButton.shape, {x:(width-barButton.text.width)/2, y:(height-barButton.text.height)/2});
     barButton.shape.on("click", function (evt)
-            {
-                var button = makeContractedButton(inpWindow)
-                        //dataWindow=makeDataWindow(truth, ['A', 'B', 'C'], variables);
-                button.render(topLayer.shape, {x:inpWindow.xPos, y:yPos});
-                inpWindow.erase()
-            });
-    barButton.shape.on("mouseover", function(evt) {
-            this.widget.background.changeColor("#666");
-            this.widget.text.changeColor("#ffffff");
-        
+    {
+        var button = makeContractedButton(inpWindow)
+        button.render(topLayer.shape, {x:inpWindow.xPos, y:yPos});
+        inpWindow.erase()
     });
-    barButton.shape.on("mouseout", function(evt) {
+    barButton.shape.on("mouseover", function(evt)
+    {
+        this.widget.background.changeColor("#666");
+        this.widget.text.changeColor("#ffffff");
+    });
+    barButton.shape.on("mouseout", function(evt)
+    {
         this.widget.background.changeColor("#ffffff");
-	this.widget.text.changeColor("#666");
+        this.widget.text.changeColor("#666");
     });
-    barButton.shape.on("mousedown", function(evt) {
+    barButton.shape.on("mousedown", function(evt)
+    {
         this.widget.background.changeColor("black");
-	this.widget.text.changeColor("#ffffff");
+        this.widget.text.changeColor("#ffffff");
         mousePressed = true;
     });
 
@@ -317,89 +326,40 @@ function makeBarButton(inpWindow, yPos)
 function makeDataWindow(data, domain, variables, xPos, modelClass)
 { 
     variables.map(function(variable){variable.enabled=true});
+    var names = [];
+    var enabled = {};
+    var bettingVar = modelClass["betting_variable"];
     var borderWidth = 0;
-    var names=[];
-    var enabled={};
-    var bettingVar=modelClass["betting_variable"]
-    //alert(JSON.stringify(bettingVar))
-    variables.map(function(variable){names.push(variable.varName.toLowerCase().replace(" ", "_"))});
 
-    names.map(function(name){enabled[name]=true});
+    variables.map(function(variable)
+    {
+        names.push(variable.varName.toLowerCase().replace(" ", "_"));
+    });
 
-    
+    names.map(function(name)
+    {
+        enabled[name] = true;
+    });
+
     var colors={}
-    variables.map(function(variable){
+    variables.map(function(variable)
+    {
         colors[variable.varName.toLowerCase().replace(" ", "_")] = variable.color;
     });
 
+
     var view = Object.create(View);
-    //=WidgetHL();
-    var betQueryWindow = Object.create(Widget);
-        
-    betQueryWindow.setShape(new createjs.Container());
-    view.enabled=enabled;
-    view.height = (domain.length + 1)*50;//stageHeight-80;
-    view.width=stageWidth-xPos-150;//(domain.length + 1)*50;
-    betQueryWindow.width=stageWidth-(xPos + view.width)
-    betQueryWindow.height = stageHeight-80;
-    betQueryWindow.background = makeRect(betQueryWindow.width, betQueryWindow.height, '#FFFFFF'/*"#f0f0f0"*/, borderWidth, "white", 5);
-    betQueryWindow.background.render(betQueryWindow.shape, {x:0, y:0});
-    betQueryWindow.heading=makeTextWidget("Your Predictions", 15,"Arial", "#666");
-    betQueryWindow.heading.render(betQueryWindow.shape, {x:0, y:5});
-    betQueryWindow.xPos=xPos + view.width;
-    betQueryWindow.dict={}
-    //alert(JSON.stringify(names))
-    var conditionalVarNames=getIntersect(Object.keys(truth[truth.length-1]), names);
-    
-    var condCircles=[];
-    var condTags=[];
-    var predictions=[];
-    var radius =((betQueryWindow.width-55)/(conditionalVarNames.length)/4);
-    var xCoord=5;
-    //alert(radius)
-    conditionalVarNames.map(function(name){
-	var circ=makeCircle(radius, colors[name], 0, colors[name])
-	circ.xCoord=xCoord;
-	circ.varName=name;
-	circ.render(betQueryWindow.shape, {x:circ.xCoord, y:betQueryWindow.height-25});
-	condCircles.push(circ);
-	
-	var condTag = Object.create(Widget);
-        
-        condTag.setShape(new createjs.Container());
-                 
-        condTag.triangle = makeTriangle(radius, radius, 0.5, "black", 90, 
-                                                   1, "black");
-                
-        condTag.triangle.render(condTag.shape, {x:radius, y:radius});
-        condTag.content=makeTextWidget(truth[truth.length-1][name], radius*2, "Arial", "#ffffff");
-                    
-        condTag.background=makeRect(condTag.content.width+2, radius*2+2, "black");
-	condTag.name=name;
-        condTag.background.render(condTag.shape, {x:radius, y:0})
-        condTag.content.render(condTag.shape, {x:radius+1, y:1});
-	condTag.render(betQueryWindow.shape, {x:circ.xCoord+2*radius, y:betQueryWindow.height-25});
-	condTags.push(condTag)
-	xCoord+=5*radius;
-    });
-
-    /*condCircles.map(function(circ){
-	circ.render(betQueryWindow.shape, {x:circ.xCoord, y:5});
-
-    });*/
-
-    //alert(conditionalVarNames)
-    betQueryWindow.notAvailText=makeTextWidget("", "#666")
-    betQueryWindow.notAvailText.render(betQueryWindow.shape, {x:10, y:200});
-
-    betQueryWindow.render(topLayer.shape, {x: betQueryWindow.xPos, y:stageHeight-betQueryWindow.height-23});
     view.frameHeight = (data.length + 1)*40;
-    view.borderWidth=borderWidth;
+    view.borderWidth = 0;
     view.xPos = xPos;
+    view.height = (domain.length + 1)*50;//stageHeight-80;
     view.yPos = stageHeight - 1.5*view.height;
     view.text="<--  OLD" + "          " + "          " + "          " + "          " + "          " + "          " + "          " + "          " + "          " + "DATA" + "          " + "          " + "          " + "          " + "          " + "          " + "          " +  "          " + "          " + "NEW  -->";
     view.setShape(new createjs.Container());
-    view.barButton=makeBarButton(view, stageHeight-25);
+    view.barButton = makeBarButton(view, stageHeight-25);
+
+    view.enabled = enabled;
+    view.width = stageWidth-xPos-150;//(domain.length + 1)*50;
     
     view.background = makeRect(view.width /*+ betQueryWindow.width*/, view.height*2, '#FFFFFF'/*'#EBEEF4',"#f0f0f0"*/, borderWidth, "#FFFFFF", 3);
     view.background.render(view.shape, {x:0, y:0});
@@ -418,381 +378,53 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
     {
         view.innerFrame = WidgetHL();
         xCoord = 10;
-	predictions=[];
-	index=0;
+        predictions = [];
+        index = 0;
         view.data.map(function(dat)
         {
             var yOffset = 0;
-	    //var index =0;
             names.map(function(key)
             {
                 value = dat[key];
                 col = colors[key];
-                if (value!==undefined)
+                if (value !== undefined)
                 {
                     makeCircle(8, col).renderW(view.innerFrame, {x: xCoord, y: coords[value] + yOffset})
                 }
                 yOffset += 5;
-            })
+            });
             dat.xCoord = xCoord;
-	    //makeRect(200, 20, "green").renderW(view.innerFrame, {x: 130, y: yCoord})
-	    pred=makePrediction("interest_rate", index)
-	    //pred.prediction();
-	    pred.renderW(view.innerFrame, {x: xCoord-10, y: 115})
-	    predictions.push(pred)
+            //makeRect(200, 20, "green").renderW(view.innerFrame, {x: 130, y: yCoord})
+            //pred = makePrediction("interest_rate", index);
+            //pred.renderW(view.innerFrame, {x: xCoord-10, y: 115});
+            //predictions.push(pred);
             xCoord += 40;
-	    index+=1;
-        })
+            index += 1;
+        });
 
         for (var i = 1; i < view.data.length; i++) 
         {
             var dataLine = new createjs.Shape();
             var graphics = dataLine.graphics.setStrokeStyle(2);
             var yOffset = 0;
-            names.map(function(key) {
+            names.map(function(key)
+            {
                 value0 = view.data[i-1][key];
-                value1 = view.data[i][key]
+                value1 = view.data[i][key];
                 col = colors[key];
-                graphics.beginStroke(col).moveTo(view.data[i-1].xCoord + 8, 
-						 coords[value0] + 8 + yOffset).lineTo(view.data[i].xCoord + 8, 
-										      coords[value1] + 8 + yOffset);
+                graphics.beginStroke(col).moveTo(view.data[i-1].xCoord + 8,
+                    coords[value0] + 8 + yOffset).lineTo(view.data[i].xCoord + 8, 
+                    coords[value1] + 8 + yOffset);
                 graphics.endStroke();
                 view.innerFrame.shape.addChild(dataLine);
                 yOffset += 5;
-                //alert(JSON.stringify({'col':col, 'x':xCoord, 'y':yCoord}));
-                //makeCircle(8, col).renderW(view,{x:coords[value], y:yCoord})
             });
         }
-    }  
+    }
 
-    view.drawInnerFrame();
-    var num;
-    var count;
-    var countDown = WidgetHL();
-    
-    $.ajax(
-    {
-	    type: "GET",
-	    url: '/ajax/clock',
-	    async: true,
-    
-	    dataType: "json",
-	    success: function(data)
-        {
-	    //alert(JSON.stringify(model))
-	    if (JSON.stringify(storedModel)!==JSON.stringify(model))
-	    {
-		//alert("here");
-		storedModel=JSON.parse(JSON.stringify(model));
-		//console.log("things are a changin'")
-		$.ajax({
-		    type: "post",
-		    url: '/ajax/model',
-		    async: true,
-		    data:JSON.stringify(model),
-		    dataType: "json",
-		    contentType: "application/json",
-		    success: function(){
-                        //alert("sent model");
-
-                    }
-		})
-	    }
-	    
-            //do your stuff with the JSON data;
-            num = data[0] + 1; 
-            //count = data[1]
-            countDown.text = makeTextWidget("New data in "+ num + " minutes", 12, "Arial", "#666");
-            countDown.background = makeRect(countDown.text.width+10, 20, '#FFFFFF'/*'#EBEEF4'*/);
-            countDown.background.renderW(countDown, Point(0, 0));
-            countDown.text.renderW(countDown, Point(5, 5));
-            countDown.renderW(view, Point((view.width - countDown.text.width)/2, view.height-90/*stageHeight-110*/));
-        }
-    });
+    sendModelIfUpdated();
+    startCountDownText(view);
     prevIsFreePeriod = false;
-
-
-    updateCount = function()
-    {
-	//alert(JSON.stringify(model))
-        $.ajax({
-            type: "GET",
-            url: '/ajax/clock',
-            dataType: "json",
-            async: true, //options.sync,
-            success: function(data) {
-		if (JSON.stringify(storedModel)!==JSON.stringify(model) | obtainedTruth)
-	    {
-		var queryPath="";
-		var condText="Pr("+ capitalizeEachWord(bettingVar.replace("_", " ")) + " |";
-	conditionalVarNames.map(function(na){
-	    queryPath+="/"+na+":"+truth[truth.length-1][na]
-	    condText += capitalizeEachWord(na.replace("_", " ")) + " = " + truth[truth.length-1][na] + ", ";
-	
-	});
-		condText=condText.slice(0, condText.length-2) + ")"
-		if (typeof(betQueryWindow.text) !== "undefined"){betQueryWindow.text.erase()}
-		
-		//betQueryWindow.text= makeTextWidget(condText, 6, "Arial", "#666");
-		condTags.map(function(condTag){
-		    condTag.content.erase();
-		    condTag.content=makeTextWidget(truth[truth.length-1][condTag.name], radius*2, "Arial", "#ffffff");
-		    condTag.content.render(condTag.shape, {x:radius+1, y:1});
-		})
-		//betQueryWindow.text.render(betQueryWindow.shape, {x:5, y:5})
-
-		//alert(condText)
-		//var queryPath="/unemployment:H/production:H/exports:H"
-		predictions.map(function(pred){pred.prediction()});
-		$.ajax({
-		    type: "GET",
-		    url: '/ajax/query/'+ user.id + queryPath,
-		    async: true,
-		    
-		    dataType: "json",
-		    success: function(data)
-		    {
-			if (typeof(data[bettingVar]) === "undefined")
-			{
-			    var currentKeys=Object.keys(betQueryWindow.dict);
-			    currentKeys.map(function(key){
-				if (typeof(betQueryWindow.dict[key]) !== "undefined" & betQueryWindow.dict[key].isActive){
-				    betQueryWindow.dict[key].erase();
-				    betQueryWindow.dict[key].percent.erase();
-				    betQueryWindow.dict[key].key.erase();
-				    betQueryWindow.dict[key].isActive=false;
-				    
-				}
-			    });
-
-			    betQueryWindow.notAvailText.changeText("Not\n Available")
-				//betQueryWindow.notAvailText.render(betQueryWindow.shape, {x:10, y:40});
-			  
-			}
-			else
-			{
-			    
-			    betQueryWindow.notAvailText.changeText("")
-				
-			    
-			  
-			    var currentData=data[bettingVar];
-			    var currentKeys=Object.keys(currentData);
-			    currentKeys.sort();
-			    var  barWidth=(betQueryWindow.width-20-(currentKeys.length-1)*5)/currentKeys.length;
-			    var xPos = 10  
-			    currentKeys.map(function(key){
-				if (typeof(betQueryWindow.dict[key]) !== "undefined"){
-				    if (betQueryWindow.dict[key].isActive)
-					{betQueryWindow.dict[key].erase()
-					 betQueryWindow.dict[key].percent.erase()
-betQueryWindow.dict[key].key.erase()
-					}
-				    }
-				
-				//alert(currentData[key])
-				betQueryWindow.dict[key]=makeRect(barWidth, (betQueryWindow.height-120)*currentData[key], 'red', 1, "red", 1)
-				betQueryWindow.dict[key].isActive=true;
-				betQueryWindow.dict[key].percent=makeTextWidget(JSON.stringify(Math.round(currentData[key]*100)), 10, "Arial", "#666");
-betQueryWindow.dict[key].key=makeTextWidget(key, 13, "Arial", "#666");
-
-betQueryWindow.dict[key].render(betQueryWindow.shape, {x:xPos, y:betQueryWindow.height-60-(betQueryWindow.height-120)*currentData[key]})
-				
-betQueryWindow.dict[key].percent.render(betQueryWindow.shape, {x:xPos+barWidth/2-betQueryWindow.dict[key].percent.width/2, y:betQueryWindow.height-75-(betQueryWindow.height-120)*currentData[key]})
-
-betQueryWindow.dict[key].key.render(betQueryWindow.shape, {x:xPos+barWidth/2-betQueryWindow.dict[key].key.width/2, y:betQueryWindow.height-55})
-
-				xPos+=barWidth+5;
-				
-				//alert(key)})
-			    })
-			//alert(JSON.stringify(data["interest_rate"]))
-			}
-			}
-		    });
-
-		storedModel=JSON.parse(JSON.stringify(model));
-		//console.log("things are a changin'")
-		$.ajax({
-		    type: "post",
-		    url: '/ajax/model',
-		    async: true,
-		    data:JSON.stringify(model),
-		    dataType: "json",
-		    contentType: "application/json",
-		    success: function(){
-                        //alert("sent model");
-
-                    }
-		})
-	    }
-
-                if (obtainedTruth) {
-                    $.ajax(
-                        {
-                        type: "GET", 
-                        url:'/ajax/hasNewData/' + modelClass["model_name"] + "/" + dataWindow.data[dataWindow.data.length-1].period, 
-                        async: true,
-                        success: function(newDataAvail) {
-                            if (parseInt(newDataAvail)===1) {
-                                renewData()
-                            }
-                        }
-                        }
-                    )
-                }
-                count = data[1]// todo
-                if (count===0) {
-                    num-=1;
-                }
-                if (num===1) {
-                    if (count!==0) {
-                        countDown.text.changeText("New data in "+count+" seconds")
-                    }
-                } else if (num==0) {
-                   // 
-                    num=2;
-                } else {
-                    countDown.text.changeText("New data in "+num+" minutes")
-                }
-
-                $.ajax({
-                    type: "GET",
-                    url: '/ajax/isFreePeriod',
-                    dataType: "json",
-                    async: true, //options.sync,
-                    success: function(data) {
-                        var isFreePeriod = data['free_period'];
-                        if (isFreePeriod)
-                        {
-                            if (betButton.isRendered()) {
-                                betButton.erase();
-                            }
-                            if (betsWindow.isRendered()) {
-                                betsWindow.erase();
-                            }
-                            if (putButton.isRendered()) {
-                                putButton.erase();
-                            }
-                            if (putsWindow.isRendered()) {
-                                putsWindow.erase();
-                            }
-                        } else if (prevIsFreePeriod) {
-                            betButton.render(stage, {x:betsWindow.xPos, y:75});
-                            betButton.callback.call()
-                            putButton.render(stage, {x:putsWindow.xPos, y:75});
-                            putButton.callback.call()
-                        }
-                        prevIsFreePeriod = isFreePeriod;
-                    }
-                });
-            
-            }
-        });
-    }
-
-    renewData = function()
-    {
-        //we don't need to produce any new data directed from the client side; the server takes care of that. We just need to request the newest data. 
-        $.ajax({
-            type: "GET",
-            url: '/ajax/newData/' + treatmentNum,
-            async: true,
-
-            dataType: "json",
-            success: function(data)
-            {
-                var newTruth1 = data[0];
-                var newTruth2 = data[1];
-                newTruth1.yCoord = truth[truth.length-1].yCoord;
-                newTruth2.yCoord = truth[truth.length-1].yCoord + 40;
-                truth = truth.slice(0, truth.length-1).concat([newTruth1, newTruth2]);
-                view.data = view.data.slice(0, view.data.length-1).concat(data);
-
-                view.frame.erase();
-                view.frameHeight += 40;
-                view.drawInnerFrame();
-
-                view.frame = makeFrameWidgetWide( 
-                     /*+ betQueryWindow.width*/ view.height-80,view.width,
-                    view.innerFrame, view.frameHeight);
-
-                view.frame.render(view.shape, {x:0, y:0});
-                countDown.renderW(view, Point((view.width-countDown.text.width)/2-20, view.height-90/*stageHeight-110*/));
-
-                var totalWinnings=0;
-                var bettingVar = modelClass['betting_variable'];
-                if (!prevIsFreePeriod && scoreTagDrawn)
-                {
-                    if (truth[truth.length-2][bettingVar] !== share_val)
-                    {
-                        var newWinnings= (user.points + user.shares*100);
-                        user.score += newWinnings; 
-                        warn('Each of your ' + user.shares + ' shares earned 100 points\n\nYour remaining points were ' + user.points + '\n\n' + "This round's winnings are: " + user.shares + " x 100 + " + user.points + " = " + newWinnings);
-
-                        scoreTag.score.changeText(JSON.stringify(user.score));
-                        var scoreLength = JSON.stringify(scoreTag.score.shape.text).length*4
-                        scoreTag.shape.graphics.clear();
-                        var g = scoreTag.shape.graphics.beginFill("white");
-                        
-                        g.beginStroke("black").setStrokeStyle(0.5);
-                
-                        g.moveTo(10, 8).lineTo(10, 14);
-                        g.lineTo(6, 17)
-                        g.lineTo(10, 20)
-                        g.lineTo(10, 26)
-                        g.lineTo(10 + scoreLength + 16, 26)
-                        g.lineTo(10 + scoreLength + 16, 8).closePath();
-                
-                        g.endStroke("black");
-                        g.endFill();
-                
-                    }
-                    else
-                    {
-                        var newWinnings = user.points;
-                        user.score += newWinnings;
-                        warn('your ' + user.shares + ' expired shares were worthless\n\n' + 'Your remaining points were ' + user.points + '\n\n' + "This round's winnings are: " + user.shares + " x 0 + " + user.points + " = " + newWinnings)
-                                scoreTag.score.changeText(JSON.stringify(user.score));
-                        var scoreLength = JSON.stringify(scoreTag.score.shape.text).length*4
-                        scoreTag.shape.graphics.clear();
-                        var g = scoreTag.shape.graphics.beginFill("white");
-                           
-                        g.beginStroke("black").setStrokeStyle(0.5);
-                
-                        g.moveTo(10, 8).lineTo(10, 14);
-                        g.lineTo(6, 17)
-                        g.lineTo(10, 20)
-                        g.lineTo(10, 26)
-                        g.lineTo(10 + scoreLength + 16, 26)
-                        g.lineTo(10 + scoreLength + 16, 8).closePath();
-                
-                        g.endStroke("black");
-                        g.endFill();
-                
-                    }
-                }
-
-                if (isMonty)
-                {
-                    if (truth[truth.length-1]['monty_door']==='A')
-                    {
-                        share_val = 'B';
-                    }
-                    else
-                    {
-                        share_val = 'A';
-                    }
-                } else {
-                    share_val = 'H';
-                }
-            }
-        });
-    }
-    
-    
-    var resInterval = window.setInterval('updateCount()', 1000); // 1 second
-
     view.drawInnerFrame();
     
     view.frame = makeFrameWidgetWide( 
@@ -800,9 +432,8 @@ betQueryWindow.dict[key].key.render(betQueryWindow.shape, {x:xPos+barWidth/2-bet
         view.innerFrame, view.frameHeight);
 
     view.frame.render(view.shape, {x:0, y:0});
-    
+
     return view;
-    
 }
 
 alertStatus = 0
@@ -810,7 +441,6 @@ alertStatus = 0
 function getCurrTimePeriod()
 {
     // the variable "truth" is just the data that the server returns
-    // console.log("truth: " + truth)
     return truth[truth.length-1].period;
 }
 
@@ -920,7 +550,7 @@ function makeBetWindow2(bets, domain, betVariable, xPos, isPut)
                         }
                         $.ajax({
                             type: "post",
-                            url: '/ajax/' + acceptOperation + '/' + this.postItem.bet.id+"/"+ user.id+'/'+ this.postItem.bet.userid,
+                            url: '/js/' + acceptOperation + '/' + this.postItem.bet.id+"/"+ user.id+'/'+ this.postItem.bet.userid,
                             async: true,
                             data: JSON.stringify({"points": this.postItem.bet.price}), 
                             dataType: "json",
@@ -964,19 +594,18 @@ function makeBetWindow2(bets, domain, betVariable, xPos, isPut)
     {
         var view = data.view;
         var currentTime = getTime();
-        if (currentTime-view.previousUpdateTime > 400)
+        if (currentTime-view.previousUpdateTime > 1000)
         {
             view.previousUpdateTime = currentTime;
             var getBetsUrl;
             if (view.isPut) {
-                getBetsUrl = '/ajax/puts/'+ treatmentNum + '/' + getCurrTimePeriod();
+                getBetsUrl = '/js/puts/'+ treatmentNum + '/' + getCurrTimePeriod();
                 view.dataReturnKey = "myputs";
             } else {
-                getBetsUrl = '/ajax/calls/' + treatmentNum + '/' + getCurrTimePeriod();
+                getBetsUrl = '/js/calls/' + treatmentNum + '/' + getCurrTimePeriod();
                 view.dataReturnKey = "myposts";
             }
             //alert("sending update request to " + getBetsUrl);
-            //console.log("sending get bets request");
             $.ajax(
                 {
                     type: "GET",
@@ -985,8 +614,6 @@ function makeBetWindow2(bets, domain, betVariable, xPos, isPut)
                     dataType: "json",
                     success: function(data)
                     {
-                        //console.log("receiving get bets data");
-                        //console.log(data);
                         //do your stuff with the JSON data;
                         if (view.data[view.dataReturnKey].length !== data[view.dataReturnKey].length)
                         {

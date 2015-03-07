@@ -3,16 +3,31 @@ import time
 import pymongo
 from random import random
 from mClassDAO import mClasses
+from miscDAO import MiscDAO
 from pprint import pprint
 import json
-from bayesian.bbn import build_bbn_from_conditionals as build_graph
+import sys
+import os
+
 import computerValueDAO
+
+currentDir = os.path.dirname(os.path.realpath(__file__))
+baseDir = os.path.dirname(currentDir)
+print "baseDir: ", baseDir
+sys.path.append(baseDir + "/Betting")
+sys.path.append(baseDir + "/serverScripts")
+sys.path.append(baseDir + "/bayesian-belief-networks")
+sys.path.append(baseDir)
+
+from bayesian.bbn import build_bbn_from_conditionals as build_graph
 
 connection = pymongo.MongoClient()
 database = connection.blog
+db2 = connection.bayesGame
+miscDAO = MiscDAO(db2)
 
-data = dataDAO.DataDAO(database)
-computerValue = computerValueDAO.ComputerValueDAO(database)
+data = dataDAO.DataDAO(db2)
+computerValue = computerValueDAO.ComputerValueDAO(db2)
 
 #build_graph(yaml.load(json.dumps(l[-1][str(_id)]))) the object we will have in modelDAO
 
@@ -55,7 +70,7 @@ def one_cause_wrap(depVar, indepVar, d, p=0.5, neg=set()):
             [[[indepVar, "H"]], {"H": 0, "L": 1.0}],
             [[[indepVar, "L"]], {"H": p, "L": 1.0-p}]]
     return d
-        
+
 gaph_a=build_graph(TRUTH)
 def relabel(label='H'):
 
@@ -267,9 +282,9 @@ def gen_next_period(modelName, count):
     data.add_data([new_point], {"model_name": modelName})
     #print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
 
-def gen_first_twenty(modelName):
+def gen_initial_data(modelName):
     count = 0
-    while count<21:
+    while count<10000:
         if modelName == "monty":
             new_point = random_monty()
         elif modelName == "banking":
@@ -284,7 +299,7 @@ def gen_first_twenty(modelName):
         new_point['period'] = count + 1
         new_point['modelClass'] = modelName
         new_point['entry_time'] = time.time()
-        data.add_data([new_point], {"model_name": modelName})
+        data.add_data(new_point, {"model_name": modelName})
         #print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
         count += 1
 
@@ -295,33 +310,33 @@ def getClockTime():
 
 #modelNames = ['monty', 'banking', 'demo']
 #betting_variables={"monty":"prize_door", "banking":'bank_2'}
-modelNames = mClasses.keys()
 
-for modelName in modelNames:
-    gen_first_twenty(modelName)
-#pprint(data.get_first_twenty({'model_name': 'demo'}))
+def regenerateData():
+    modelNames = mClasses.keys()
+    data.erase_data()
+    for modelName in modelNames:
+        gen_initial_data(modelName)
 
-count = 20
-prevTime = getClockTime()
-genTime = 10
-currTimeInSecs = -1
+numData = data.data_count()
+print "numData: ", numData
+if numData < len(mClasses)*10000:
+    regenerateData()
+
+intervalBetweenData = 120
+miscDAO.setCurrPeriod(40)
+print miscDAO.getCurrPeriod()
+prevTime = time.time()
+computerValue.newRandomValue()
+print "newRandomValue: ", computerValue.getComputerValue()
 while True:
-    timeInSecs=-1
-    timeInSecs = getClockTime()
-    if timeInSecs != prevTime:
-        timeUpdated = True
-    else:
-        timeUpdated = False
-    if timeInSecs == 0 and timeUpdated:
-        #print "rerun"
-        for modelName in modelNames:
-            #print count
-            gen_next_period(modelName, count)
-            computerValue.newRandomValue()
-        #pprint(data.get_first_twenty({'model_name': 'demo'}))
-        count += 1
-    prevTime = timeInSecs
-    #print timeInSecs
-    #print
-    time.sleep(0.1)
+    newTime = time.time()
+    if newTime > prevTime + intervalBetweenData:
+        prevTime = newTime
+        miscDAO.incrementPeriod()
+        print "currentPeriod: ", miscDAO.getCurrPeriod()
+        computerValue.newRandomValue()
+        print "newRandomValue: ", computerValue.getComputerValue()
+    timeUntilNextData = int(round(intervalBetweenData - (newTime - prevTime)))
+    miscDAO.setTimeUntilNextData(timeUntilNextData)
+    time.sleep(1)
 

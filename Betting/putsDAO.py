@@ -1,6 +1,5 @@
 __author__ = 'aje'
 
-
 #
 # Copyright (c) 2008 - 2013 10gen, Inc. <http://10gen.com>
 #
@@ -18,7 +17,6 @@ __author__ = 'aje'
 #
 #
 
-
 import sys
 import re
 import datetime
@@ -29,106 +27,72 @@ import pymongo
 # The Blog Post Data Access Object handles interactions with the Posts collection
 class PutsDAO:
 
-    # constructor for the class
     def __init__(self, database):
         self.db = database
         self.puts = database.puts
 
-    # inserts the blog entry and returns a permalink for the entry
-    def insert_entry(self, title, post, comments, tags_array, author, userid, group, period, opend):
-        print "inserting blog entry", title, post
-
-        # fix up the permalink to not include whitespace
-
-        exp = re.compile('\W') # match anything not alphanumeric
-        whitespace = re.compile('\s')
-        temp_title = whitespace.sub("_",title)
-        permalink = exp.sub('', temp_title)
-
-        # Build a new post
-        put = { "group": group,
-                "title": title,
-                "open": opend,
-                "author": author,
-                "userid":userid,
-                "price": int(post),
-                "permalink":permalink,
-                "tags": tags_array,
-                "comments": comments,
+    def insert_entry(self, userid, treatment, valToBetOn, price, period, opend):
+        put = { "userid": userid,
+                "treatment": treatment,
+                "valToBetOn": valToBetOn,
+                "price": int(price),
                 "date": datetime.datetime.utcnow(),
-                "period":period}
+                "period": period,
+                "open": opend}
 
-        # now insert the post
         try:
-            # XXX HW 3.2 Work Here to insert the post
             print "Inserting the put", put
-            self.puts.insert(put)
+            newId = self.puts.insert(put)
+            return str(newId)
         except:
             print "Error inserting post"
             print "Unexpected error:", sys.exc_info()[0]
-        return permalink
+            raise
 
     # returns an array of num_posts posts, reverse ordered
-    def get_puts(self, group, period, demo_mode):
-        cursor = []         # Placeholder so blog compiles before you make your changes
-
-        # XXX HW 3.2 Work here to get the posts
-        #for i in range(10):print period
+    def get_puts(self, treatment, period, demo_mode):
         l = []
         if demo_mode:
             cursor = self.puts.find({'period': period, 'open': 1}).sort('price', pymongo.ASCENDING)
         else:
-            cursor = self.puts.find({'group': group, 'period':period, 'open':1}).sort('price', pymongo.ASCENDING)
+            cursor = self.puts.find({'treatment': treatment, 'period':period, 'open': True}).sort('price', pymongo.ASCENDING)
         for put in cursor:
-            put['date'] =str(time.time())  # fix up date
-            put['id']=str(put['_id']);
-            put['price']=str(put['price'])
-            if 'tags' not in put:
-                put['tags'] = [] # fill it in if its not there already
-            if 'comments' not in put:
-                put['comments'] = []
-            put["_id"]=str(put['_id']);
+            put['date'] = str(time.time())  # fix up date
+            put['id'] = str(put['_id']);
+            put['price'] = str(put['price'])
+            put["_id"] = str(put['_id']);
             if 'period' not in put:
                 put['period'] = 0
             else:
-                put['period']=str(put['period']);
-            l.append(put) 
+                put['period'] = str(put['period']);
+            l.append(put)
         return l
-
-    # find a post corresponding to a particular permalink
-    def get_put_by_permalink(self, permalink):
-        put = None
-        # XXX Work here to retrieve the specified post
-        put=self.puts.find_one({'permalink':permalink})
-        print put;
-        if put is not None:
-            # fix up date
-            put['date'] = put['date'].strftime("%A, %B %d %Y at %I:%M%p")
-        return put
 
     def get_put_by_id(self, item_id):
         #put = None
         #Work here to retrieve the specified post
         put=self.puts.find_one({'_id':ObjectId(item_id)})
-        #print put;
         #if put is not None:
         # fix up date
         #put['date'] = put['date'].strftime("%A, %B %d %Y at %I:%M%p")
         #new= put.next()
-        print "here's the put", put
         return put
 
     def accept_put(self, id, accepter_id):
-        put=self.get_put_by_id(id)
-        put["open"]=False;
-        put['accepted']=accepter_id
-        self.puts.update({'_id':put['_id']}, {"$set": put}, upsert=False)
+        put = self.get_put_by_id(id)
+        putId = put['_id']
+        putMods = {}
+        putMods["open"] = False
+        putMods['accepted'] = accepter_id
+        self.puts.update({'_id': putId}, {"$set": putMods}, upsert=False)
 
     def computer_accept(self, id):
-        put=self.get_put_by_id(id)
-        put["open"]=False;
-        put['accepted'] = -1
-        self.puts.update({'_id':put['_id']}, {"$set": put}, upsert=False)
+        put = self.get_put_by_id(id)
+        putId = put['_id']
+        putMods = {}
+        putMods["open"] = False
+        putMods['accepted'] = -1
+        self.puts.update({'_id': putId}, {"$set": putMods}, upsert=False)
 
     # add a comment to a particular blog post
     def add_comment(self, id, name, email, body, commentId):

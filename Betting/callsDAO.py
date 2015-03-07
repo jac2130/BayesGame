@@ -26,7 +26,7 @@ from bson.objectid import ObjectId
 
 
 # The Blog Post Data Access Object handles interactions with the Posts collection
-class BlogPostDAO:
+class CallsDAO:
 
     # constructor for the class
     def __init__(self, database):
@@ -34,80 +34,41 @@ class BlogPostDAO:
         self.posts = database.posts
 
     # inserts the blog entry and returns a permalink for the entry
-    def insert_entry(self, title, post, comments, tags_array, author, userid, group, period, opend):
-        print "inserting blog entry", title, post
+    def insert_entry(self, userid, treatment, valToBetOn, price, period, opend):
+        post = { "userid": userid,
+                 "treatment": treatment,
+                 "valToBetOn": valToBetOn,
+                 "price": int(price),
+                 "date": datetime.datetime.utcnow(),
+                 "period": period,
+                 "open": opend}
 
-        # fix up the permalink to not include whitespace
-
-        exp = re.compile('\W') # match anything not alphanumeric
-        whitespace = re.compile('\s')
-        temp_title = whitespace.sub("_",title)
-        permalink = exp.sub('', temp_title)
-
-        # Build a new post
-        post = {"group": group,
-                "title": title,
-                "open": opend,
-                "author": author,
-                "userid":userid,
-                "price": int(post),
-                "permalink":permalink,
-                "tags": tags_array,
-                "comments": comments,
-                "date": datetime.datetime.utcnow(),
-                "period":period}
-
-        # now insert the post
         try:
-            # XXX HW 3.2 Work Here to insert the post
             print "Inserting the post", post
-            self.posts.insert(post)
+            newId = self.posts.insert(post)
+            return str(newId)
         except:
             print "Error inserting post"
             print "Unexpected error:", sys.exc_info()[0]
-        return permalink
 
     # returns an array of num_posts posts, reverse ordered
-    def get_posts(self, group, period, demo_mode):
-
-        cursor = []         # Placeholder so blog compiles before you make your changes
-
-        # XXX HW 3.2 Work here to get the posts
-        for i in range(10):print period
+    def get_posts(self, treatment, period, demo_mode):
         l = []
         if demo_mode:
             cursor=self.posts.find({'period':period, 'open':1}).sort('price',-1)
         else:
-            cursor=self.posts.find({'group': group, 'period':period, 'open':1}).sort('price',-1)
+            cursor=self.posts.find({'treatment': treatment, 'period':period, 'open': True}).sort('price',-1)
         for post in cursor:
-            post['date'] =str(time.time())  # fix up date
-            post['id']=str(post['_id']);
+            post['date'] = str(time.time())  # fix up date
+            post['id'] = str(post['_id']);
             post['price'] = str(post['price'])
-            if 'tags' not in post:
-                post['tags'] = [] # fill it in if its not there already
-            if 'comments' not in post:
-                post['comments'] = []
-            post["_id"]=str(post['_id']);
+            post["_id"] = str(post['_id']);
             if 'period' not in post:
                 post['period'] = 0
             else:
-                post['period']=str(post['period']);
-            l.append(post) 
+                post['period'] = str(post['period']);
+            l.append(post)
         return l
-
-
-    # find a post corresponding to a particular permalink
-    def get_post_by_permalink(self, permalink):
-
-        post = None
-        # XXX Work here to retrieve the specified post
-        post=self.posts.find_one({'permalink':permalink})
-        print post;
-        if post is not None:
-            # fix up date
-            post['date'] = post['date'].strftime("%A, %B %d %Y at %I:%M%p")
-
-        return post
 
     def get_post_by_id(self, id):
 
@@ -123,16 +84,19 @@ class BlogPostDAO:
 
     def accept_call(self, id, accepter_id):
         call=self.get_post_by_id(id)
-
-        call["open"]=False;
-        call['accepted']=accepter_id
-        self.posts.update({'_id':call['_id']}, {"$set": call}, upsert=False)
+        callId = call['_id']
+        callMods = {}
+        callMods["open"] = False
+        callMods['accepted'] = accepter_id
+        self.posts.update({'_id': callId}, {"$set": callMods}, upsert=False)
 
     def computer_accept(self, id):
-        call = self.get_put_by_id(id)
-        call["open"] = False;
-        call['accepted'] = -1
-        self.posts.update({'_id':call['_id']}, {"$set": call}, upsert=False)
+        call = self.get_post_by_id(id)
+        callId = call['_id']
+        callMods = {}
+        callMods["open"] = False
+        callMods['accepted'] = -1
+        self.posts.update({'_id': callId}, {"$set": callMods}, upsert=False)
 
     # add a comment to a particular blog post
     def add_comment(self, id, name, email, body, commentId):

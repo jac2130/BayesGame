@@ -191,87 +191,10 @@ function bayesVarFactory ()
 
         newBayesVar.addCircle = function ()
         {
-	    if (this.varCircles.length < 1){
+	    if (this.varCircles.length < 1)
+        {
             var newVarCircle = makeBayesCircle(20, this.color);
             newVarCircle.bayesVar = this;
-	    
-
-//            newVarCircle.makeMiniHist = function(vals) 
-//            { 
-//                this.miniHistShown = false;
-//                this.miniHist = makeHist(vals, 
-//					this.bayesVar.possibilities,
-//					700, 400, 20, this.bayesVar.color);
-//                this.miniHist.width = 700;
-//                this.miniHist.borderWidth = 1;
-//                this.miniHist.barButton = makeHistBar(this.miniHist);
-//                this.miniHist.barButton.render(this.miniHist.shape, {x:0, y:-45})
-
-//                this.miniHist.killButton = makeTextWidget("x", 60, "Arial", '#f7f7f7'/*"#f0f0f0"*/);
-        /*Now I'm creating the kill switch that allows erasing the little histogram */
-//                this.miniHist.killButton.miniHist = this.miniHist;
-//                this.miniHist.killButton.bayesCircle = this;
-//                this.miniHist.killButton.call = function() 
-//                {
-//                    if (this.bayesCircle.miniHistShown)
-//                    {
-//                        this.bayesCircle.miniHistShown=false;
-//                        stage.removeChild(this.miniHist.shape)
-//                    }
-//                }
-//                this.miniHist.killButton.render(this.miniHist.shape, {x:10, y:0});
-   
-//                this.miniHist.shape.on("mouseover", function(evt)
-//                {
-					//this.widget.killButton.changeColor("#666");
-//				})
-                        /*Actual interaction with the button*/
-//                this.miniHist.killButton.shape.on("mouseover", function(evt)
-//				{
-//                    this.widget.changeColor("red");
-//                    this.widget.changeFont("120px " + "Arial");
-//				});
-//                this.miniHist.killButton.shape.on("mouseout", function(evt)
-//				{
-//                    this.widget.changeColor("#666");
-//                    this.widget.changeFont("60px " + "Arial");
-//				});
-//                this.miniHist.killButton.shape.on("mousedown", function(evt)
-//				{
-//                    this.widget.changeColor("red");
-//                    this.widget.changeFont("120px " + "Arial");
-//                    mousePressed = true;
-//			    });
-//                this.miniHist.killButton.shape.on("pressup", function(evt)
-//				{
-//					 this.widget.changeColor("red");
-//					 this.widget.changeFont("240px " + "Arial");
-//					 this.widget.call();
-//				});
-	    
-  //              this.miniHist.shape.on("mouseout", function(evt)
-//				{
-					//this.widget.killButton.changeColor('#f7f7f7'/*"#f0f0f0"*/);
-//				});
-  //              this.miniHist.shape.scaleX = 0.2;
-  //              this.miniHist.shape.scaleY = 0.2;
-  //              this.miniHist.offset = {x:-30, y:35};
-  //              this.miniHist.isMini = true;
-  //              this.miniHist.bigHist = this.bayesVar.probSetter;
-                
-  //           this.miniHist.bigHist.smallHists.push(this.miniHist);
- //             return this.miniHist;
- //           }
-
-/*            newVarCircle.showMiniHist = function()
-            {
-                this.miniHistShown = true;
-                var histX = this.shape.x+this.miniHist.offset.x;
-                var histY = this.shape.y+this.miniHist.offset.y;
-                this.miniHist.render(stage, Point(histX, histY));
-            }
-
-            newVarCircle.makeMiniHist([20, 30, 50]); */
 	    
             var circleShape = newVarCircle.shape;
 
@@ -279,7 +202,7 @@ function bayesVarFactory ()
             {
                 this.widget.ready = true;
                 var globalPt = this.parent.localToGlobal(this.x, this.y);
-		this.widget.miniHistShown=false;
+                this.widget.miniHistShown = false;
                 if (!this.widget.miniHistShown)
                 {
                     //alert(this.widget.miniHistShown);
@@ -588,18 +511,15 @@ function createSideBar2(modelClass, isMonty)
 
 				this.widget.expanded = true;
 
-				//tutorial.trigger("sideBarIconHover", varText);
 				varCircle.shape.on("mousedown", function (evt) 
 				{
 					sideBar.variablesDragged += 1
 					var varText = this.widget.bayesVar.varText;
-					//tutorial.trigger("circleDrag", varText);
 				}, null, true);
 
 				varCircle.shape.on("click", function (evt) 
 				{
 					var varText = this.widget.bayesVar.varText;
-					//tutorial.trigger("circleClicked", varText);
 				});
 			    }
 		    }
@@ -645,7 +565,8 @@ function createSideBar2(modelClass, isMonty)
     //bankB = makeBayesVar("bankB", "bankB",
   //                           ["0", "1"]);
 
-    var toSent = JSON.stringify(GraphJson);
+    initializeModel(GraphJson);
+
     //here, the GraphJson should be sent back and the first model should be build.
 
     //sideBar.addBayesVar(contesVar);
@@ -655,9 +576,7 @@ function createSideBar2(modelClass, isMonty)
     //sideBar.addBayesVar(bankB);
 
     sideBar.render(stage, {x:0, y:0});
-    //alert(JSON.stringify(user));
-    //the facebook user object must be created (facebook login must happen) before the sideBar is created.
-    //console.log(sideBar.Vars);
+
     return sideBar;
 }
 

@@ -19,9 +19,9 @@ function warn(msg)
     var message = user.first_name + ": ";
     var message2 = msg;
 
-    warningWindow.message1=makeTextWidget(message, 16, "Arial", "#666");
+    //warningWindow.message1=makeTextWidget(message, 16, "Arial", "#666");
     warningWindow.message2=makeTextWidget(message2, 16, "Arial", "#666");
-    warningWindow.message1.renderW(warningWindow, Point(10, 10));
+    //warningWindow.message1.renderW(warningWindow, Point(10, 10));
     warningWindow.message2.renderW(warningWindow, Point(10, 40));
 
     warningWindow.render(topLayer.shape, Point(stageWidth/2-200, stageHeight/2-100));

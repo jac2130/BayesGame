@@ -5,13 +5,13 @@ function makeView(graphWidth, graphHeight, bayesVar)
 {
     var borderWidth = 1;
     var view = Object.create(View);
-    view.width=graphWidth;
-    view.height=graphHeight;
+    view.width = graphWidth;
+    view.height = graphHeight;
     view.setShape(new createjs.Container());
     view.background = makeRect(graphWidth, graphHeight, "#ffffff"/*"#EBEEF4"*/, borderWidth);
     view.background.render(view.shape, {x:0, y:0});
     view.bayesVar=bayesVar;
-    return view
+    return view;
 }
 
 function makeQueryButton(view, size)
@@ -131,19 +131,16 @@ function makeQueryView(width, height, bayesVar)
                 }
             }
         }
-        console.log(user.id);
         console.log(queryPath);
-        
 
         //alert(queryPath);
         //
         console.log("varModelNames: " + varModelNames);
         console.log("varName: " + queryView.bayesVar.varName);
         index = varNames.indexOf(queryView.bayesVar.varName);
-	console.log(queryPath);
         $.ajax({
             type: "GET",
-            url: '/ajax/query/'+ user.id + queryPath,
+            url: '/js/query' + queryPath,
             async: true,
         
             dataType: "json",
@@ -249,8 +246,8 @@ function makeCounterButton(menu, post, betView)
     var counterButton = makeButton("Go!", 58, 25);
     var callback = {
         "bet": menu,
-	"post": post,
-	'betView':betView,
+        "post": post,
+        'betView':betView,
         "call": function() {
             var theBet=this.bet.activeChoice;
 	    //alert(theBet)
@@ -265,13 +262,13 @@ function makeCounterButton(menu, post, betView)
 		
 		$.ajax({
 		    type: "post",
-		    url: '/ajax/newcomment',
+		    url: '/js/newcomment',
 		    async: true,
 		    data:JSON.stringify({"variable": bayesVar.varName.replace(/\s+/g, ''), 
 "commentName":user.name, "commentId":user.id, "commentEmail":"","commentBody": theBet, "permalink":permalink, "id":id}),
 		    dataType: "json",
 		    contentType: "application/json",
-		    success: function(user){alert(user.name)} 
+		    success: function(user) {alert(user.name)} 
     
 		});
 
@@ -304,9 +301,9 @@ function makeBetButton(betView)
     var betButton = makeButton("Place Bet!", 70, 15);
     var callback = {
         "bet": betView.bettingMenu,
-	"points":betView.pointMenu,
-	'betView':betView,
-	'truth':truth,
+        "points":betView.pointMenu,
+        'betView':betView,
+        'truth':truth,
         "call": function() {
             var theBet=this.bet.activeChoice;
             var points=this.points.activeChoice;
@@ -316,10 +313,10 @@ function makeBetButton(betView)
             { 
             $.ajax({
                 type: "post",
-                url: '/ajax/newpost',
+                url: '/js/newpost',
                 async: true,
                 data:JSON.stringify({"variable":bayesVar.varName.replace(/\s+/g, ''), 
-    "username":user.name, "userid":user.id, "subject":theBet, 'body':points, 'comments':[], 'period': this.truth[this.truth.length-1].period}),
+                    "username":user.name, "userid":user.id, "subject":theBet, 'body':points, 'comments':[], 'period': this.truth[this.truth.length-1].period}),
                 dataType: "json",
                 contentType: "application/json",
                 success: function(user){alert(user.name)} 
@@ -431,15 +428,6 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
 	postItem.betBackground=makeRect(425,betHeight-20,"#666", 4, "#666");
 	postItem.betBackground.renderW(postItem, {x:-190, y:20});
 	postItem.bet.renderW(postItem, {x:-200, y:30});
-	//if (post.userid)
-	//{
-	//    post.pic=new createjs.Bitmap("/ajax/picture/" + post.userid + "/5/5");
-	//    post.pic.x=-150;
-	//    post.pic.y=20;
-	//    post.pic.scaleX*=0.3;
-	//    post.pic.scaleY*=0.3;
-	//    postItem.shape.addChild(post.pic);
-	//}
 
 	postItem.points = makeTextWidget(post.body, 46, "Arial", "#666");
 	postItem.pointsBackground=makeRect(65,betHeight,"#ffffff", 4, "#460595", 50);
@@ -476,7 +464,7 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
 
 		    if (post.comments[i].id)
 		    {
-			post.comments[i].pic=new createjs.Bitmap("/ajax/picture/" + post.comments[i].id + "/5/5");
+			post.comments[i].pic=new createjs.Bitmap("/js/picture/" + post.comments[i].id + "/5/5");
 			post.comments[i].pic.x=60;
 			post.comments[i].pic.y=150 + i*80;
 			post.comments[i].pic.scaleX*=0.5;
@@ -505,7 +493,7 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
 
     $.ajax({
     type: "GET",
-	url: '/ajax/'+ betView.bayesVar.varName.replace(/\s+/g, '') + '/' + 0,
+	url: '/js/'+ betView.bayesVar.varName.replace(/\s+/g, '') + '/' + 0,
     async: true,
     
     dataType: "json",
@@ -527,7 +515,7 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
 
     $.ajax({
         type: "GET",
-        url: '/ajax/puts/'+ betView.bayesVar.varName.replace(/\s+/g, '') + '/' + 0,
+        url: '/js/puts/'+ betView.bayesVar.varName.replace(/\s+/g, '') + '/' + 0,
         async: true,
         
         dataType: "json",
@@ -541,29 +529,3 @@ function makeBettingView(graphWidth, graphHeight, bayesVar)
     betView.name="BETS"
     return betView;
 }
-
-//var filename='/ajax'+'/hello/' + user.id;
-
-//$.ajax({
-//    type: "GET",
-//    url: filename,
-//    async: true,
-    
-//    dataType: "json",
-//    success: function(data){
-//	alert(data.name)//do your stuff with the JSON data
-//    }
-//});
-
-//$.ajax({
-//    type: "post",
-//    url: '/ajax/posthere',
-//    async: true,
-//    data:JSON.stringify(user),
-//    dataType: "json",
-//    contentType: "application/json",
-//    success: function(data){
-//        alert(data.name)//do your stuff with the JSON data                      
-//    }
-//});
-

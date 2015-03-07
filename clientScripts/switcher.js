@@ -64,7 +64,7 @@ var checkQuery=function() {
     
     $.ajax({
 	type: "GET",
-	url: '/ajax/'+ "has_query/"+user.id,
+	url: '/js/'+ "has_query/"+user.id,
 	async: true,
     
 	dataType: "json",
@@ -511,7 +511,7 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color,
 	//sending back the changes;
 	$.ajax({ 
 	    type: "post",
-	    url: '/ajax/model',
+	    url: '/js/model',
 	    async: true,
 	    data:JSON.stringify(model),
 	    dataType: "json",
@@ -641,7 +641,7 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color,
         //here goes the ajax post call.
         $.ajax({
             type: "post",
-            url: '/ajax/model',
+            url: '/js/model',
             async: true,
             data:JSON.stringify(model),
             dataType: "json",
