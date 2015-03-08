@@ -24,7 +24,7 @@
 #
 ######################################################################
 
-from numpy import ones,copy,cos,tan,pi,linspace
+from numpy import ones,copy,cos,tan,pi,linspace, array
 from numpy import tile as repmat #for compatibility with Matlab
 def gaussxw(N):
 
@@ -53,3 +53,11 @@ def gaussxw(N):
 def gaussxwab(N,a,b):
     x,w = gaussxw(N)
     return 0.5*(b-a)*x+0.5*(b+a),0.5*(b-a)*w
+
+def rquad(N,k):
+    k1=k+1; k2=k+2; n=array(range(1, N+1));  nnk=2*n+k;
+    A=(float(k)/k2)*repmat(k^2,(1,N))/(nnk*(nnk+2));
+    n=array(range(1, N)); nnk=nnk[n]; 
+    B1=4*float(k1)/(k2*k2*(k+3)); nk=n+k; nnk2=nnk*nnk;
+    B=4*(n*nk)**2/(nnk2*nnk2-nnk2);
+    A.T
