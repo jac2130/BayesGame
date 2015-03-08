@@ -41,7 +41,6 @@ currMClass = "simple"
 class mClassDAO:
     def __init__(self, db):
         self.mClass = db.mClass
-        self.next_treatment = 0
         self.treatments = [
             #('simple', 1000),
                 ('demo', 1000),
@@ -51,21 +50,7 @@ class mClassDAO:
                 ('complex', 2000)
         ]
         # creates a new user in the users collection
-        lastUserAddedList = list(self.mClass.find().sort('timeAdded', -1).limit(1))
-        if not lastUserAddedList:
-            self.next_treatment = 0
-        else:
-            self.next_treatment = lastUserAddedList[0]['treatmentNum']
 
-        #self.min_group_users = 8
-        #mClass, points = self.get_group_treatment(self.next_group)
-        #treatment_ndx = self.treatments.index((mClass, points))
-        #self.next_treatment = treatment_ndx + 1
-
-    #def new_group(self):
-    #    self.next_group += 1
-    #    self.assign_treatment(self.next_group)
-    #    return self.next_group
     def get_treatment_from_num(self, treatmentNum):
         return self.treatments[treatmentNum]
 
@@ -73,25 +58,23 @@ class mClassDAO:
         self.mClass.remove({})
 
     def assign_treatment(self, user_id):
-        assignedTreatmentNum = self.next_treatment
-        self.next_treatment += 1
-        if self.next_treatment >= len(self.treatments):
-            self.next_treatment = 0
-        mClass, points = self.treatments[assignedTreatmentNum]
+        lastUserAddedList = list(self.mClass.find().sort('timeAdded', -1).limit(1))
+        if not lastUserAddedList:
+            next_treatment = 0
+        else:
+            next_treatment = lastUserAddedList[0]['treatmentNum'] + 1
+            if next_treatment > 3:
+                next_treatment = 0
+
+        mClass, points = self.treatments[next_treatment]
         self.mClass.insert({
             'user' : user_id,
             'mClass': mClass,
             'points': points,
             'timeAdded': datetime.datetime.now(),
-            'treatmentNum': assignedTreatmentNum,
+            'treatmentNum': next_treatment,
         })
-        return assignedTreatmentNum, mClass, points
-
-    #def get_num_users_in_group(self, group_id):
-    #    num_users_in_group = self.user_groups.find({
-    #        'group': group_id
-    #    }).count()
-    #    return num_users_in_group
+        return next_treatment, mClass, points
 
     def assign_treatment_if_not_already(self, user_id):
         prevTreatment = self.mClass.find_one({'user': user_id})
@@ -99,48 +82,6 @@ class mClassDAO:
             return self.assign_treatment(user_id)
         else:
             return prevTreatment['treatmentNum'], prevTreatment['mClass'], prevTreatment['points']
-
-    #def assign_group_if_not_already(self, user_id):
-    #    prevGroup = self.user_groups.find_one({'user': user_id})
-    #    if not prevGroup:
-    #        return self.assign_group(user_id)
-    #    else:
-    #        return prevGroup['group']
-
-    #def assign_group(self, user_id):
-    #    total_num_users = self.user_groups.find().count()
-    #    if total_num_users < 200:
-    #        num_users_in_next_group = self.get_num_users_in_group(self.next_group)
-    #        if num_users_in_next_group >= 8:
-    #            group_id = self.new_group()
-    #        else:
-    #            group_id = self.next_group
-    #    else:
-    #        group_id = self.get_min_usr_grp()
-
-    #    self.user_groups.insert({
-    #        'user': user_id,
-    #        'group': group_id
-    #    })
-    #    return group_id
-
-    #def get_num_groups(self):
-    #    return self.group_treatments.find().count()
-
-    #def get_min_usr_grp(self):
-    #    for group_num in range(self.get_num_groups()):
-    #        num_group_users = self.get_num_users_in_group(group_num)
-    #        if num_group_users <= self.min_group_users:
-    #            return group_num
-    #    self.min_group_users += 1
-    #    return self.get_min_usr_grp()
-
-    #def get_group_mClass(self, group_num):
-    #    group_entry = self.group_treatments.find_one({'group': group_num})
-    #    if group_entry == None:
-    #        return -1
-    #    else:
-    #        return group_entry['mClass']
 
     def clear(self):
         self.mClass.remove()
@@ -154,22 +95,3 @@ class mClassDAO:
         print "user_treatments:"
         pprint(list(user_treatments))
         print
-
-    #def get_user_treatment(self, user_id):
-    #    user_group = self.get_user_group(user_id)
-    #    return self.get_group_treatment(user_group)
-
-    #def get_group_treatment(self, group_id):
-    #    group_entry = self.group_treatments.find_one({'group': group_id})
-    #    if group_entry:
-    #        return group_entry['mClass'], group_entry['points']
-    #    else:
-    #        raise ValueError("group id ", group_id, " not found")
-
-    #def get_user_group(self, user_id):
-    #    user_entry = self.user_groups.find_one({'user': user_id})
-    #    if user_entry:
-    #        return user_entry['group']
-    #    else:
-    #        raise ValueError ("group id not found")
-

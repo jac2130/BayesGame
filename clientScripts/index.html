@@ -92,40 +92,36 @@ function main()
 
     GraphJson.userId=user.id;
 
-    logInScreen   = WidgetHL();
-    logInScreen.cover=makeRect(stageWidth, stageHeight, "#ffffff");
-    logInScreen.cover.render(logInScreen.shape, Point(0, 0));
-    logInScreen.background=makeRect(stageWidth, stageHeight, "rgba(0, 0, 0, 0.75)");
-    logInScreen.background.render(logInScreen.shape, Point(0, 0));
-    logInScreen.title=makeTextWidget("Betting is Believing", 45, "Arial", "#FFFFFF");
+    //logInScreen   = WidgetHL();
+    //logInScreen.cover=makeRect(stageWidth, stageHeight, "#ffffff");
+    //logInScreen.cover.render(logInScreen.shape, Point(0, 0));
+    //logInScreen.background=makeRect(stageWidth, stageHeight, "rgba(0, 0, 0, 0.75)");
+    //logInScreen.background.render(logInScreen.shape, Point(0, 0));
+    //logInScreen.title=makeTextWidget("Betting is Believing", 45, "Arial", "#FFFFFF");
 
-    logInScreen.title.renderW(logInScreen, Point((stageWidth-logInScreen.title.width)/2, 100));
+    //logInScreen.title.renderW(logInScreen, Point((stageWidth-logInScreen.title.width)/2, 100));
 
-    logInScreen.pic=new createjs.Bitmap(THIS_DOMAIN + "/LoginWithFacebook.png");
-    logInScreen.pic.x = (stageWidth-318)/2;
-    logInScreen.pic.y = 200;
-    logInScreen.pic.scaleX *= 0.9;
-    logInScreen.pic.scaleY *= 0.9;
-    logInScreen.message1 = makeTextWidget("No worries; nothing will be posted on your facebook profile without your permission", 15, "Arial", "#FFFFFF");
-    logInScreen.message1.renderW(logInScreen, Point((stageWidth-logInScreen.message1.width)/2, 300));
-    logInScreen.message2 = makeTextWidget("and your facebook data will be made anonymous and will only be used for scientific purposes.", 15, "Arial", "#FFFFFF");
-    logInScreen.message2.renderW(logInScreen, Point((stageWidth-logInScreen.message2.width)/2, 320));
+    //logInScreen.pic = new createjs.Bitmap("/LoginWithFacebook.png");
+    //logInScreen.pic.x = (stageWidth-318)/2;
+    //logInScreen.pic.y = 200;
+    //logInScreen.pic.scaleX *= 0.9;
+    //logInScreen.pic.scaleY *= 0.9;
+    //logInScreen.message1 = makeTextWidget("No worries; nothing will be posted on your facebook profile without your permission", 15, "Arial", "#FFFFFF");
+    //logInScreen.message1.renderW(logInScreen, Point((stageWidth-logInScreen.message1.width)/2, 300));
+    //logInScreen.message2 = makeTextWidget("and your facebook data will be made anonymous and will only be used for scientific purposes.", 15, "Arial", "#FFFFFF");
+    //logInScreen.message2.renderW(logInScreen, Point((stageWidth-logInScreen.message2.width)/2, 320));
 
-    logInScreen.pic.on("click", function(event) {
-        logInScreen.erase()
-        Login();
-    });
-     form = document.getElementById("fbl");
-     
-formDOMElement = new DOMElement(form);
-//formDOMElement.regX = form.offsetWidth*0.5;
-//formDOMElement.regY = form.offsetHeight*0.5;
-//formDOMElement.x = 500;
-//formDOMElement.y = 300;
-//
-    logInScreen.shape.addChild(logInScreen.pic);    
-    
-    logInScreen.render(topLayer.shape, Point(0, 0));
+    //logInScreen.pic.on("click", function(event) {
+    //    logInScreen.erase()
+    //    Login();
+    //});
+    //form = document.getElementById("fbl");
+    // 
+    //formDOMElement = new DOMElement(form);
+    //logInScreen.shape.addChild(logInScreen.pic);    
+    //logInScreen.render(topLayer.shape, Point(0, 0));
+
+    Login(); // needs to be changed
    
     createjs.Ticker.setFPS(45);
     createjs.Ticker.addEventListener("tick", function(event) {

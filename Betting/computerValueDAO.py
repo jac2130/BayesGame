@@ -8,7 +8,13 @@ class ComputerValueDAO:
         self.computerValue = database.computerValue
 
     def getComputerValue(self):
-        return self.computerValue.find().sort('timeAdded', -1).limit(1)[0]['value']
+        result = self.computerValue.find().sort('timeAdded', -1).limit(1)
+        if result.count() == 0:
+            print "no computer value found, setting to 0"
+            computerValue = 0
+        else:
+            computerValue = result[0]['value']
+        return computerValue
 
     def changeComputerValue(self, newValue):
         newValueEntry = {

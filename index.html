@@ -4,14 +4,17 @@
 <head>
 
 <style>
+
 body {
     overflow-x: hidden;
 }
+
 .fb-like {
     position:absolute;
     left:1%;
     top:90%;;
 }
+
 </style>
 
 <div id="fbl" class="fb-like" data-send="true" data-width="450" data-layout="button_count" data-show-faces="true"></div>
@@ -24,14 +27,16 @@ body {
 <script src="http://code.createjs.com/tweenjs-0.2.0.min.js"></script>
 <script src="//connect.facebook.net/en_US/all.js"></script>
 
+<script src="clientScripts/shapeLib.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/social.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/data.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/scroll.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScripts/betQueryWindow.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScripts/scoreDisplay.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/core.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/deepCopy.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/verify.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/jslib.js" type="text/javascript" charset="utf-8"></script>
-<script src="clientScripts/shapeLib.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/warn.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/arrowNodes.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/sideBar.js" type="text/javascript" charset="utf-8"></script>
@@ -42,6 +47,8 @@ body {
 <script src="clientScripts/switcher.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/bettingView.js" type="text/javascript" charset="utf-8"></script>
 <script src="clientScripts/textBox.js" type="text/javascript" charset="utf-8"></script>
+<script src="clientScripts/updateCount.js" type="text/javascript" charset="utf-8"></script>
+
 <link rel="stylesheet" href="Betting/css/style.css">
 
 <script>
@@ -100,9 +107,9 @@ function main()
     // textBar.render(topLayer.shape, {x:310, y:0});
     // tutorial.init(textBar); 
 
-    GraphJson.userId=user.id;
+    GraphJson.userId = user.id;
 
-    logInScreen   = WidgetHL();
+    logInScreen = WidgetHL();
     logInScreen.cover=makeRect(stageWidth, stageHeight, "#ffffff");
     logInScreen.cover.render(logInScreen.shape, Point(0, 0));
     logInScreen.background=makeRect(stageWidth, stageHeight, "rgba(0, 0, 0, 0.75)");
@@ -111,7 +118,7 @@ function main()
 
     logInScreen.title.renderW(logInScreen, Point((stageWidth-logInScreen.title.width)/2, 100));
 
-    logInScreen.pic=new createjs.Bitmap(THIS_DOMAIN + "/LoginWithFacebook.png");
+    logInScreen.pic=new createjs.Bitmap("/LoginWithFacebook.png");
     logInScreen.pic.x = (stageWidth-318)/2;
     logInScreen.pic.y = 200;
     logInScreen.pic.scaleX *= 0.9;

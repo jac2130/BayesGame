@@ -11,33 +11,25 @@ function marginalDist(effect, cause)
 	    output[cause][keys[i]]={};
 	    var outKeys=Object.keys(localModel[0][1]);
 	    outKeys.map(function(outKey)
-			{
-			    output[cause][keys[i]][outKey]=0;
-			})
-	    
-	    localModel.map(function(item)
-			  {
-			      //alert(item[0])
-			      item[0].map(function(jtem){
-				  if (jtem.indexOf(cause)===0 && jtem.indexOf(keys[i])===1)
-				      {
-					  outKeys.map(function(outKey)
-						      {
-							  output[cause][keys[i]][outKey]+= item[1][outKey];
-						      })
-					  
-					  //alert(JSON.stringify(item[1])) 
-				      }
-			      })
-			    //  if (item[0].indexOf([cause, keys[i]]) >= 0){
-				 // alert(item)
-			  //}    
-			  })
-	    
+        {
+            output[cause][keys[i]][outKey]=0;
+        });
+
+        localModel.map(function(item)
+        {
+            item[0].map(function(jtem)
+            {
+                if (jtem.indexOf(cause)===0 && jtem.indexOf(keys[i])===1)
+                {
+                    outKeys.map(function(outKey)
+                    {
+                        output[cause][keys[i]][outKey]+= item[1][outKey];
+                    })
+                }
+            });
+        });
 	}
-    return output[cause]
-    //alert(JSON.stringify(keys))
-    //alert(JSON.stringify(localModel[0][1]))
+    return output[cause];
 }
 
 function relationSign(effect, cause)
@@ -340,38 +332,31 @@ function makeValBar(barHeight, barWidth, barColor, value, label, hist)
         this.valBar.value += valChange;
 	
         this.valBar.hist.valDict[this.valBar.label] += valChange;
-        //send back to the server via Ajax!
-        //alert(this.valBar.hist.conditions)
-        //console.log("array: " + JSON.stringify(Array(model[user.id][this.valBar.hist.bayesVar.varText.toLowerCase().replace(" ", "_")])))
   
         var currVarText = this.valBar.hist.bayesVar.varText.toLowerCase().replace(" ", "_")
 
-        //console.log(JSON.stringify(this.valBar.hist.conditions));
-        //console.log(JSON.stringify(model[user.id][currVarText]));
-
-        for (i=0; i < model[user.id][currVarText].length; i++) {
+        for (i=0; i < model[user.id][currVarText].length; i++)
+        {
             if (JSON.stringify(model[user.id][currVarText][i][0])===JSON.stringify(this.valBar.hist.conditions))
             {
-		//alert(JSON.stringify(this.valBar.hist.valDict))
-                //alert(JSON.stringify(model[user.id][currVarText][i][1]))
                 for (j = 0; j<Object.keys(this.valBar.hist.valDict).length; j++)
                 {
                     model[user.id][currVarText][i][1][Object.keys(this.valBar.hist.valDict)[j]] = this.valBar.hist.valDict[Object.keys(this.valBar.hist.valDict)[j]]/100.0;
                 }
-
             }
-
         }
-	this.valBar.hist.bayesVar.activeCircles.map(function(node){
-	    adjustSignsNode2(node);
-	})
-        //alert("model: " + JSON.stringify() + "\n\nconditions: " + JSON.stringify(this.valBar.hist.conditions))
+        this.valBar.hist.bayesVar.activeCircles.map(function(node)
+        {
+            adjustSignsNode2(node);
+        });
 
-        if (this.valBar.value < 0) {
+        if (this.valBar.value < 0)
+        {
             this.valBar.value = 0;
             this.valBar.hist.valDict[this.valBar.label] = 0;
         }
-        if (this.valBar.value > 100) {
+        if (this.valBar.value > 100)
+        {
             this.valBar.value = 100;
             this.valBar.hist.valDict[this.valBar.label] = 100;
         }
@@ -470,11 +455,6 @@ function makeValBar(barHeight, barWidth, barColor, value, label, hist)
 
         var widthChange = -(this.pressX - evtStageX)/this.valBar.hist.shape.scaleX/0.5;
 
-        //if (isDef(this.valBar.hist.modelView))
-        //{
-        //    console.log(this.valBar.hist.modelView.shape.scaleX);
-        //    widthChange /= this.valBar.hist.modelView.shape.scaleX;
-        //}
         this.pressX = evtStageX;
         var oldVal = this.valBar.value;
         this.changeWidth(widthChange);
