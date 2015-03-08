@@ -154,6 +154,8 @@ def query(args, data):
 
 def removeLatestBettingVar(dataInOrder, mClassName):
     betting_variable = mClasses[mClassName]["bettingVar"]
+    print "removing betting variable from: ", dataInOrder[-1]
+    print "betting variable: ", betting_variable
     del dataInOrder[-1][betting_variable]
 
 def assembleModelClass(mClassName):
@@ -353,9 +355,12 @@ def getUserIdFromCookie(http_cookie):
     cookie = Cookie.SimpleCookie()
     #cookieInfo = {'user_id': 'asdfasdf'}
     cookie.load(http_cookie)
-    cookieInfo = json.loads(cookie['access_token'].value)
-    if 'user_id' in cookieInfo:
-        return str(cookieInfo['user_id'])
+    if 'access_token' in cookie:
+        cookieInfo = json.loads(cookie['access_token'].value)
+        if 'user_id' in cookieInfo:
+            return str(cookieInfo['user_id'])
+        else:
+            return None
     else:
         return None
 

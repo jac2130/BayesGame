@@ -42,7 +42,7 @@ class MiscDAO:
     def getFreePeriod(self):
         varsDict = self.misc.find_one()
         if 'freePeriod' not in varsDict:
-            self.startFreePeriod()
+            self.beginFreePeriod()
             varsDict = self.misc.find_one()
         return varsDict['freePeriod']
 
