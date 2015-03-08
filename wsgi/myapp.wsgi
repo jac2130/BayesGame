@@ -323,6 +323,14 @@ def getUserId(args, data):
     #print "userId: ", data['user_id']
     return json.dumps({'user_id': data['user_id']})
 
+def queryList(args, data):
+    # etc etc etc
+    return json.dumps({'query_return_info': []})
+
+#http://www.bettingisbelieving.com/js/query/banking:H/gm:L
+#query -> [banking:H, gm:L]
+#data -> {}
+
 handlerDict = {
         'hello': hello,
         'dataTest': dataTest,
@@ -347,7 +355,8 @@ handlerDict = {
         'login': process_login,
         'model': add_model,
         'has_query': hasQuery,
-        'getUserId': getUserId
+        'getUserId': getUserId,
+        'queryList': queryList
 }
 
 # user environ['HTTP_COOKIE'] to access
