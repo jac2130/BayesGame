@@ -23,9 +23,12 @@
 # You may use, share, or modify this file freely
 #
 ######################################################################
-
-from numpy import ones,copy,cos,tan,pi,linspace, array
+import numpy as np
+from numpy import ones,copy,cos,tan,pi,linspace, array, diag, sort, sqrt
+from numpy.linalg import eig
 from numpy import tile as repmat #for compatibility with Matlab
+
+
 def gaussxw(N):
 
     # Initial approximation to roots of the Legendre polynomial
@@ -56,8 +59,18 @@ def gaussxwab(N,a,b):
 
 def rquad(N,k):
     k1=k+1; k2=k+2; n=array(range(1, N+1));  nnk=2*n+k;
-    A=(float(k)/k2)*repmat(k^2,(1,N))/(nnk*(nnk+2));
-    n=array(range(1, N)); nnk=nnk[n]; 
+    A=repmat(k^2,(1,N))/(nnk*(nnk+2));
+    A=np.append(array([float(k)/k2]), A);
+    n=array(range(1, N)); nnk=nnk[n]; n=n+1;
     B1=4*float(k1)/(k2*k2*(k+3)); nk=n+k; nnk2=nnk*nnk;
-    B=4*(n*nk)**2/(nnk2*nnk2-nnk2);
-    A.T
+    B=4.0*(n*nk)**2/(nnk2*nnk2-nnk2);
+    ab=np.append(array([2**float(k1)/k1, B1]), B);
+    s=sqrt(ab[1:N]);
+    x, v=eig(diag(A[0:N]) + diag(s, -1) + diag(s, +1))
+    I, x=zip(*enumerate(x))
+    x=array(x)
+    x=(x+1)/2; w=((1.0/2)**(k1))*ab[0]*v[0,I]**2;
+    #Still have to fix sorting by x.
+    xw=zip(x, w)
+    xw.sort()
+    return [array(x) for x in zip(*xw)]
