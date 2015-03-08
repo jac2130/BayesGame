@@ -8,11 +8,11 @@ from pprint import pprint
 import datetime
 
 mClasses = {
-    "monty": {
-        "vars": ["prize_door", "contestant_door", "monty_door"],
-        "bettingVar": "prize_door",
-        "domain": ["A", "B", "C"]
-    },
+    #"monty": {
+    #    "vars": ["prize_door", "contestant_door", "monty_door"],
+    #    "bettingVar": "prize_door",
+    #    "domain": ["A", "B", "C"]
+    #},
     "banking": {
         "vars": ["bank_1", "bank_2"],
         "bettingVar": "bank_2",

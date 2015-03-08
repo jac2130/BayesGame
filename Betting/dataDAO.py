@@ -14,8 +14,14 @@ class DataDAO:
     def __init__(self, db):
         self.db = db
         self.data = self.db.data
-        if not self.data_exists():
+        if not self.period_index_exists():
             self.data.create_index("period")
+
+    def period_index_exists(self):
+        if "period_1" in self.data.index_information():
+            return True
+        else:
+            return False
 
     def data_exists(self):
         aData = self.data.find_one()

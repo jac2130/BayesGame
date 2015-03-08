@@ -31,31 +31,6 @@ computerValue = computerValueDAO.ComputerValueDAO(db2)
 
 #build_graph(yaml.load(json.dumps(l[-1][str(_id)]))) the object we will have in modelDAO
 
-TRUTH = {
-        "prize_door": [
-            # For nodes that have no parents
-            # use the empty list to specify
-            # the conditioned upon variables
-            # ie conditioned on the empty set
-            [[], {"A": float(1)/3, "B": float(1)/3, "C": float(1)/3}]],
-        "contestant_door": [
-            [[], {"A": float(1)/3, "B": float(1)/3, "C": float(1)/3}]],
-        "monty_door": [
-            [[["prize_door", "A"], ["contestant_door", "A"]], {"A": 0, "B": 0.5, "C": 0.5}],
-            [[["prize_door", "A"], ["contestant_door", "B"]], {"A": 0, "B": 0, "C": 1}],
-            [[["prize_door", "A"], ["contestant_door", "C"]], {"A": 0, "B": 1, "C": 0}],
-            [[["prize_door", "B"], ["contestant_door", "A"]], {"A": 0, "B": 0, "C": 1}],
-            [[["prize_door", "B"], ["contestant_door", "B"]], {"A": 0.5, "B": 0, "C": 0.5}],
-            [[["prize_door", "B"], ["contestant_door", "C"]], {"A": 1, "B": 0, "C": 0}],
-            [[["prize_door", "C"], ["contestant_door", "A"]], {"A": 0, "B": 1, "C": 0}],
-            [[["prize_door", "C"], ["contestant_door", "B"]], {"A": 1, "B": 0, "C": 0}],
-            [[["prize_door", "C"], ["contestant_door", "C"]], {"A": 0.5, "B": 0.5, "C": 0}],
-        ]
-    }
-
-
-g=build_graph(TRUTH)
-
 def indep_wrap(varName, d={}, p=0.5):
     d[varName]= [[[],{"H":p , "L":1.0-p}]]
     return d
@@ -71,7 +46,6 @@ def one_cause_wrap(depVar, indepVar, d, p=0.5, neg=set()):
             [[[indepVar, "L"]], {"H": p, "L": 1.0-p}]]
     return d
 
-gaph_a=build_graph(TRUTH)
 def relabel(label='H'):
 
     if label=='L':
@@ -138,13 +112,11 @@ def one_cause(depVar, indepVar, p, d, neg=set()):
     "if some other label gets in the way:"
     if d[indepVar]!="H":
         d[indepVar]="L"
-        
     num = random()
     if (d[indepVar]=="L" and indepVar not in neg) or (d[indepVar]=="H" and indepVar in neg) or num > p:
         d[depVar]="L"
     else:
         d[depVar]="H"
-    
     return d
 
 def random_demo(p=0.5):
@@ -165,8 +137,8 @@ def random_demo(p=0.5):
     stochastic). 
     '''
     d={};
-    d['period']=0;
-    names= ["A", "B", "C", "D"];
+    d['period'] = 0;
+    names= ["interest_rate", "production", "exports", "unemployment"];
     shuffle(names); #randomly assign labels
     n1, n2, n3, n4 = names;
 
@@ -195,7 +167,7 @@ def random_simple(p=0.5):
     d=indepVar("interest_rate", p, d)
     d=indepVar("bank_income", p, d)
     d=causes("general_motors", ["interest_rate", "bank_income"], d, p, neg=set(["interest_rate"]))
-    return d 
+    return d
 
 def random_complex(p=0.5):
     d={}
