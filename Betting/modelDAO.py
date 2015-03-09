@@ -6,7 +6,7 @@ import time
 import pymongo
 import yaml
 from bayesian.bbn import build_bbn_from_conditionals as build_graph
-
+from itertools import product
 # The session Data Access Object handles interactions with the sessions collection
 
 def json_convert(query):
@@ -146,8 +146,29 @@ class ModelDAO:
         if j == None:
             return json.dumps("Model not found")
 
-        try: 
+        try:
+            domains=j.domains
             return json_convert(j.query(**conditions))
+        except: 
+            #print "sorry the model is not fully defined yet"
+            return json.dumps("You have not yet fully specified your model");
+
+    def query_all_possible(self, _id, variable):
+        '''
+        queries the newest graph and returns the query object.
+        '''
+        j = self.get_newest(_id)
+        if j == None:
+            return json.dumps("Model not found")
+
+        try:
+            domains = {key: val for key, val in j.domains.items() if key!=variable}
+            cr=list(product(*domains.values()))
+            names=domains.keys()
+            all_possible= [{name: v for name, v in zip(names, c)} for c in cr]
+            temp_dict={";".join(list(":".join(it) for it in conditions.items())): eval(json_convert(j.query(**conditions)))[variable] for conditions in all_possible}
+            
+            return json.dumps(temp_dict)
         except: 
             #print "sorry the model is not fully defined yet"
             return json.dumps("You have not yet fully specified your model");

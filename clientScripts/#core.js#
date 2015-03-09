@@ -1,5 +1,5 @@
 scoreTagDrawn = false;
-predictionVar="interest_rate" //draw this variable always at random at each period from modelclass['variables'];
+predictionVar="interest_rate"  //draw this variable always at random at each period from modelclass['variables'];
 
 function welcome()
 {

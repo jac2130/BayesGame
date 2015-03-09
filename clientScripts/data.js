@@ -1,8 +1,45 @@
-// going to break the game into periods: 1, 2, 3, 4, 5 etc. and that way all posts and all data will be the same for all players no matter when they start to play. This also solves Alessandra Casella's problem. There has to be a global clock that is gotten by an ajax call. The global clock gives periods: 1, 2, 3, plus how many seconds are left before the next period starts. Each bet and each datapoint is tagged with a period number (the current one). Each players interface pulls out the current bets and datapoints out of the mongodb database. 
+// going to break the game into periods: 1, 2, 3, 4, 5 etc. and that way all posts and all data will be the same for all players no matter when they start to play. This also solves Alessandra Casella's problem. There has to be a global clock that is gotten by an ajax call. The global clock gives periods: 1, 2, 3, plus how many seconds are left before the next period starts. Each bet and each datapoint is tagged with a period number (the current one). Each players interface pulls out the current bets and datapoints out of the mongodb database.; 
+
+
 
 var putWindowDebug = false;
 var callWindowDebug = false;
 var betWindowDebug = false;
+
+function lookup(firstDict, secondDict, names){
+    strins=Object.keys(secondDict);
+//cases.push()
+    var target={};
+    var cases=[];
+    var tempList=[];
+    names.map(function(n){target[n]=firstDict[n]})
+    //alert(JSON.stringify(target))
+    strins.map(function(n){tempList.push(n.split(";"))})
+    //alert(JSON.stringify(tempList))
+    tempList.map(function(m){
+	var tempDict={};
+	m.map(function(n){
+
+	    var keyVal=n.split(":")
+	    tempDict[keyVal[0]]=keyVal[1]
+	    
+	})
+	cases.push(tempDict)
+    })
+    var returnVal="";
+    cases.map(function(ca){
+	var checkList=[]
+	Object.keys(ca).map(function(k)
+			    {
+				checkList.push(ca[k]===target[k])
+			    });
+	if (sum(checkList)===checkList.length)
+	{
+	    returnVal = secondDict[strins[cases.indexOf(ca)]]
+	}		    
+    })
+    return returnVal
+}
 
 function makePrediction(variable, t, width, color)
 {
@@ -30,34 +67,27 @@ function makePrediction(variable, t, width, color)
         names.push(variab.varName.replace(" ", "_").toLowerCase());
     });
 
-    names.map(function(na)
-    {
-        if (na !== variable)
-        {
-            queryPath += "/" + na + ":" + truth[t][na]
-            conds[na] = truth[t][na];
-        }
-    });
+    
 
     //return JSON.stringify(conds)
-    predictionCanvas.prediction = function()
+    predictionCanvas.prediction = function(queryLookup)
     {
-        $.ajax({
-            type: "GET",
-            url: '/js/query' + queryPath,
-            async: true,
-            
-            dataType: "json",
-            success: function(data)
-            {
-                if (typeof(data)==="object")
-                {
-                    var predVals = [];
-                    var curKeys = Object.keys(data[variable]).sort();
-                    var len = curKeys.length;
-                    var coordX = 6;
+	//var sillydict={}
+	//var Keys=Object.keys(somedict)
+	//Keys.map(function(k){sillydict[k]=somedict[k];})
+	//console.log(typeof(somedict), somedict)
+	if (typeof(queryLookup)==="string") { 
+	    if (typeof(JSON.parse(queryLookup))!=="string") {
+		var lookupTable=JSON.parse(queryLookup);
+		var predVals = [];
+                
+		var quer = lookup(truth[t], lookupTable, names);
+		//alert(JSON.stringify(quer))
+		var curKeys = Object.keys(quer).sort();
+                var len = curKeys.length;
+                var coordX = 6;
                    
-                    curKeys.map(function(key)
+                curKeys.map(function(key)
                     {
                         if (typeof(predictionCanvas.tags[key])!=="undefined")
                         {
@@ -69,23 +99,25 @@ function makePrediction(variable, t, width, color)
                         }
                     });
 
-                    for (var i=0; i<len; i++)
-                    {
-                        predVals.push(data[variable][curKeys[i]]);
-                        predictionCanvas.tags[curKeys[i]] = makeTextWidget(curKeys[i], 10, "Arial", "#666");
-                        predictionCanvas.tags[curKeys[i]].rect=makeRect((width-10)/len, 0.70*height*data[variable][curKeys[i]], "red", 1, "#FFFFFF", 3);
+                for (var i=0; i<len; i++)
+                {
+                    predVals.push(quer[curKeys[i]]);
+                    predictionCanvas.tags[curKeys[i]] = makeTextWidget(curKeys[i], 10, "Arial", "#666");
+                    predictionCanvas.tags[curKeys[i]].rect=makeRect((width-10)/len, 0.70*height*quer[curKeys[i]], "red", 1, "#FFFFFF", 3);
                 //(betQueryWindow.height-120)*currentData[key]	
-                        predictionCanvas.tags[curKeys[i]].rect.render(predictionCanvas.shape, {x:coordX-(width-10)/(4*len), y:height*(1-0.7*data[variable][curKeys[i]])-20});
-                        predictionCanvas.tags[curKeys[i]].render(predictionCanvas.shape, {x:coordX, y:height-20});
-                        coordX += (1.0/len)*width;
-                    }
-                    
-                } 
-            }
-        });
+                    predictionCanvas.tags[curKeys[i]].rect.render(predictionCanvas.shape, {x:coordX-(width-10)/(4*len), y:height*(1-0.7*quer[curKeys[i]])-20});
+                    predictionCanvas.tags[curKeys[i]].render(predictionCanvas.shape, {x:coordX, y:height-20});
+                    coordX += (1.0/len)*width;
+                }
+                
+            } 
+        }
+            
+       
     }
 
     return predictionCanvas;
+
 }
 
 function getTime()
@@ -292,7 +324,7 @@ function makeContractedButton(inpWindow)
 function makeBarButton(inpWindow, yPos)
 {
     var height = 25;
-    var width = inpWindow.width + inpWindow.borderWidth*2;
+    var width = inpWindow.width //+ inpWindow.borderWidth*2;
     var barButton = Object.create(Button);
     barButton.setShape(new createjs.Container());
     barButton.background = makeRect(width, height, /*"#3B4DD0", "#3b5998"*/ '#FFFFFF', 0, 1, 3);
@@ -379,26 +411,33 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
     {
         view.innerFrame = WidgetHL();
         xCoord = 10;
-        predictions = [];
-        index = 0;
-        view.data.map(function(dat)
-        {
-            var yOffset = 0;
-            names.map(function(key)
-            {
-                value = dat[key];
-                col = colors[key];
-                if (value !== undefined)
-                {
-                    makeCircle(8, col).renderW(view.innerFrame, {x: xCoord, y: coords[value] + yOffset})
-                }
-                yOffset += 5;
-            });
-            dat.xCoord = xCoord;
-            xCoord += 40;
-            index += 1;
-        });
 
+		//alert(mydict.responseJSON)
+	predictions = [];
+	index = 0;
+	view.data.map(function(dat)
+		      {
+			  var yOffset = 0;
+			  names.map(function(key)
+				    {
+					value = dat[key];
+					col = colors[key];
+					if (value !== undefined)
+					{
+					    makeCircle(8, col).renderW(view.innerFrame, {x: xCoord, y: coords[value] + yOffset})
+					}
+					yOffset += 5;
+				    });
+			  dat.xCoord = xCoord;
+			  pred=makePrediction(predictionVar, index, 40, colors[predictionVar])
+			  pred.prediction({});                                                                                                                
+			  pred.renderW(view.innerFrame, {x: xCoord-10, y: 115})
+			  predictions.push(pred)
+
+			  xCoord += 40;
+			  index += 1;
+		      });
+		
         for (var i = 1; i < view.data.length; i++) 
         {
             var dataLine = new createjs.Shape();

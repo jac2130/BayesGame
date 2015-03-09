@@ -8,7 +8,7 @@ from random import random
 import requests
 import pymongo
 os.chdir('/var/www/Betting/')
-import blogPostDAO
+#import blogPostDAO
 import mClassDAO
 import pointsDAO
 import sessionDAO
@@ -32,7 +32,7 @@ connection = pymongo.MongoClient(connection_string)
 database = connection.blog #The directory in the Mongo Database that we use. 
 mClass = mClassDAO.mClassDAO(database) 
 #Access to the classes of models seen by the participants 
-posts = blogPostDAO.BlogPostDAO(database) #Optimistic Bets 
+#posts = blogPostDAO.BlogPostDAO(database) #Optimistic Bets 
 puts  = putsDAO.PutsDAO(database) #Pessimistic Bets
 users = userDAO.UserDAO(database) #Access to the information on participants 
 models=modelDAO.ModelDAO(database) 

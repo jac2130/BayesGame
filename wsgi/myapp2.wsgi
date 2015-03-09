@@ -4,7 +4,6 @@ import pymongo
 import os
 from random import random
 
-import urllib
 import re
 import json
 #from gevent import monkey; monkey.patch_all()
@@ -14,6 +13,7 @@ import time
 import threading
 import thread
 import Cookie
+import urlparse
 
 currentDir = os.path.dirname(os.path.realpath(__file__))
 baseDir = os.path.dirname(currentDir)
@@ -326,15 +326,11 @@ def getUserId(args, data):
 
 def queryList(args, data):
     print "query args: ", args
-    path = [elem for elem in args][0]
-    #query_dict = dict(tuple(elem.split(':')) for elem in path)
-    #return json.dumps(models.query(_id=data['user_id'], path))
-    #variable = args
-    #return args
-    #query_dict = dict(tuple(elem.split(':')) for elem in path)
-    return json.dumps(models.query_all_possible(_id=data['user_id'], variable=path))
+    path = args
+    query_dict = dict(tuple(elem.split(':')) for elem in path)
+    return data
     #return models.query(_id=data['user_id'], conditions=query_dict)
-
+ 
 #http://www.bettingisbelieving.com/js/query/banking:H/gm:L
 #query -> [banking:H, gm:L]
 #data -> {}
@@ -396,13 +392,6 @@ def makeNewCookieWithUserId(userId):
     cookie['access_token'] = json.dumps(cookieInfo)
     return cookie
 
-def getGETData(environ):
-    try:
-        unquotedJson = urllib.unquote(environ['QUERY_STRING'].split("&")[0])
-        return json.loads(unquotedJson)
-    except:
-        return {}
-
 def application(environ, start_response):
     status = '200 OK'
     script_name = environ['SCRIPT_NAME']
@@ -432,10 +421,6 @@ def application(environ, start_response):
     else:
         data = {}
 
-    getData = getGETData(environ)
-    for entry in getData:
-        data[entry] = getData[entry]
-
     data['user_id'] = userId
 
     print "QUERY: ", script_name
@@ -443,6 +428,7 @@ def application(environ, start_response):
 
     output = handlerDict[handlerWord](args, data)
 
+    output = pformat(environ)
     response_headers = [('Content-type', 'text/plain'),
                         ('Content-Length', str(len(output)))]
 

@@ -100,11 +100,29 @@ function updateQueryPrediction()
             condTag.content = makeTextWidget(truth[truth.length-1][condTag.name], radius*2, "Arial", "#ffffff");
             condTag.content.render(condTag.shape, {x:radius+1, y:1});
         });
+	
+	$.ajax({
+            type: "GET",
+            url: '/js/queryList/interest_rate',
+            //data: JSON.stringify({'asdf': 'sdfg', 'someinfo2': 'hello world2'}),
+            async: true,
+            dataType: "json",
+            success: function(data)
+            {
+			
+	/*if (typeof(mydict.responseJSON) === "undefined")
+                {
+		    new_dict=JSON.parse(mydict.responseJSON)
+		    alert(JSON.stringify(new_dict))
+		}*/
+	//responseSrting=mydict.responseJSON;
+	//alert(JSON.stringify(mydict.respnseJSON))
 
-        predictions.map(function(pred)
-        {
-            pred.prediction() 
-        });
+		predictions.map(function(pred)
+				{
+				    pred.prediction(data) 
+				});
+	    }})
 
         $.ajax({
             type: "GET",

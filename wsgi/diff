@@ -1,0 +1,15 @@
+15a16
+> import urlparse
+328c329
+<     variable = args
+---
+>     path = args
+330c331
+<     return models.query_all_possible(_id=data['user_id'], variable)
+---
+>     return data
+429c430,431
+<     output = pprint.pformat(environ)
+---
+> 
+>     output = pformat(environ)
