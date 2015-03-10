@@ -314,7 +314,7 @@ def add_model(args, data):
     if not models.detect_cyclic_model(modelInfo):
         models.add_model(model)
     else:
-        print "CYCLIC MODEL DETECTED"
+        return json.dumps(["CYCLIC MODEL DETECTED"])
     return json.dumps({})
 
 def hasQuery(args, data):

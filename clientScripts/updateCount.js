@@ -2,6 +2,7 @@ updateCount = function(dataView)
 {
     //updateQueryPrediction();
     checkFreePeriod();
+    var view = dataView;
     var currPeriod = getCurrTimePeriod();
 
     $.ajax({
@@ -23,8 +24,9 @@ updateCount = function(dataView)
             }
             var minLeft = Math.floor(timeUntilNextData/60);
             var secLeft = timeUntilNextData % 60;
-
+	    
             countDown.text.changeText("New data in " + timeUntilNextData + " seconds");
+	    //countDown.renderW(view, Point((view.width - countDown.text.width)/2, view.height-90));
         }
     });
 }
@@ -74,7 +76,7 @@ function addDataToDataWindow(newDataSets)
     newTruth2.yCoord = truth[truth.length-1].yCoord + 40;
     truth = truth.slice(0, truth.length-1).concat([newTruth1, newTruth2]);
     dataWindow.data = dataWindow.data.slice(0, dataWindow.data.length-1).concat(newDataSets);
-
+    countDown.erase()
     dataWindow.frame.erase();
     dataWindow.frameHeight += 40;
     dataWindow.drawInnerFrame();
@@ -84,16 +86,18 @@ function addDataToDataWindow(newDataSets)
         dataWindow.innerFrame, dataWindow.frameHeight);
 
     dataWindow.frame.render(dataWindow.shape, {x:0, y:0});
+    
+    countDown.renderW(dataWindow, Point((dataWindow.width - countDown.text.width)/2, dataWindow.height-90));
 
     var totalWinnings = 0;
     var bettingVar = modelClass['betting_variable'];
     if (truth[truth.length-2][bettingVar] !== share_val)
     {
-        updateScoreTag(true);
+        updateScoreTag(false);
     }
     else
     {
-        updateScoreTag(false);
+        updateScoreTag(true);
     }
     setShareVal();
 }
@@ -124,7 +128,10 @@ function sendModelIfUpdated()
             data:JSON.stringify(model),
             dataType: "json",
             contentType: "application/json",
-            success: function(){}
+            success: function(data){
+		if(JSON.stringify(data)!=="{}")
+		{warn("Cyclical Models are not allowed!")}
+	    }
         });
     }
 }
@@ -136,14 +143,16 @@ function updateScoreTag(sharesEarnedWinnings)
     if (sharesEarnedWinnings)
     {
         newWinnings= (user.points + user.shares*100);
+	warn('Each of your ' + user.shares + ' shares earned 100 points\n\nYour remaining points were ' + user.points + '\n\n' + "This round's winnings are: " + user.shares + " x 100 + " + user.points + " = " + newWinnings + " points");
     }
     else
     {
         newWinnings = user.points;
+	warn('None of your ' + user.shares + ' shares earned any points\n\nYour remaining points were ' + user.points + '\n\n' + "This round's winnings are: " + user.shares + " x 0 + " + user.points + " = " + newWinnings + " points");
+
     }
     user.score += newWinnings; 
-    warn('Each of your ' + user.shares + ' shares earned 100 points\n\nYour remaining points were ' + user.points + '\n\n' + "This round's winnings are: " + user.shares + " x 100 + " + user.points + " = " + newWinnings);
-
+    
     scoreTag.score.changeText(JSON.stringify(user.score));
     var scoreLength = JSON.stringify(scoreTag.score.shape.text).length*4;
     scoreTag.shape.graphics.clear();

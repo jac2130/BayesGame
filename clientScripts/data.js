@@ -70,12 +70,13 @@ function makePrediction(variable, t, width, color)
     
 
     //return JSON.stringify(conds)
-    predictionCanvas.prediction = function(queryLookup)
+    predictionCanvas.prediction = function(queryLookup, color)
     {
 	//var sillydict={}
 	//var Keys=Object.keys(somedict)
 	//Keys.map(function(k){sillydict[k]=somedict[k];})
 	//console.log(typeof(somedict), somedict)
+	if (typeof(color)==="undefined"){color="red"}
 	if (typeof(queryLookup)==="string") { 
 	    if (typeof(JSON.parse(queryLookup))!=="string") {
 		var lookupTable=JSON.parse(queryLookup);
@@ -103,7 +104,7 @@ function makePrediction(variable, t, width, color)
                 {
                     predVals.push(quer[curKeys[i]]);
                     predictionCanvas.tags[curKeys[i]] = makeTextWidget(curKeys[i], 10, "Arial", "#666");
-                    predictionCanvas.tags[curKeys[i]].rect=makeRect((width-10)/len, 0.70*height*quer[curKeys[i]], "red", 1, "#FFFFFF", 3);
+                    predictionCanvas.tags[curKeys[i]].rect=makeRect((width-10)/len, 0.70*height*quer[curKeys[i]], color, 1, "#FFFFFF", 3);
                 //(betQueryWindow.height-120)*currentData[key]	
                     predictionCanvas.tags[curKeys[i]].rect.render(predictionCanvas.shape, {x:coordX-(width-10)/(4*len), y:height*(1-0.7*quer[curKeys[i]])-20});
                     predictionCanvas.tags[curKeys[i]].render(predictionCanvas.shape, {x:coordX, y:height-20});
@@ -389,10 +390,11 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
     view.yPos = stageHeight - 1.5*view.height;
     view.text="<--  OLD" + "          " + "          " + "          " + "          " + "          " + "          " + "          " + "          " + "          " + "DATA" + "          " + "          " + "          " + "          " + "          " + "          " + "          " +  "          " + "          " + "NEW  -->";
     view.setShape(new createjs.Container());
+    view.width = stageWidth-xPos-150;//(domain.length + 1)*50;
     view.barButton = makeBarButton(view, stageHeight-25);
 
     view.enabled = enabled;
-    view.width = stageWidth-xPos-150;//(domain.length + 1)*50;
+    
     
     view.background = makeRect(view.width /*+ betQueryWindow.width*/, view.height*2, '#FFFFFF'/*'#EBEEF4',"#f0f0f0"*/, borderWidth, "#FFFFFF", 3);
     view.background.render(view.shape, {x:0, y:0});
@@ -459,7 +461,7 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
     }
 
     sendModelIfUpdated();
-    startCountDownText(view);
+    
     prevIsFreePeriod = false;
     view.drawInnerFrame();
     
@@ -468,6 +470,7 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
         view.innerFrame, view.frameHeight);
 
     view.frame.render(view.shape, {x:0, y:0});
+    startCountDownText(view);
 
     return view;
 }

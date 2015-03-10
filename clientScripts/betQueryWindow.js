@@ -103,7 +103,7 @@ function updateQueryPrediction()
 	
 	$.ajax({
             type: "GET",
-            url: '/js/queryList/interest_rate',
+            url: '/js/queryList/' + predictionVar,
             //data: JSON.stringify({'asdf': 'sdfg', 'someinfo2': 'hello world2'}),
             async: true,
             dataType: "json",
@@ -119,8 +119,8 @@ function updateQueryPrediction()
 	//alert(JSON.stringify(mydict.respnseJSON))
 
 		predictions.map(function(pred)
-				{
-				    pred.prediction(data) 
+				{ 
+				    pred.prediction(data, "red") 
 				});
 	    }})
 
