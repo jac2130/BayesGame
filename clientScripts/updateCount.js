@@ -90,7 +90,7 @@ function addDataToDataWindow(newDataSets)
     countDown.renderW(dataWindow, Point((dataWindow.width - countDown.text.width)/2, dataWindow.height-90));
 
     var totalWinnings = 0;
-    var bettingVar = modelClass['betting_variable'];
+    bettingVar = modelClass['betting_variable'];
     if (truth[truth.length-2][bettingVar] !== share_val)
     {
         updateScoreTag(false);

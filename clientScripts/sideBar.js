@@ -146,17 +146,18 @@ function makeModelViewButton(bayesVar)
     makeClickable2(modelViewButton, callback);
     return modelViewButton;
 }
-
+colors={}
 function bayesVarFactory ()
 {
-    var colors = [ "red" /*"#3b5998"*/,  "yellow", "#3B4DD0", "green", "purple", "brown",
+    var cols = [ "red" /*"#3b5998"*/,  "yellow", "#3B4DD0", "green", "purple", "brown",
                   "DarkRed", "GoldenRod"];
     var BayesVar = {};
     var numVars = 0;
     var makeBayesVar = function(varName, varText, possibilities)
     {
         var newBayesVar = Object.create(BayesVar);
-        newBayesVar.color = colors[numVars];
+        newBayesVar.color = cols[numVars];
+	colors[varName] = newBayesVar.color;
         newBayesVar.varName = varName;
         newBayesVar.varText = varText;
         newBayesVar.possibilities = possibilities;

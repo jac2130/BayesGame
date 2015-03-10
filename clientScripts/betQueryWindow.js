@@ -1,3 +1,9 @@
+String.prototype.capitalize = function() {
+    ind=this.indexOf(" ") + 1;
+    return this.charAt(0).toUpperCase() + this.slice(1, ind) + this.charAt(ind).toUpperCase() + this.slice(ind+1);
+    
+}
+
 function makeBetQueryWindow(variables)
 {
     //console.log("variables: " + variables);
@@ -34,6 +40,10 @@ function makeBetQueryWindow(variables)
         circ.xCoord = xCoord;
         circ.varName = name;
         circ.render(betQueryWindow.shape, {x:circ.xCoord, y:betQueryWindow.height-25});
+	circ.shape.on("click", function (evt) {
+	    predictionVar=this.widget.varName;
+	});
+
         condCircles.push(circ);
 
         var condTag = Object.create(Widget);
@@ -52,6 +62,16 @@ function makeBetQueryWindow(variables)
         condTags.push(condTag)
         xCoord += 5*radius;
     });
+    
+    var betCirc=makeCircle(radius, colors[bettingVar], 0, colors[bettingVar]);
+    betCirc.xCoord=xCoord;
+    betCirc.varName=bettingVar;
+    betCirc.render(betQueryWindow.shape, {x:betCirc.xCoord, y:betQueryWindow.height-25});
+    betCirc.shape.on("click", function (evt)
+		     {
+			 predictionVar=this.widget.varName;
+		     });
+
     betQueryWindow.condTags = condTags;
 
     betQueryWindow.notAvailText = makeTextWidget("", "#666")
@@ -120,7 +140,7 @@ function updateQueryPrediction()
 
 		predictions.map(function(pred)
 				{ 
-				    pred.prediction(data, "red") 
+				    pred.prediction(data, colors[predictionVar.replace("_", " ").capitalize()]) 
 				});
 	    }})
 

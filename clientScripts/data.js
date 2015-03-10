@@ -167,7 +167,7 @@ function makeBetButton2(betView)
             var vars = modelClass.vars;
             var queryPath = "";
             var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
-            var bettingVar = modelClass['betting_variable'];
+            bettingVar = modelClass['betting_variable'];
 
             conditionalVarNames.map(function(na)
             {
@@ -431,7 +431,7 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
 					yOffset += 5;
 				    });
 			  dat.xCoord = xCoord;
-			  pred=makePrediction(predictionVar, index, 40, colors[predictionVar])
+			  pred=makePrediction(predictionVar, index, 40, colors[predictionVar.replace("_", " ").capitalize()])
 			  pred.prediction({});                                                                                                                
 			  pred.renderW(view.innerFrame, {x: xCoord-10, y: 115})
 			  predictions.push(pred)
