@@ -24,10 +24,11 @@
 #
 ######################################################################
 
-from numpy import ones,copy,cos,tan,pi,linspace, array, sqrt, diag
-from numpy.linalg import eig
+from numpy import ones,copy,cos,tan,pi,linspace, array, sqrt, diag, eye, reshape, prod
+from numpy.linalg import eig, det
 from numpy import tile as repmat #for compatibility with Matlab
 import numpy as np
+from scitools.numpyutils import ndgrid
 def gaussxw(N):
 
     # Initial approximation to roots of the Legendre polynomial
@@ -59,7 +60,7 @@ def gaussxwab(N,a,b):
 
 def rquad(N,k):
     k1=k+1; k2=k+2; n=array(range(1, N+1));  nnk=2*n+k;
-    A=repmat(k^2,(1,N))/(nnk*(nnk+2));
+    A=repmat(1.0*k**2,(1,N))/(nnk*(nnk+2));
     A=np.append(array([float(k)/k2]), A);
     n=array(range(1, N)); nnk=nnk[n]; n=n+1;
     B1=4*float(k1)/(k2*k2*(k+3)); nk=n+k; nnk2=nnk*nnk;
@@ -75,3 +76,33 @@ def rquad(N,k):
     xw.sort()
     return [array(x) for x in zip(*xw)]
 
+def simplex_quad(n, N):
+    """
+    n: number of dimensions (bins)
+    N: number of integration points per bin
+    """
+    vert=eye(n+1, n)
+    
+    if n==1:
+        q, w = rquad(N, 0)
+    else:
+        q, w=zip(*[rquad(N, n-(k+1)) for k in range(n)])
+        Q=ndgrid(*q); W=ndgrid(*w)
+        shaper=np.zeros([N, N, N*n])
+        for i in range(n):
+            shaper[:,:,i*N:(i+1)*N] = Q[i]
+        qu = reshape(shaper,[N**n,n], order='F')
+        shaper=np.zeros([N, N, N*n])
+        for i in range(n):
+            shaper[:,:,i*N:(i+1)*N] = W[i]
+        wu = reshape(shaper,[N**n,n], order='F')
+        m=eye(n+1)
+        m[1:n+1,0]=-1
+        c=np.dot(m, vert)
+        W=abs(det(c[1:n+1, :]))*prod(wu, axis=1)
+        qp=cumprod(qu, 1)
+        e=np.ones([N**n, 1])
+        np.append((1-qu[:, :n-1]), array(e), 1)
+        array([e, qp[:, :n-2], qp[:,n-1]])
+        X=np.dot(np.append(array(e),np.append((1-qu[:, :n-1]), array(e), 1)*array([array(e), qp[:, :n-2], qp[:,n-1]]).T,1), c)
+        return W, X
