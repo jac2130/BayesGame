@@ -499,6 +499,170 @@ function makeCallWindow(bets, domain, betVariable, xPos, isPut)
     return makeBetWindow2(bets, domain, betVariable, xPos, false);
 }
 
+function makeBuyButton(xPos)
+{
+    var betButton = makeButton("Buy", 70, 15);
+    betButton.xPos=xPos;
+    var callback = {
+        //'betView':betView,
+        'truth':truth,
+        "call": function()
+        {
+            //var betView = this.betView;
+            var valToBetOn = share_val;
+            var points = price;
+	    var newShares =(user.points-user.points%price)/price;
+            //var bayesVar = betView.bayesVar;
+            var vars = modelClass.vars;
+            var queryPath = "";
+            var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
+            bettingVar = modelClass['betting_variable'];
+
+            conditionalVarNames.map(function(na)
+            {
+                queryPath += "/" + na + ":" + truth[truth.length-1][na];
+            });
+	   
+            $.ajax({
+                type: "GET",
+                url: '/js/query' + queryPath,
+                async: true,
+                
+                dataType: "json",
+                success: function(data)
+                {
+                    if (typeof(data) === "object")
+                    {
+                        var prediction = data[bettingVar];
+                        var currentKeys=Object.keys(prediction);
+                        currentKeys.sort();
+                        threshHold=Math.round(prediction[currentKeys[0]]*100);
+                        //alert(threshHold)
+                        if (points in range(threshHold + 1) && user.points-price>=0)
+                        {
+                            $.ajax({
+                                type: "post",
+                                url: '/js/newpost',
+                                async: true,
+                                data:JSON.stringify({"user_id": user.id, "treatmentNum": treatmentNum, "valToBetOn": valToBetOn, 'price': points, 'shares':newShares,  'period': truth[truth.length-1].period}),
+                                            dataType: "json",
+                                dataType: "json",
+                                contentType: "application/json",
+                                success: function(){} 
+                            });
+                        }
+                        else
+                        {
+			    if (user.points-price<=0)
+			    {
+				warn("You have no points to buy shares with.");
+				
+			    }
+			    else
+			    {
+				warn("The current price of " + JSON.stringify(price) + " points \nexceeds your buying threshold of " + JSON.stringify(threshHold) + " points.\n\nIf you want to buy at the current price,\nyou must change your model!");
+			    }
+                        }
+                    }
+                    else {
+                        warn(JSON.stringify(data));
+                    }
+                }
+            });
+            //this.betView.pointsInp.clear();
+        }
+    };
+    //betView.pointsInp.registerEnterCallback(callback);
+    makeClickable(betButton, callback);
+    return betButton;
+}
+    
+function makeSellButton(xPos)
+{
+    var putButton = makeButton("Sell", 70, 15);
+    putButton.xPos=xPos;
+    var callback = {
+        //'betView': betView,
+        'truth': truth,
+        "call": function()
+        {
+            //var betView = this.betView;
+            var valToBetOn = share_val;
+            var points = price;
+            //var bayesVar = betView.bayesVar;
+            var vars = modelClass.vars;
+            var queryPath = "";
+            var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
+            var bettingVar=modelClass['betting_variable'];
+
+            conditionalVarNames.map(function(na)
+            {
+                queryPath += "/" + na + ":" + truth[truth.length-1][na];
+            });
+                //alert(truth[truth.length-1].period);
+	   
+            $.ajax({
+                type: "GET",
+                url: '/js/query' + queryPath,
+                async: true,
+                
+                dataType: "json",
+                success: function(data)
+                {
+                    if (typeof(data)==="object")
+                    {
+                        var prediction = data[bettingVar];
+                        var currentKeys = Object.keys(prediction);
+                        currentKeys.sort();
+                        var threshHold = Math.round(prediction[currentKeys[0]]*100);			
+                        var greaterVal = range(101).slice(threshHold, 101);
+                        var truthVal = (greaterVal.contains(parseInt(points)));
+                        if (truthVal === true && user.shares>=1) 
+                        {
+                            $.ajax({
+                                type: "post",
+                                url: '/js/newput',
+                                async: true,
+                                data:JSON.stringify({"user_id": user.id, "treatmentNum": treatmentNum, "valToBetOn": valToBetOn, 'price': points, 'shares':user.shares, 'period': truth[truth.length-1].period}),
+                                            dataType: "json",
+                                contentType: "application/json",
+                                success: function(){} 
+                            });
+                        }
+                        else
+			{
+			    if (user.shares<=0)
+			    {
+				warn("You have no shares to sell.");
+				
+			    }
+			    else
+			    {
+				warn("The current share price of " + JSON.stringify(price) + " points \nis below your threshold of " + JSON.stringify(threshHold) + ". \n\nIf you want to sell at the current price,\n you must change your model!");
+
+			    }
+                        /*{
+                            
+                        }*/
+			}
+		    }
+		    else
+		    {
+                        warn(JSON.stringify(data));
+		    }
+                }
+		
+	    });
+	    
+            //this.betView.pointsInp.clear();
+        }
+    };
+    //betView.pointsInp.registerEnterCallback(callback);
+    makeClickable(putButton, callback);
+    return putButton;
+}
+
+//The below is not used now.
 function makeBetWindow2(bets, domain, betVariable, xPos, isPut)
 { 
     //the variable "betVariable" is the variable on which bets are placed.  

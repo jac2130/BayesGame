@@ -42,23 +42,24 @@ function checkFreePeriod()
             var isFreePeriod = data['free_period'];
             if (isFreePeriod)
             {
-                if (betButton.isRendered()) {
-                    betButton.erase();
+                if (buyButton.isRendered()) {
+                    buyButton.erase();
                 }
-                if (betsWindow.isRendered()) {
-                    betsWindow.erase();
+                if (priceTag.isRendered()) {
+                    priceTag.erase();
                 }
-                if (putButton.isRendered()) {
-                    putButton.erase();
+                if (sellButton.isRendered()) {
+                    sellButton.erase();
                 }
-                if (putsWindow.isRendered()) {
-                    putsWindow.erase();
-                }
+                //if (putsWindow.isRendered()) {
+                  //  putsWindow.erase();
+                //}
             } else if (prevIsFreePeriod) {
-                betButton.render(stage, {x:betsWindow.xPos, y:75});
-                betButton.callback.call()
-                putButton.render(stage, {x:putsWindow.xPos, y:75});
-                putButton.callback.call()
+                buyButton.render(stage, {x:buyButton.xPos, y:25});
+		priceTag.render(stage, {x:buyButton.xPos + 90, y:25});
+                //buyButton.callback.call()
+                sellButton.render(stage, {x:sellButton.xPos, y:25});
+                //sellButton.callback.call()
             }
             prevIsFreePeriod = isFreePeriod;
         }

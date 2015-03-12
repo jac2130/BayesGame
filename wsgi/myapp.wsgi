@@ -262,15 +262,16 @@ def post_newpost(args, data):
     treatmentNum = int(data['treatmentNum'])
     valToBetOn = data['valToBetOn']
     price = int(data['price'])
+    shares = int(data['shares'])
     period = int(data["period"])
 
-    newId = posts.insert_entry(userid, treatmentNum, valToBetOn, price, period, True)
+    newId = posts.insert_entry(userid, treatmentNum, valToBetOn, price, shares, period, True)
 
     computerShareValue = cvd.getComputerValue()
     if price > computerShareValue:
         print "computer accepting call", newId
         posts.computer_accept(newId)
-        points.computer_accept_call(userid, price)
+        points.computer_accept_call(userid, price, shares)
 
     return json.dumps({})
 
@@ -279,15 +280,16 @@ def put_newput(args, data):
     treatmentNum = int(data['treatmentNum'])
     valToBetOn = data['valToBetOn']
     price = int(data['price'])
+    shares = int(data['shares'])
     period = int(data["period"])
 
-    newId = puts.insert_entry(userid, treatmentNum, valToBetOn, price, period, True)
+    newId = puts.insert_entry(userid, treatmentNum, valToBetOn, price, shares, period, True)
 
     computerShareValue = cvd.getComputerValue()
     if price < computerShareValue:
         print "computer accepting put", newId
         puts.computer_accept(newId)
-        points.computer_accept_put(userid, price)
+        points.computer_accept_put(userid, price, shares)
 
     return json.dumps({})
 

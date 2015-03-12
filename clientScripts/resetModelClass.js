@@ -57,18 +57,18 @@ function resetModelClass(modelClass)
 
 					    dataButton = makeContractedButton(dataWindow);
 					    dataButton.render(stage, {x:dataWindow.xPos, y:stageHeight-25})
-					    betsWindow = makeCallWindow([], domain, variables[variables.length-1], stageWidth-500);
+					    //betsWindow = makeCallWindow([], domain, variables[variables.length-1], stageWidth-500);
 
 					    //the last variable must always be the betting variable!
                         //MARK1
-					    betButton=makeContractedButton(betsWindow);
-					    betButton.render(stage, {x:betsWindow.xPos, y:stageHeight-25});
+					    //betButton=makeContractedButton(betsWindow);
+					    //betButton.render(stage, {x:betsWindow.xPos, y:stageHeight-25});
 					    
-					    putsWindow = makePutWindow([], domain, variables[variables.length-1], stageWidth-750);
+					    //putsWindow = makePutWindow([], domain, variables[variables.length-1], stageWidth-750);
 
 					    //the last variable must always be the betting variable!
-					    putButton = makeContractedButton(putsWindow);
-					    putButton.render(stage, {x:putsWindow.xPos, y:stageHeight-25});
+					    //putButton = makeContractedButton(putsWindow);
+					    //putButton.render(stage, {x:putsWindow.xPos, y:stageHeight-25});
 					    
 
 					} 

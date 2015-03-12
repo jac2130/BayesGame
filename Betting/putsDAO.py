@@ -31,11 +31,12 @@ class PutsDAO:
         self.db = database
         self.puts = database.puts
 
-    def insert_entry(self, userid, treatment, valToBetOn, price, period, opend):
+    def insert_entry(self, userid, treatment, valToBetOn, price, shares, period, opend):
         put = { "userid": userid,
                 "treatment": treatment,
                 "valToBetOn": valToBetOn,
                 "price": int(price),
+                "shares":int(shares),
                 "date": datetime.datetime.utcnow(),
                 "period": period,
                 "open": opend}
@@ -60,6 +61,7 @@ class PutsDAO:
             put['date'] = str(time.time())  # fix up date
             put['id'] = str(put['_id']);
             put['price'] = str(put['price'])
+            put['shares'] = str(put['shares'])
             put["_id"] = str(put['_id']);
             if 'period' not in put:
                 put['period'] = 0

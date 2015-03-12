@@ -42,19 +42,19 @@ class PointsDAO:
         new = self.points.find({"user_id":user_id}).sort([("time", pymongo.DESCENDING)]).limit(1)
         return new.next()
 
-    def accept_put(self, poster_id, accepter_id, point_count):
+    def accept_put(self, poster_id, accepter_id, point_count, share_count):
         old_accepter = self.get_points(accepter_id)
         old_poster = self.get_points(poster_id)
         now = datetime.datetime.utcnow()
         print now
         new_accepter= {"user_id": accepter_id,
-                       "points": str(int(float(old_accepter["points"])-float(point_count))),
-                       "shares": str(int(float(old_accepter["shares"]) + 1)),
+                       "points": str(int(float(old_accepter["points"])-float(point_count)*float(share_count))),
+                       "shares": str(int(float(old_accepter["shares"]) + float(share_count))),
                        "time": now
         }
         new_poster= {"user_id": poster_id,
-                       "points": str(int(float(old_poster["points"])+float(point_count))),
-                       "shares": str(int(float(old_poster["shares"]) - float(1))),
+                       "points": str(int(float(old_poster["points"])+float(point_count)*float(share_count))),
+                       "shares": str(int(float(old_poster["shares"]) - float(share_count))),
                        "time": now
         }
         print new_accepter, new_poster
@@ -62,41 +62,41 @@ class PointsDAO:
         self.points.insert(new_accepter)
         self.points.insert(new_poster)
 
-    def accept_call(self, poster_id, accepter_id, point_count):
+    def accept_call(self, poster_id, accepter_id, point_count,share_count):
         old_accepter=self.get_points(accepter_id)
         old_poster=self.get_points(poster_id)
         now=datetime.datetime.utcnow()
         new_accepter= {"user_id": accepter_id,
                        "points": str(int(float(old_accepter["points"])+float(point_count))),
-                       "shares": str(int(float(old_accepter["shares"]) - float(1))),
+                       "shares": str(int(float(old_accepter["shares"]) - float(share_count))),
                        "time": now
         }
 
         new_poster= {"user_id": poster_id,
                        "points": str(int(float(old_poster["points"])-float(point_count))),
-                       "shares": str(int(float(old_poster["shares"]) + float(1))),
+                       "shares": str(int(float(old_poster["shares"]) + float(share_count))),
                        "time": now
         }
 
         self.points.insert(new_accepter)
         self.points.insert(new_poster)
 
-    def computer_accept_call(self, poster_id, point_count):
+    def computer_accept_call(self, poster_id, point_count, share_count):
         old_poster = self.get_points(poster_id)
         now = datetime.datetime.utcnow()
         new_poster= {"user_id": poster_id,
-                       "points": str(int(float(old_poster["points"])-float(point_count))),
-                       "shares": str(int(float(old_poster["shares"]) + float(1))),
+                       "points": str(int(float(old_poster["points"])-float(point_count)*float(share_count))),
+                       "shares": str(int(float(old_poster["shares"]) + float(share_count))),
                        "time": now
         }
         self.points.insert(new_poster)
 
-    def computer_accept_put(self, poster_id, point_count):
+    def computer_accept_put(self, poster_id, point_count, share_count):
         old_poster = self.get_points(poster_id)
         now = datetime.datetime.utcnow()
         new_poster= {"user_id": poster_id,
-                       "points": str(int(float(old_poster["points"])+float(point_count))),
-                       "shares": str(int(float(old_poster["shares"]) - float(1))),
+                       "points": str(int(float(old_poster["points"])+float(point_count)*float(share_count))),
+                       "shares": str(int(float(old_poster["shares"]) - float(share_count))),
                        "time": now
         }
         self.points.insert(new_poster)

@@ -1,5 +1,6 @@
 scoreTagDrawn = false;
 predictionVar="interest_rate" //draw this variable always at random at each period from modelclass['variables'];
+price = 50;
 
 function welcome()
 {
@@ -220,19 +221,24 @@ Login = function()
             var dataButton = makeContractedButton(dataWindow);
             dataButton.render(stage, {x:dataWindow.xPos, y: stageHeight-25});
             dataButton.callback.call();
-            betsWindow = makeCallWindow([], domain, variables[variables.length-1], rightX+dataWindow.width-250);
+            //betsWindow = makeCallWindow([], domain, variables[variables.length-1], rightX+dataWindow.width-250);
+	    buyButton = makeBuyButton(350);
+	    priceTag = makeTextWidget("Current Price: " + JSON.stringify(price) + " points", 16, "Arial", "#666");
+	    sellButton = makeSellButton(buyButton.xPos+90+ priceTag.shape.widget.width + 20);
+            //the last variable must always be the betting variable!
+            //betButton = makeContractedButton(betsWindow);
+            //betButton.render(stage, {x:betsWindow.xPos, y:75});
+	    buyButton.render(stage, {x:buyButton.xPos, y:25});
+	    priceTag.render(stage, {x:buyButton.xPos+90, y:25});
+	    sellButton.render(stage, {x:sellButton.xPos, y:25});
+            //betButton.callback.call();
+
+            //putsWindow = makePutWindow([], domain, variables[variables.length-1], rightX + dataWindow.width-500);
 
             //the last variable must always be the betting variable!
-            betButton = makeContractedButton(betsWindow);
-            betButton.render(stage, {x:betsWindow.xPos, y:75});
-            betButton.callback.call();
-
-            putsWindow = makePutWindow([], domain, variables[variables.length-1], rightX + dataWindow.width-500);
-
-            //the last variable must always be the betting variable!
-            putButton = makeContractedButton(putsWindow);
-            putButton.render(topLayer.shape, {x:putsWindow.xPos, y:75});
-            putButton.callback.call();
+            //putButton = makeContractedButton(putsWindow);
+            //putButton.render(topLayer.shape, {x:putsWindow.xPos, y:75});
+            //putButton.callback.call();
         }
     });
 }

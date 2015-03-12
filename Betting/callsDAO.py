@@ -34,11 +34,12 @@ class CallsDAO:
         self.posts = database.posts
 
     # inserts the blog entry and returns a permalink for the entry
-    def insert_entry(self, userid, treatment, valToBetOn, price, period, opend):
+    def insert_entry(self, userid, treatment, valToBetOn, price, shares, period, opend):
         post = { "userid": userid,
                  "treatment": treatment,
                  "valToBetOn": valToBetOn,
                  "price": int(price),
+                 "shares": int(shares),
                  "date": datetime.datetime.utcnow(),
                  "period": period,
                  "open": opend}
