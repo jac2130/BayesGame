@@ -1,7 +1,7 @@
 import dataDAO
 import time
 import pymongo
-from random import random, shuffle
+from random import random, shuffle, choice
 from mClassDAO import mClasses
 from miscDAO import MiscDAO
 from pprint import pprint
@@ -52,6 +52,7 @@ def relabel(label='H'):
         return 0
     else:
         return 1
+
 def sub_dict(d, var_list):
     s={}
     for var in var_list:
@@ -139,6 +140,8 @@ def random_demo(p=0.5):
     d={};
     d['period'] = 0;
     names= ["interest_rate", "production", "exports", "unemployment"];
+    d['betting_var']=choice(names);
+    d['price']=computerValue;
     shuffle(names); #randomly assign labels
     n1, n2, n3, n4 = names;
 
@@ -155,6 +158,9 @@ def random_intermediate(p=0.5):
     '''
     d={}
     d['period']=0;
+    names=["interest_rate", "general_motors", "bank_income", "consumer_spending"];
+    d['betting_var']=choice(names);
+    d['price']=computerValue;
     d=indepVar("interest_rate", p, d)
     d=indepVar("general_motors", p, d)
     d=one_cause("bank_income", "interest_rate", p, d)
@@ -164,6 +170,9 @@ def random_intermediate(p=0.5):
 def random_simple(p=0.5):
     d={}
     d['period']=0;
+    names=["interest_rate", "bank_income", "general_motors"];
+    d['betting_var']=choice(names);
+    d['price']=computerValue;
     d=indepVar("interest_rate", p, d)
     d=indepVar("bank_income", p, d)
     d=causes("general_motors", ["interest_rate", "bank_income"], d, p, neg=set(["interest_rate"]))
@@ -172,8 +181,11 @@ def random_simple(p=0.5):
 def random_complex(p=0.5):
     d={}
     d['period']=0;
-    d=indepVar("interest_rate", p, d)
-    d=indepVar("bank_income", p, d)
+    names=["interest_rate", "bank_income", "general_motors", "consumer_spending"];
+    d['betting_var']=choice(names);
+    d['price']=computerValue;
+    d=indepVar("interest_rate", p, d);
+    d=indepVar("bank_income", p, d);
     d=causes("general_motors", ["interest_rate", "bank_income"], d, p, neg=set(["interest_rate"]))
     d=causes("consumer_spending", ["interest_rate", "general_motors"], d, p, neg=set(["interest_rate"]))
     return d
@@ -246,6 +258,7 @@ def gen_next_period(modelName, count):
         new_point = random_banking()
     elif modelName == "demo":
         new_point = random_demo()
+        print "Yo!!!"
     elif modelName == "complex":
         new_point = random_complex()
     elif modelName == "simple":
@@ -255,7 +268,7 @@ def gen_next_period(modelName, count):
     new_point['period'] = count + 1
     new_point['modelClass'] = modelName
     new_point['entry_time'] = time.time()
-    data.add_data([new_point], {"model_name": modelName})
+    data.add_data(new_point, {"model_name": modelName})
     #print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
 
 def gen_initial_data(modelName):
@@ -273,10 +286,14 @@ def gen_initial_data(modelName):
             new_point = random_complex()
         else: raise ValueError ("invalid thread_name")
         new_point['period'] = count + 1
+        print "count: ", count
         new_point['modelClass'] = modelName
+        print "modelName: ", modelName
         new_point['entry_time'] = time.time()
+        print "new point: "
+        pprint(new_point)
         data.add_data(new_point, {"model_name": modelName})
-        #print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
+        print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
         count += 1
 
 def getClockTime():
@@ -289,6 +306,7 @@ def getClockTime():
 
 def regenerateData():
     modelNames = mClasses.keys()
+    print modelNames
     data.erase_data()
     for modelName in modelNames:
         gen_initial_data(modelName)

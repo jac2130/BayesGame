@@ -40,11 +40,13 @@ class DataDAO:
     def add_data(self, inputData, model_class):
         dataToInsert = {}
         dataToInsert['period'] = inputData['period']
+        dataToInsert['betting_var'] = inputData['betting_var']
+        dataToInsert['price'] = inputData['price']
         dataToInsert['data'] = inputData
         dataToInsert['entry_time'] = time.time()
         dataToInsert['model_class'] = model_class['model_name']
         try:
-            self.data.insert(dataToInsert)
+            self.data.insert(json.dumps(dataToInsert))
         except pymongo.errors.OperationFailure:
             print "oops, mongo error"
             return False
@@ -80,6 +82,8 @@ class DataDAO:
             if variable is not mClasses[modelName]['bettingVar']:
                 new[variable] = l[0][variable]
         new['period'] = l[0]['period']
+        new['betting_var']=l[0]['betting_var']
+        new['price']=l[0]['price']
         #new={'contestant_door':l[0]['contestant_door'], 'monty_door':l[0]['monty_door'], 'period':l[0]['period']}
         return [old, new]
 
@@ -98,6 +102,8 @@ class DataDAO:
                 new[variable] = l[-2][variable]
 
         new['period'] = l[-2]['period']
+        new['betting_var'] = l[-2]['betting_var']
+        new['price'] = l[-2]['price']
         new['entry_time'] = l[-2]['entry_time']
         new = [new]
         # new=[{'contestant_door':l[-2]['contestant_door'], 'monty_door':l[-2]['monty_door'], 'period':l[-2]['period']}];

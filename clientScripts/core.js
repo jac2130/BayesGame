@@ -184,7 +184,7 @@ Login = function()
             }
 
             //alert(JSON.stringify(truth))
-            bettingVar = modelClass['betting_variable'];
+            bettingVar = truth['betting_var'];
             //truth = truth.concat(data);
             //var isMonty;
             if (modelClass['model_name'] === 'monty')
