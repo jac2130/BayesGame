@@ -1,6 +1,16 @@
-String.prototype.capitalize = function() {
-    ind=this.indexOf(" ") + 1;
-    return this.charAt(0).toUpperCase() + this.slice(1, ind) + this.charAt(ind).toUpperCase() + this.slice(ind+1);
+String.prototype.capitalize = function() { 
+    if (this.indexOf(" ")>=0){
+	var ind=this.indexOf(" ") + 1;
+	var First = this.charAt(0).toUpperCase();
+	var Second = this.slice(1, ind);
+	var Third = this.charAt(ind).toUpperCase();  
+	var Fourth = this.slice(ind+1);
+	return First + Second + Third + Fourth
+    }
+    else 
+    {
+	return this.charAt(0).toUpperCase() + this.slice(1, this.length)
+    }
     
 }
 

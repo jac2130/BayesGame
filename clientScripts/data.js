@@ -167,7 +167,7 @@ function makeBetButton2(betView)
             var vars = modelClass.vars;
             var queryPath = "";
             var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
-            bettingVar = modelClass['betting_variable'];
+            bettingVar = truth[truth.length-1]['betting_var'];
 
             conditionalVarNames.map(function(na)
             {
@@ -236,7 +236,7 @@ function makePutButton(betView)
             var vars = modelClass.vars;
             var queryPath = "";
             var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
-            var bettingVar=modelClass['betting_variable'];
+            var bettingVar=truth[truth.length-1]['betting_var'];
 
             conditionalVarNames.map(function(na)
             {
@@ -363,7 +363,7 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
     variables.map(function(variable){variable.enabled=true});
     var names = [];
     var enabled = {};
-    var bettingVar = modelClass["betting_variable"];
+    var bettingVar = truth[truth.length-1]['betting_var'];
     var borderWidth = 0;
 
     variables.map(function(variable)
@@ -516,7 +516,7 @@ function makeBuyButton(xPos)
             var vars = modelClass.vars;
             var queryPath = "";
             var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
-            bettingVar = modelClass['betting_variable'];
+            bettingVar = truth[truth.length-1]['betting_var'];
 
             conditionalVarNames.map(function(na)
             {
@@ -593,7 +593,7 @@ function makeSellButton(xPos)
             var vars = modelClass.vars;
             var queryPath = "";
             var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
-            var bettingVar=modelClass['betting_variable'];
+            var bettingVar= truth[truth.length-1]['betting_var'];
 
             conditionalVarNames.map(function(na)
             {

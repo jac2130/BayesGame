@@ -141,7 +141,7 @@ def random_demo(p=0.5):
     d['period'] = 0;
     names= ["interest_rate", "production", "exports", "unemployment"];
     d['betting_var']=choice(names);
-    d['price']=computerValue;
+    d['price']=computerValue.getComputerValue();
     shuffle(names); #randomly assign labels
     n1, n2, n3, n4 = names;
 
@@ -160,7 +160,7 @@ def random_intermediate(p=0.5):
     d['period']=0;
     names=["interest_rate", "general_motors", "bank_income", "consumer_spending"];
     d['betting_var']=choice(names);
-    d['price']=computerValue;
+    d['price']=computerValue.getComputerValue();
     d=indepVar("interest_rate", p, d)
     d=indepVar("general_motors", p, d)
     d=one_cause("bank_income", "interest_rate", p, d)
@@ -172,7 +172,7 @@ def random_simple(p=0.5):
     d['period']=0;
     names=["interest_rate", "bank_income", "general_motors"];
     d['betting_var']=choice(names);
-    d['price']=computerValue;
+    d['price']=computerValue.getComputerValue();
     d=indepVar("interest_rate", p, d)
     d=indepVar("bank_income", p, d)
     d=causes("general_motors", ["interest_rate", "bank_income"], d, p, neg=set(["interest_rate"]))
@@ -183,7 +183,7 @@ def random_complex(p=0.5):
     d['period']=0;
     names=["interest_rate", "bank_income", "general_motors", "consumer_spending"];
     d['betting_var']=choice(names);
-    d['price']=computerValue;
+    d['price']=computerValue.getComputerValue();
     d=indepVar("interest_rate", p, d);
     d=indepVar("bank_income", p, d);
     d=causes("general_motors", ["interest_rate", "bank_income"], d, p, neg=set(["interest_rate"]))
@@ -293,7 +293,7 @@ def gen_initial_data(modelName):
         print "new point: "
         pprint(new_point)
         data.add_data(new_point, {"model_name": modelName})
-        print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
+        #print "%s: %s, period %s" % ( threadName, time.ctime(time.time()), new_point )
         count += 1
 
 def getClockTime():

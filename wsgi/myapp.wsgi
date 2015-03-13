@@ -154,7 +154,7 @@ def query(args, data):
     return models.query(_id=data['user_id'], conditions=query_dict)
 
 def removeLatestBettingVar(dataInOrder, mClassName):
-    betting_variable = mClasses[mClassName]["bettingVar"]
+    betting_variable = dataInOrder[-1]["betting_var"]
     print "removing betting variable from: ", dataInOrder[-1]
     print "betting variable: ", betting_variable
     del dataInOrder[-1][betting_variable]

@@ -40,13 +40,13 @@ class DataDAO:
     def add_data(self, inputData, model_class):
         dataToInsert = {}
         dataToInsert['period'] = inputData['period']
-        dataToInsert['betting_var'] = inputData['betting_var']
-        dataToInsert['price'] = inputData['price']
+        #dataToInsert['betting_var'] = inputData['betting_var']
+        #dataToInsert['price'] = inputData['price']
         dataToInsert['data'] = inputData
         dataToInsert['entry_time'] = time.time()
         dataToInsert['model_class'] = model_class['model_name']
         try:
-            self.data.insert(json.dumps(dataToInsert))
+            self.data.insert([dataToInsert])
         except pymongo.errors.OperationFailure:
             print "oops, mongo error"
             return False
