@@ -511,7 +511,7 @@ function makeBuyButton(xPos)
             //var betView = this.betView;
             var valToBetOn = share_val;
             var points = truth[truth.length-1]['price'];
-	    var newShares =(user.points-user.points%truth[truth.length-1]['price']/truth[truth.length-1]['price']);
+	    var newShares =(user.points-user.points%points)/points;
             //var bayesVar = betView.bayesVar;
             var vars = modelClass.vars;
             var queryPath = "";
