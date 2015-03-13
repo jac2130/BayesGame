@@ -96,7 +96,7 @@ function getConditionalVarNames()
     var conditionalVarNames = [];
     for (var i=0; i<modelClass['vars'].length; i++)
     {
-        if (modelClass['vars'][i] != modelClass['betting_variable'])
+        if (modelClass['vars'][i] != truth[truth.length-1]['betting_var'])
         {
             conditionalVarNames.push(modelClass['vars'][i]);
         }
@@ -106,7 +106,7 @@ function getConditionalVarNames()
 
 function updateQueryPrediction()
 {
-    var bettingVar = modelClass['betting_variable'];
+    var bettingVar = truth[truth.length-1]['betting_var'];
     if (JSON.stringify(storedModel) !== JSON.stringify(model) | obtainedTruth)
     {
         var queryPath = "";

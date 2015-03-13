@@ -91,7 +91,10 @@ function addDataToDataWindow(newDataSets)
     countDown.renderW(dataWindow, Point((dataWindow.width - countDown.text.width)/2, dataWindow.height-90));
 
     var totalWinnings = 0;
-    bettingVar = modelClass['betting_variable'];
+    bettingVar = truth[truth.length-1]['betting_var'];
+    priceTag.changeText("Current Price: " +truth[truth.length-1]['price'] + " points");
+    //updatePointWindow()
+    updatePoints()
     if (truth[truth.length-2][bettingVar] !== share_val)
     {
         updateScoreTag(false);
@@ -135,6 +138,24 @@ function sendModelIfUpdated()
 	    }
         });
     }
+}
+
+function updatePoints()
+{
+    $.ajax({
+        type: "GET",
+        url: '/js/truth',
+        data: JSON.stringify({'asdf': 'sdfg', 'someinfo2': 'hello world2'}),
+        async: true,
+        dataType: "json",
+        success: function(data)
+        {
+
+            //user.score= data['score'];
+            user.points= data['points'];
+            user.shares= data['shares'];
+	}
+    })
 }
 
 function updateScoreTag(sharesEarnedWinnings)

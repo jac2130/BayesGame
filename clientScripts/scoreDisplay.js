@@ -60,8 +60,9 @@ function displayScoreAndPointWindow()
                     user.shares = parseInt(data['shares']);
                     //alert(user.points);
                     //alert(user.shares);
-                    pointWindow.points.shape.text = user.points +"      points";
-                    pointWindow.shares.shape.text = user.shares +"      shares";
+		    //alert(parseInt(data['points']));
+                    pointWindow.points.changeText(user.points +"      points");
+                    pointWindow.shares.changeText(user.shares +"      shares");
                     //do your stuff with the JSON data;
                 }
             });
