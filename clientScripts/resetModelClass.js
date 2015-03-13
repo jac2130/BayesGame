@@ -28,6 +28,7 @@ function resetModelClass(modelClass)
                         var modelClass = data['model_class'];
                         truth = data['samples'];
                         bettingVar = truth[truth.length-1]['betting_var'];
+					    predictionVar = bettingVar;
                         //truth = truth.concat(data);
                         var isMonty;
                         if (modelClass['model_name'] == 'monty')

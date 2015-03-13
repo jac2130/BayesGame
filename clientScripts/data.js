@@ -76,7 +76,7 @@ function makePrediction(variable, t, width, color)
 	//var Keys=Object.keys(somedict)
 	//Keys.map(function(k){sillydict[k]=somedict[k];})
 	//console.log(typeof(somedict), somedict)
-	if (typeof(color)==="undefined"){color="red"}
+	if (typeof(color)==="undefined"){color='red'}
 	if (typeof(queryLookup)==="string") { 
 	    if (typeof(JSON.parse(queryLookup))!=="string") {
 		var lookupTable=JSON.parse(queryLookup);
@@ -168,7 +168,7 @@ function makeBetButton2(betView)
             var queryPath = "";
             var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
             bettingVar = truth[truth.length-1]['betting_var'];
-
+	    predictionVar = bettingVar;
             conditionalVarNames.map(function(na)
             {
                 queryPath += "/" + na + ":" + truth[truth.length-1][na];
@@ -432,7 +432,7 @@ function makeDataWindow(data, domain, variables, xPos, modelClass)
 				    });
 			  dat.xCoord = xCoord;
 			  pred=makePrediction(predictionVar, index, 40, colors[predictionVar.replace("_", " ").capitalize()])
-			  pred.prediction({});                                                                                                                
+			  pred.prediction({}, colors[bettingVar.replace("_", " ").capitalize()]);                                                                                                                
 			  pred.renderW(view.innerFrame, {x: xCoord-10, y: 115})
 			  predictions.push(pred)
 
@@ -517,7 +517,7 @@ function makeBuyButton(xPos)
             var queryPath = "";
             var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
             bettingVar = truth[truth.length-1]['betting_var'];
-
+	    predictionVar=bettingVar;
             conditionalVarNames.map(function(na)
             {
                 queryPath += "/" + na + ":" + truth[truth.length-1][na];

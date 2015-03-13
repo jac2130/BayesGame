@@ -185,6 +185,7 @@ Login = function()
 
             //alert(JSON.stringify(truth))
             bettingVar = truth[truth.length-1]['betting_var'];
+	    predictionVar= bettingVar;
             //truth = truth.concat(data);
             //var isMonty;
             if (modelClass['model_name'] === 'monty')

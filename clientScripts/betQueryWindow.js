@@ -197,7 +197,7 @@ function updateQueryPrediction()
                             }
                         }
 
-                        betQueryWindow.dict[key] = makeRect(barWidth, (betQueryWindow.height-120)*currentData[key], 'red', 1, "red", 1);
+                        betQueryWindow.dict[key] = makeRect(barWidth, (betQueryWindow.height-120)*currentData[key], colors[bettingVar.replace("_", " ").capitalize()], 1, colors[bettingVar.replace("_", " ").capitalize()], 1);
                         betQueryWindow.dict[key].isActive = true;
                         betQueryWindow.dict[key].percent = makeTextWidget(JSON.stringify(Math.round(currentData[key]*100)), 10, "Arial", "#666");
                         betQueryWindow.dict[key].key = makeTextWidget(key, 13, "Arial", "#666");

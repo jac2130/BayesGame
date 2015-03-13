@@ -92,6 +92,7 @@ function addDataToDataWindow(newDataSets)
 
     var totalWinnings = 0;
     bettingVar = truth[truth.length-1]['betting_var'];
+    predictionVar=bettingVar;
     priceTag.changeText("Current Price: " +truth[truth.length-1]['price'] + " points");
     //updatePointWindow()
     updatePoints()
