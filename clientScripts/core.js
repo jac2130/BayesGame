@@ -77,10 +77,15 @@ Login = function()
     // send first the user:
     // then his model:
 
+    if (typeof password === "undefined")
+    {
+        password = "";
+    }
+
     $.ajax({
         type: "GET",
         url: '/js/truth',
-        data: JSON.stringify({'asdf': 'sdfg', 'someinfo2': 'hello world2'}),
+        data: JSON.stringify({'password': password}),
         async: true,
         dataType: "json",
         success: function(data)
@@ -89,6 +94,7 @@ Login = function()
             user.id = data['user_id']
             modelClass = data['model_class'];
             truth = data['samples'];
+            price = data['price'];
             isAdmin = data['isAdmin'];
             treatmentNum = data['treatmentNum'];
 
@@ -224,14 +230,14 @@ Login = function()
             dataButton.callback.call();
             //betsWindow = makeCallWindow([], domain, variables[variables.length-1], rightX+dataWindow.width-250);
 	    buyButton = makeBuyButton(350);
-	    priceTag = makeTextWidget("Current Price: " + JSON.stringify(truth[truth.length-1]['price']) + " points", 16, "Arial", "#666");
+	    priceTag = makeTextWidget("Current Price: " + JSON.stringify(price) + " points", 16, "Arial", "#666");
 	    sellButton = makeSellButton(buyButton.xPos+90+ priceTag.shape.widget.width + 20);
             //the last variable must always be the betting variable!
             //betButton = makeContractedButton(betsWindow);
             //betButton.render(stage, {x:betsWindow.xPos, y:75});
-	    buyButton.render(stage, {x:buyButton.xPos, y:25});
+	    buyButton.render(stage, {x:buyButton.xPos, y:20});
 	    priceTag.render(stage, {x:buyButton.xPos+90, y:25});
-	    sellButton.render(stage, {x:sellButton.xPos, y:25});
+	    sellButton.render(stage, {x:sellButton.xPos, y:20});
             //betButton.callback.call();
 
             //putsWindow = makePutWindow([], domain, variables[variables.length-1], rightX + dataWindow.width-500);

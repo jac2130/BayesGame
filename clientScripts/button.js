@@ -1,12 +1,15 @@
 var Button = Object.create(Widget);
 var mousePressed = false;
 
-function makeButton(text, width, height)
+function makeButton(text, width, height, color)
 {
+    if (typeof(color)==="undefined"){
+	color = "#666"
+    }
     var button = Object.create(Button);
     button.setShape(new createjs.Container());
-    button.background = makeRect(width, height, "white", 1, "#666", 100);
-    button.text = makeTextWidget(text,  height/1.2, "Arial", "#666");
+    button.background = makeRect(width, height, "white", 1, "white", 100);
+    button.text = makeTextWidget(text,  height/1.2, "Arial", color);
     var textWidth  = button.text.shape.getMeasuredWidth();
     var textHeight = button.text.shape.getMeasuredHeight();
     var textX = height/4;
@@ -140,16 +143,19 @@ function makeNegativeButton(window, size)
 }
 
 // for this function, callback is an object with the method "call()"
-function makeClickable(widget, callback)
+function makeClickable(widget, callback, color)
 {
+    if (typeof(color)==="undefined"){
+	var color = "#666";
+    }
     widget.shape.on("mouseover", function(evt) {
-            this.widget.background.changeColor("#666");
+            this.widget.background.changeColor(color);
             this.widget.text.changeColor("#ffffff");
         
     });
     widget.shape.on("mouseout", function(evt) {
         this.widget.background.changeColor("#ffffff");
-	this.widget.text.changeColor("#666");
+	this.widget.text.changeColor(color);
     });
     widget.shape.on("mousedown", function(evt) {
         this.widget.background.changeColor("black");
@@ -161,11 +167,11 @@ function makeClickable(widget, callback)
         mousePressed = false;
         if (mouseOnWidget(widget, evt.stageX, evt.stageY)) {
             callback.call();
-            widget.background.changeColor("#666");
+            widget.background.changeColor(color);
 	    this.widget.text.changeColor("#ffffff");
         } else {
             widget.background.changeColor("#ffffff");
-	    this.widget.text.changeColor("#666");
+	    this.widget.text.changeColor(color);
         }
     });
 }

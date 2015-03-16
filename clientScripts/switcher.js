@@ -370,8 +370,8 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color,
 		cases.push([zip([varnames,item])])
 		modelCases.push([zip([modelNames,item])])
 	    })
-	    cases.map(function(item){item.push({"H":NoisyOr(crossDomain[cases.indexOf(item)], fromSigns, 1),"L":1-NoisyOr(crossDomain[cases.indexOf(item)], fromSigns, 1)})});
-	    modelCases.map(function(item){item.push({"H":NoisyOr(crossDomain[modelCases.indexOf(item)], fromSigns, 1),"L":1-NoisyOr(crossDomain[modelCases.indexOf(item)], fromSigns, 1)})});
+	    cases.map(function(item){item.push({"H":NoisyOr(crossDomain[cases.indexOf(item)], fromSigns, 0.99),"L":1-NoisyOr(crossDomain[cases.indexOf(item)], fromSigns, 0.99)})});
+	    modelCases.map(function(item){item.push({"H":NoisyOr(crossDomain[modelCases.indexOf(item)], fromSigns, 0.99),"L":1-NoisyOr(crossDomain[modelCases.indexOf(item)], fromSigns, 0.99)})});
 
 		    //alert(JSON.stringify(cases))
 		

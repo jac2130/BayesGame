@@ -31,8 +31,8 @@ function displayScoreAndPointWindow()
 
     // scoreTag.addChild(scoreTag.score, Point(5, 5))
 
-    scoreTag.render(stage, Point(scoreWindow.shape.x+88, scoreWindow.shape.y - 7))
-    scoreTag.score.render(stage, Point(scoreWindow.shape.x+106, scoreWindow.shape.y + 3))
+    scoreTag.renderW(topLayer, Point(scoreWindow.shape.x+88, scoreWindow.shape.y - 7))
+    scoreTag.score.renderW(topLayer, Point(scoreWindow.shape.x+106, scoreWindow.shape.y + 3))
 
     var pointWindow = WidgetHL();
     pointWindow.background=makeRect(358,30,/*"#3b5998"*/'#FFFFFF', 0, 1, 3);

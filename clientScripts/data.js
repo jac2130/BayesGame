@@ -501,7 +501,7 @@ function makeCallWindow(bets, domain, betVariable, xPos, isPut)
 
 function makeBuyButton(xPos)
 {
-    var betButton = makeButton("Buy", 70, 15);
+    var betButton = makeButton("Buy", 90, 25, "green");
     betButton.xPos=xPos;
     var callback = {
         //'betView':betView,
@@ -510,7 +510,7 @@ function makeBuyButton(xPos)
         {
             //var betView = this.betView;
             var valToBetOn = share_val;
-            var points = truth[truth.length-1]['price'];
+            var points = price;
 	    var newShares =(user.points-user.points%points)/points;
             //var bayesVar = betView.bayesVar;
             var vars = modelClass.vars;
@@ -538,7 +538,7 @@ function makeBuyButton(xPos)
                         currentKeys.sort();
                         threshHold=Math.round(prediction[currentKeys[0]]*100);
                         //alert(threshHold)
-                        if (points in range(threshHold + 1) && user.points-truth[truth.length-1]['price']>=0)
+                        if (points in range(threshHold + 1) && user.points-price>=0)
                         {
                             $.ajax({
                                 type: "post",
@@ -553,14 +553,14 @@ function makeBuyButton(xPos)
                         }
                         else
                         {
-			    if (user.points-truth[truth.length-1]['price']<=0)
+			    if (user.points-price<=0)
 			    {
 				warn("You have no points to buy shares with.");
 				
 			    }
 			    else
 			    {
-				warn("The current price of " + JSON.stringify(truth[truth.length-1]['price']) + " points \nexceeds your buying threshold of " + JSON.stringify(threshHold) + " points.\n\nIf you want to buy at the current price,\nyou must change your model!");
+				warn("The current price of " + JSON.stringify(price) + " points \nexceeds your buying threshold of " + JSON.stringify(threshHold) + " points.\n\nIf you want to buy at the current price,\nyou must change your model!");
 			    }
                         }
                     }
@@ -573,13 +573,13 @@ function makeBuyButton(xPos)
         }
     };
     //betView.pointsInp.registerEnterCallback(callback);
-    makeClickable(betButton, callback);
+    makeClickable(betButton, callback, "green");
     return betButton;
 }
     
 function makeSellButton(xPos)
 {
-    var putButton = makeButton("Sell", 70, 15);
+    var putButton = makeButton("Sell", 90, 25, "red");
     putButton.xPos=xPos;
     var callback = {
         //'betView': betView,
@@ -588,12 +588,12 @@ function makeSellButton(xPos)
         {
             //var betView = this.betView;
             var valToBetOn = share_val;
-            var points = truth[truth.length-1]['price'];
+            var points = price;
             //var bayesVar = betView.bayesVar;
             var vars = modelClass.vars;
             var queryPath = "";
             var conditionalVarNames = getIntersect(Object.keys(truth[truth.length-1]), modelClass.vars);
-            var bettingVar= truth[truth.length-1]['betting_var'];
+            //var bettingVar= truth[truth.length-1]['betting_var'];
 
             conditionalVarNames.map(function(na)
             {
@@ -638,7 +638,7 @@ function makeSellButton(xPos)
 			    }
 			    else
 			    {
-				warn("The current share price of " + JSON.stringify(truth[truth.length-1]['price']) + " points \nis below your threshold of " + JSON.stringify(threshHold) + ". \n\nIf you want to sell at the current price,\n you must change your model!");
+				warn("The current share price of " + JSON.stringify(price) + " points \nis below your threshold of " + JSON.stringify(threshHold) + ". \n\nIf you want to sell at the current price,\n you must change your model!");
 
 			    }
                         /*{
@@ -658,7 +658,7 @@ function makeSellButton(xPos)
         }
     };
     //betView.pointsInp.registerEnterCallback(callback);
-    makeClickable(putButton, callback);
+    makeClickable(putButton, callback, "red");
     return putButton;
 }
 

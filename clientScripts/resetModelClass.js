@@ -18,9 +18,9 @@ function resetModelClass(modelClass)
     //var bettingVar = modelClass['betting_variable'];
     $.ajax({
 				    type: "GET",
-				    url: '/js/truth/' + user.id,
+				    url: '/js/truth/',
 				    async: true,
-				    
+				    data: JSON.stringify({'password': password}),
 				    dataType: "json",
 				    success: function(data){
 					if (data) 

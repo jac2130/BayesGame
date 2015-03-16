@@ -1,3 +1,11 @@
+Array.prototype.max = function() {
+    return Math.max.apply(null, this);
+};
+
+Array.prototype.min = function() {
+    return Math.min.apply(null, this);
+};
+
 String.prototype.capitalize = function() { 
     if (this.indexOf(" ")>=0){
 	var ind=this.indexOf(" ") + 1;
@@ -42,9 +50,45 @@ function makeBetQueryWindow(variables)
     var condTags = [];
     var predictions = [];
     var radius = ((betQueryWindow.width-55)/(conditionalVarNames.length)/4);
-    var xCoord = 5;
+    var xCoord = 0;
+    Object.keys(colors).map(function(name){
+	var circ = makeCircle(radius, colors[name], 0, colors[name]);
+        circ.xCoord = xCoord;
+        circ.varName = name;
+        circ.render(betQueryWindow.shape, {x:circ.xCoord, y:betQueryWindow.height-25});
+	circ.shape.on("click", function (evt) {
+	    predictionVar=this.widget.varName;
+	});
 
-    conditionalVarNames.map(function(name)
+        condCircles.push(circ);
+
+        var condTag = Object.create(Widget);
+        condTag.setShape(new createjs.Container());
+        condTag.triangle = makeTriangle(radius, radius/2, 0.5, "black", 90, 
+                                                   1, "black");
+
+        condTag.triangle.render(condTag.shape, {x:radius/2 + 1, y:radius});
+	if (typeof(truth[truth.length-1][name])==="undefined"){
+	    condTag.content=makeTextWidget("?", radius*2, "Arial", "#ffffff");
+	}
+	else
+	{
+	    condTag.content=makeTextWidget(truth[truth.length-1][name], radius*2, "Arial", "#ffffff");
+	}
+	var tempList =[];
+	variables.map(function(vari){tempList.push.apply(tempList, vari["possibilities"])});
+	var ls2=[];
+	tempList.map(function(item){ls2.push(makeTextWidget(item,radius*2, "Arial", "#ffffff").width)})
+
+	condTag.background=makeRect(ls2.max()+2, radius*2+2, "black");
+        condTag.name = name;
+        condTag.background.render(condTag.shape, {x:radius/2 + 1, y:0})
+        condTag.content.render(condTag.shape, {x:radius/2+2, y:1});
+        condTag.render(betQueryWindow.shape, {x:circ.xCoord+2*radius, y:betQueryWindow.height-25});
+        condTags.push(condTag)
+        xCoord += 5*radius;
+    })
+    /*conditionalVarNames.map(function(name)
     {
         var circ = makeCircle(radius, colors[name], 0, colors[name]);
         circ.xCoord = xCoord;
@@ -81,6 +125,7 @@ function makeBetQueryWindow(variables)
 		     {
 			 predictionVar=this.widget.varName;
 		     });
+		     */
 
     betQueryWindow.condTags = condTags;
 
@@ -127,8 +172,15 @@ function updateQueryPrediction()
         betQueryWindow.condTags.map(function(condTag)
         {
             condTag.content.erase();
-            condTag.content = makeTextWidget(truth[truth.length-1][condTag.name], radius*2, "Arial", "#ffffff");
-            condTag.content.render(condTag.shape, {x:radius+1, y:1});
+	    if (typeof(truth[truth.length-1][condTag.name])==="undefined")
+	    {
+		condTag.content = makeTextWidget("?", radius*2, "Arial", "#ffffff");
+	    }
+	    else
+	    {
+		condTag.content = makeTextWidget(truth[truth.length-1][condTag.name], radius*2, "Arial", "#ffffff");
+	    }
+            condTag.content.render(condTag.shape, {x:radius/2 + 2, y:1});
         });
 	
 	$.ajax({

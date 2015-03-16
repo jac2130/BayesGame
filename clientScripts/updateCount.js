@@ -15,7 +15,10 @@ updateCount = function(dataView)
             var timeUntilNextData = 120;
             if (obtainedTruth && data['dataAvail'])
             {
-                addDataToDataWindow(data['newData']);
+                if (data['newData'][1].period !== truth[truth.length-1].period)
+                {
+                    addDataToDataWindow(data['newData']);
+                }
                 timeUntilNextData = 120;
             }
             else
@@ -93,9 +96,10 @@ function addDataToDataWindow(newDataSets)
     var totalWinnings = 0;
     bettingVar = truth[truth.length-1]['betting_var'];
     predictionVar=bettingVar;
-    priceTag.changeText("Current Price: " +truth[truth.length-1]['price'] + " points");
-    //updatePointWindow()
     updatePoints()
+    
+    //updatePointWindow()
+    
     if (truth[truth.length-2][bettingVar] !== share_val)
     {
         updateScoreTag(false);
@@ -146,7 +150,8 @@ function updatePoints()
     $.ajax({
         type: "GET",
         url: '/js/truth',
-        data: JSON.stringify({'asdf': 'sdfg', 'someinfo2': 'hello world2'}),
+	data: JSON.stringify({'password': password}),
+        //data: JSON.stringify({'asdf': 'sdfg', 'someinfo2': 'hello world2'}),
         async: true,
         dataType: "json",
         success: function(data)
@@ -155,6 +160,8 @@ function updatePoints()
             //user.score= data['score'];
             user.points= data['points'];
             user.shares= data['shares'];
+	    price = data['price'];
+	    priceTag.changeText("Current Price: " + JSON.stringify(price) + " points");
 	}
     })
 }

@@ -43,11 +43,11 @@ function connectCircles2(fromCircle, toCircle, sgn)
       //              1400, 800, 20, toCircle.bayesVar.color);
        // toCircle.bayesVar.isMultiVar = false;
     //}
-    fromSigns=toCircle.fromSigns;
+    var fromSigns=toCircle.fromSigns;
     //alert(JSON.stringify(fromSigns))
-    fromVars = arrow.toNode.bayesVar.getFromVars();
+    var fromVars = arrow.toNode.bayesVar.getFromVars();
     //alert(fromVars)
-    fromNames=[]
+    var fromNames=[]
     for (var i=0;i< fromVars.length; i++){
         fromNames.push(fromVars[i].varText)
     }
@@ -216,11 +216,79 @@ function makeBayesCircle(radius, color)
         if (circleActive) {
             if (activeCircle !== this.widget && !isConnected(activeCircle, this.widget)) {
                 //connectCircles(activeCircle, this.widget);
-		sign(activeCircle, this.widget)
+		var modelOld=model[user.id];
+		var toSend=model[user.id]; //making a test model with which to test whether the relationship would be cyclical.
+		var modelCases=[];
+		var modelNames=[];
+		var domains=[];
+		//alert(this.widget.bayesVar)
+		var fromVars = this.widget.bayesVar.getFromVars();
+    //alert(fromVars)
+		var fromSigns = this.widget.fromSigns;
+		var fromNames=[];
+		for (var i=0;i< fromVars.length; i++){
+		    fromNames.push(fromVars[i].varText)
+		};
+		fromNames.push(activeCircle.bayesVar.varName);
+		fromSigns.push("+");
+
+		fromNames.map(function(name){modelNames.push(name.toLowerCase().replace(" ", "_"))});
+		
+		modelNames.map(function(name){
+		    var ddmVals;
+		    if (isMonty)
+		    {
+			ddmVals = ["A", "B", "C"];
+		    } else {
+			ddmVals = ["H", "L"];
+		    }
+		    domains.push(ddmVals)
+		})
+		var crossDomain=allCombinations(domains);
+		var effectVar=this.widget;
+		crossDomain.map(function(item){
+		//cases.push([zip([varnames,item])])
+		modelCases.push([zip([modelNames,item])])
+		});
+	    //cases.map(function(item){item.push({"H":NoisyOr(crossDomain[cases.indexOf(item)], fromSigns, 0.99),"L":1-NoisyOr(crossDomain[cases.indexOf(item)], fromSigns, 0.99)})});
+		modelCases.map(function(item){item.push({"H":NoisyOr(crossDomain[modelCases.indexOf(item)], fromSigns, 0.99),"L":1-NoisyOr(crossDomain[modelCases.indexOf(item)], fromSigns, 0.99)})});
+		//alert(JSON.stringify(modelCases))
+		var varKey=effectVar.bayesVar.varName.toLowerCase().replace(" ", "_");
+    //alert(JSON.stringify(varKey))
+		toSend[varKey]=modelCases;
+		$.ajax({
+		    type: "post",
+		    url: '/js/cyclic',
+		    async: true,
+		    data:JSON.stringify(toSend),
+		    dataType: "json",
+		    contentType: "application/json",
+		    success: function(data){
+			if (data===0){
+			    //alert(activeCircle);
+			    //alert(effectVar.fromSigns)
+			    sign(activeCircle, effectVar);
+			    circleActive = false;
+			    activeCircle.unhlCircle();
+			}
+			else
+			{
+			    circleActive = false;
+			    activeCircle.unhlCircle();
+			    warn("WARNING:\n\nCyclical Models\n\nAre ill defined\n\nThus, they are NOT allowed!");
+			    //circleActive = false;
+			    //activeCircle.unhlCircle();
+			    //model[user.id]=modelOld;
+			  
+			}
+		    }
+
+		});
+
+		
                 
             }
-            circleActive = false;
-            activeCircle.unhlCircle();
+            
         } else {
             circleActive = true;
             activeCircle = this.widget;

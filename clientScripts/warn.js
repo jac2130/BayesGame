@@ -109,18 +109,12 @@ function sign(var1, var2, plusCallback, minusCallback)
     //warningWindow.message1=makeTextWidget(message, 16, "Arial", "#666");
     warningWindow.message=makeTextWidget(message, 16, "Arial", "#666");
     warningWindow.message.renderW(warningWindow, Point(10, 10));
-    //warningWindow.message2.renderW(warningWindow, Point(10, 10));
 
     warningWindow.render(topLayer.shape, Point(stageWidth/2-200, stageHeight/2-100));
-    //alert(callback)
-     
-        
+
     var plusButton = makePlusButton(warningWindow, 35, plusCallback);
-    
     plusButton.renderW(warningWindow, Point(120, 50));
 
     var minusButton = makeMinusButton(warningWindow, 35, minusCallback);
-    
     minusButton.renderW(warningWindow, Point(220, 50));
-    
 }

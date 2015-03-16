@@ -1,4 +1,4 @@
-import sys
+import sys 
 from pprint import pformat
 import pymongo
 import os
@@ -170,6 +170,12 @@ def assembleModelClass(mClassName):
 
 def getTruth(args, data):
     user_id = data['user_id']
+    password = data['password']
+    if password == "bayesGame":
+        isAdmin = True
+    else:
+        isAdmin = False
+
     treatmentNum, mClassName, points_assigned = mClass.assign_treatment_if_not_already(user_id)
     demo_mode = miscDAO.getDemoMode()
     print "demo_mode: ", demo_mode
@@ -189,11 +195,13 @@ def getTruth(args, data):
     retData = {
         'user_id': user_id,
         'model_class': model_class,
-        'isAdmin': True,
+        'isAdmin': isAdmin,
         'samples': truthData,
         'points': points_assigned,
+	'price': cvd.getComputerValue(),
         'treatmentNum': treatmentNum,
     };
+
     return json.dumps(retData)
 
 def getNewData(args, data):
@@ -268,7 +276,7 @@ def post_newpost(args, data):
     newId = posts.insert_entry(userid, treatmentNum, valToBetOn, price, shares, period, True)
 
     computerShareValue = cvd.getComputerValue()
-    if price > computerShareValue:
+    if price >= computerShareValue:
         print "computer accepting call", newId
         posts.computer_accept(newId)
         points.computer_accept_call(userid, price, shares)
@@ -286,7 +294,7 @@ def put_newput(args, data):
     newId = puts.insert_entry(userid, treatmentNum, valToBetOn, price, shares, period, True)
 
     computerShareValue = cvd.getComputerValue()
-    if price < computerShareValue:
+    if price <= computerShareValue:
         print "computer accepting put", newId
         puts.computer_accept(newId)
         points.computer_accept_put(userid, price, shares)
@@ -305,6 +313,18 @@ def process_login(args, data):
 
 def no_fb_login(args, data):
     return json.dumps({'user_id': user_id})
+
+def is_cyclic(args, data):
+    model= data;
+    #user = data['user_id'];
+    #del model['user_id']
+    #print "model: ", model
+    #modelInfo = model[user]
+    if models.detect_cyclic_model(model):
+        return '1'
+    else:
+        return '0'
+    
 
 def add_model(args, data):
     # model = bottle.request.json
@@ -342,6 +362,7 @@ def queryList(args, data):
 #data -> {}
 
 handlerDict = {
+	'cyclic':is_cyclic,		
         'hello': hello,
         'dataTest': dataTest,
         'clock': get_time,
