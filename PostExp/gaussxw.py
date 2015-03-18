@@ -1,8 +1,13 @@
 ######################################################################
 #
 # Functions to calculate integration points and weights for Gaussian
-# quadrature
-#
+# quadrature written by Mark Newman <mejn@umich.edu>, June 4, 2011
+# and the integration points and weights used for integrating functions    
+# defined on a k-dimensional simplex were translated from MATLAB code by 
+# Greg von Winckel <gregvw(at)math(dot)unm(dot)edu>. Python translation by 
+# Johannes Castner <jac2130@columbia.edu>. 
+# You may use, share, or modify this file freely.
+
 # x,w = gaussxw(N) returns integration points x and integration
 #           weights w such that sum_i w[i]*f(x[i]) is the Nth-order
 #           Gaussian approximation to the integral int_{-1}^1 f(x) dx
@@ -19,12 +24,10 @@
 # values of N up to 1000.  It is compatible with version 2 and version
 # 3 of Python.
 #
-# Written by Mark Newman <mejn@umich.edu>, June 4, 2011
-# You may use, share, or modify this file freely
 #
 ######################################################################
 
-from numpy import ones,copy,cos,tan,pi,linspace, array, sqrt, diag, eye, reshape, prod
+from numpy import ones,copy,cos,tan,pi,linspace, array, sqrt, diag, eye, reshape, prod, cumprod
 from numpy.linalg import eig, det
 from numpy import tile as repmat #for compatibility with Matlab
 import numpy as np
@@ -71,7 +74,6 @@ def rquad(N,k):
     I, x=zip(*enumerate(x))
     x=array(x)
     x=(x+1)/2; w=((1.0/2)**(k1))*ab[0]*v[0,I]**2;
-    #Still have to fix sorting by x.                                            
     xw=zip(x, w)
     xw.sort()
     return [array(x) for x in zip(*xw)]

@@ -22,6 +22,7 @@ import computerValueDAO
 import cgi
 import re
 import json
+os.chdir('/var/www/PostExp/')
 from gaussint import gaussint # to do quite precise integration, using Mark Newman's gaussian quadrature integration.
 
 #The below code links to a handful of python modules, which are interfaces for the participants' expressed mental models --stored in MongoDB-- over time and information about the participants, such as their scores and active points in the game --their constraints and their share holdings of a bet, as well as what that bet was:
@@ -323,13 +324,14 @@ def Diversity(ls):
     n=len(ls)
     return sqrt(N_point_JSD(ls)/log(n, 2))
 
+def GraphDiversity(tup):
+    ls=[graph.probs for graph in tup if graph!=None]
+    if len(ls)<=1: return 0
+    return Diversity(ls)
 
-def modelProp(u, g, lam):
-    """
-    u, is some utility function, g is a Bayes Net and lam is a parameter of rationality
-    """
-    p=exp(lam*u(g))
-    return p
+def DiversityTimeSeries(day, month="", year=15):
+    graphs=get_all_graphs(day, month, year)
+    return [GraphDiversity(tup) for tup in graphs]
 
 Entropy([0.7, 0.7, 0.7])
 

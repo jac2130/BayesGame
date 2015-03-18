@@ -1,9 +1,11 @@
 from random import random, choice
+from bayesian.bbn import build_bbn_from_conditionals as build_graph
 import numpy as np
 import thinkbayes as prob #Imports Alan Downey's useful "think bayes module"
 from scipy.special import gamma, digamma
 from math import log
-
+from numpy import prod
+from gaussint import simp_int
 def beta_func(counts):
     numerator=np.array([gamma_func(count) for count in counts]).prod()
     denom=gamma(sum(counts))
@@ -74,3 +76,16 @@ def makeOneCauseMI(p=0.5, q=0.5):
     return px, py, joint
 
 #Perhaps symmetry of the transition matrix would come out of the optimization theory, that would be better than just a perhaps unfounded assumption.
+Beta=lambda a: prod([gamma(i) for i in a])/gamma(sum(a))
+def Derichlet(alph, x):
+    if len(alph)==len(x):
+        return (1/Beta(alph))*prod([x[i]**(alph[i]-1) for i in range(len(alph))])
+
+    
+def modelProp(u, g, lam):
+    """
+    u, is some utility function, g is a Bayes Net and lam is a parameter of rationality
+    """
+    h=lambda x: exp(lam*u(x))
+    p=exp(lam*u(g)) #/simplex_int(h)
+    return p

@@ -398,6 +398,10 @@ def getUserIdFromCookie(http_cookie):
     if 'access_token' in cookie:
         cookieInfo = json.loads(cookie['access_token'].value)
         if 'user_id' in cookieInfo:
+	    user={}
+	    user['id'] = cookieInfo['user_id']
+	    user['entry_time'] = time.time()
+	    users.add_user(user);
             return str(cookieInfo['user_id'])
         else:
             return None

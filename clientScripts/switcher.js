@@ -355,16 +355,16 @@ function makeSwitcher(bayesVar, graphWidth, graphHeight, color,
         } else {
             ddmVals = ["H", "L"];
         }
-	    cases=[]
-	    modelCases=[]
-	    modelNames=[];
+	    var cases=[]
+	    var modelCases=[]
+	    var modelNames=[];
 	    varnames.map(function(name){modelNames.push(name.toLowerCase().replace(" ", "_"))})
         //alert(ddmVals);
           
 		
 		    //alert("positive, dude!")
 	    domains.push(ddmVals)
-	    crossDomain=allCombinations(domains)
+	    var crossDomain=allCombinations(domains)
 		    //alert(JSON.stringify(crossDomain))
 	    crossDomain.map(function(item){
 		cases.push([zip([varnames,item])])

@@ -217,7 +217,7 @@ function makeBayesCircle(radius, color)
             if (activeCircle !== this.widget && !isConnected(activeCircle, this.widget)) {
                 //connectCircles(activeCircle, this.widget);
 		var modelOld=model[user.id];
-		var toSend=model[user.id]; //making a test model with which to test whether the relationship would be cyclical.
+		var toSend=JSON.parse(JSON.stringify(model[user.id])); //making a test model with which to test whether the relationship would be cyclical.
 		var modelCases=[];
 		var modelNames=[];
 		var domains=[];
